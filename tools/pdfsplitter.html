@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>PDF Page Splitter — Logical Page Start</title>
+<style>
+:root{
+  --bg:#0f1724;--card:#0b1220;--accent:#06b6d4;--muted:#9aa8b2;--glass:rgba(255,255,255,0.03);
+}
+html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial;}
+body{background:linear-gradient(180deg,#041025 0%, #0b1730 100%);color:#e6eef6;display:flex;align-items:center;justify-content:center;padding:24px;}
+.app{width:940px;max-width:96%;background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));border-radius:12px;padding:20px;box-shadow:0 8px 30px rgba(2,6,23,0.6);border:1px solid rgba(255,255,255,0.03);}
+h1{margin:0;font-size:20px;display:flex;align-items:center;gap:10px}
+p.lead{margin:6px 0 18px;color:var(--muted);font-size:13px}
+.row{display:flex;gap:12px;flex-wrap:wrap}
+.col{flex:1;min-width:260px}
+label{display:block;font-size:13px;margin-bottom:6px;color:var(--muted)}
+input[type=file]{display:block}
+textarea{width:100%;min-height:72px;padding:10px;border-radius:8px;background:var(--glass);border:1px solid rgba(255,255,255,0.03);color:inherit;resize:vertical}
+button{background:linear-gradient(90deg,var(--accent),#3b82f6);border:0;padding:10px 14px;font-weight:600;border-radius:8px;color:#042027;cursor:pointer}
+.muted{color:var(--muted);font-size:13px}
+.list{margin-top:14px;border-radius:8px;padding:12px;background:linear-gradient(180deg,rgba(255,255,255,0.01),rgba(255,255,255,0.005));border:1px solid rgba(255,255,255,0.02)}
+.item{display:flex;align-items:center;justify-content:space-between;padding:8px 6px;border-bottom:1px dashed rgba(255,255,255,0.02)}
+.item:last-child{border-bottom:0}
+.danger{background:#ffebe9;color:#7b0a00;padding:8px;border-radius:8px}
+.inline{display:inline-flex;gap:8px;align-items:center}
+small{color:var(--muted)}
+footer{margin-top:14px;color:var(--muted);font-size:12px}
+a.link{color:inherit;text-decoration:underline}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/pdf-lib/dist/pdf-lib.min.js"></script>
+</head>
+<body>
+<div class="app" role="main">
+  <h1>PDF Page Splitter</h1>
+  <p class="lead">Select a PDF, choose logical 1st page (optional), and enter page ranges like <code>1-11, 21-31, 5</code>.</p>
+
+  <div class="row">
+    <div class="col">
+      <label for="file">Choose PDF</label>
+      <input id="file" type="file" accept="application/pdf" />
+
+      <div style="height:10px"></div>
+      <label for="firstPage">Logical “First Page” number</label>
+      <input id="firstPage" type="number" min="1" value="1"
+        style="width:100%;padding:8px;border-radius:8px;background:var(--glass);border:1px solid rgba(255,255,255,0.03);color:inherit"
+        placeholder="e.g. 6 → treat PDF page 6 as logical 1" />
+      <small class="muted">Example: if textbook starts on PDF page 6, enter 6. Then typing 1-10 means real pages 6-15.</small>
+
+      <div style="height:10px"></div>
+      <label for="ranges">Page ranges (based on logical numbers)</label>
+      <textarea id="ranges" placeholder="Example: 1-11, 21-31, 5"></textarea>
+
+      <div style="height:10px"></div>
+      <label>Output filename prefix (optional)</label>
+      <input id="prefix" placeholder="example: chapter"
+        style="width:100%;padding:8px;border-radius:8px;background:var(--glass);border:1px solid rgba(255,255,255,0.03);color:inherit" />
+
+      <div style="height:12px"></div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <button id="splitBtn">Split PDF</button>
+        <div id="progress" class="muted"></div>
+      </div>
+      <div id="errors" style="margin-top:8px"></div>
+    </div>
+
+    <div class="col" style="min-width:300px">
+      <label>Generated files</label>
+      <div id="results" class="list">
+        <div class="muted">No output yet — choose a PDF, set ranges, then click <strong>Split PDF</strong>.</div>
+      </div>
+      <div style="height:12px"></div>
+      <label>Notes</label>
+      <div class="muted" style="font-size:13px">
+        • Runs entirely in your browser — no upload.<br>
+        • Logical page numbering makes range input easier.<br>
+        • Example: PDF page 6 = logical 1 → typing 1-10 extracts 6-15.
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    Client-side powered by <code>pdf-lib</code>. Made for educators ✦
+  </footer>
+</div>
+
+<script>
+const { PDFDocument } = PDFLib;
+
+const fileInput = document.getElementById('file');
+const rangesInput = document.getElementById('ranges');
+const splitBtn = document.getElementById('splitBtn');
+const results = document.getElementById('results');
+const errors = document.getElementById('errors');
+const progress = document.getElementById('progress');
+const prefixInput = document.getElementById('prefix');
+const firstPageInput = document.getElementById('firstPage');
+
+function parseRanges(text){
+  const tokens=text.split(',').map(t=>t.trim()).filter(Boolean);
+  const ranges=[];
+  for(const t of tokens){
+    if(/^\d+$/.test(t)){const n=parseInt(t,10);ranges.push({start:n,end:n});}
+    else if(/^\d+\s*-\s*\d+$/.test(t)){
+      const [a,b]=t.split('-').map(s=>parseInt(s.trim(),10));
+      ranges.push({start:Math.min(a,b),end:Math.max(a,b)});
+    }else{throw new Error(`Invalid token: "${t}"`);}
+  }
+  return ranges;
+}
+function clearOutputs(){results.innerHTML='';errors.innerHTML='';progress.textContent='';}
+function showError(msg){errors.innerHTML=`<div class="danger">${msg}</div>`;}
+function createDownloadLink(bytes, filename){
+  const blob=new Blob([bytes],{type:'application/pdf'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download=filename;a.textContent='Download';a.className='link';
+  a.addEventListener('click',()=>setTimeout(()=>URL.revokeObjectURL(url),1000));
+  return a;
+}
+
+splitBtn.addEventListener('click',async()=>{
+  clearOutputs();
+  const file=fileInput.files[0];
+  if(!file){showError('Please choose a PDF file.');return;}
+  const rangesText=rangesInput.value.trim();
+  if(!rangesText){showError('Enter page ranges (e.g. 1-3, 5, 7-9).');return;}
+  let logicalStart=parseInt(firstPageInput.value||'1',10);
+  if(isNaN(logicalStart)||logicalStart<1) logicalStart=1;
+
+  let ranges;
+  try{ranges=parseRanges(rangesText);}catch(e){showError(e.message);return;}
+  if(ranges.length===0){showError('No valid ranges.');return;}
+
+  progress.textContent='Loading PDF…';
+  let bytes;
+  try{bytes=await file.arrayBuffer();}catch(e){showError('Cannot read PDF.');return;}
+  let src;
+  try{src=await PDFDocument.load(bytes);}catch(e){showError('Invalid PDF.');return;}
+  const total=src.getPageCount();
+
+  // translate logical → real page numbers
+  const offset=logicalStart-1;
+  for(const r of ranges){
+    r.realStart=r.start+offset;
+    r.realEnd=r.end+offset;
+    if(r.realStart<1||r.realEnd<1||r.realStart>total||r.realEnd>total){
+      showError(`Range ${r.start}-${r.end} → real ${r.realStart}-${r.realEnd} out of bounds (1-${total}).`);
+      return;
+    }
+  }
+
+  const prefix=(prefixInput.value||'').trim();
+  results.innerHTML='';
+  for(let i=0;i<ranges.length;i++){
+    const r=ranges[i];
+    progress.textContent=`Processing ${r.start}-${r.end} (logical) → ${r.realStart}-${r.realEnd}…`;
+    const newPdf=await PDFDocument.create();
+    const srcPages=await newPdf.copyPages(src,
+      Array.from({length:r.realEnd-r.realStart+1},(_,k)=>r.realStart-1+k)
+    );
+    for(const p of srcPages)newPdf.addPage(p);
+    const out=await newPdf.save();
+    const name=prefix?
+      `${prefix}_${r.start}-${r.end}.pdf`:
+      `${file.name.replace(/\.pdf$/i,'')}_${r.start}-${r.end}.pdf`;
+
+    const blob=new Blob([out],{type:'application/pdf'});
+    const blobUrl=URL.createObjectURL(blob);
+
+    const item=document.createElement('div');
+    item.className='item';
+    const left=document.createElement('div');
+    left.innerHTML=`<strong>${name}</strong><br><small class="muted">Logical ${r.start}-${r.end} → Real ${r.realStart}-${r.realEnd}</small>`;
+    const right=document.createElement('div');
+    right.className='inline';
+    right.appendChild(createDownloadLink(out,name));
+    const openBtn=document.createElement('button');
+    openBtn.style.background='transparent';
+    openBtn.style.border='1px solid rgba(255,255,255,0.06)';
+    openBtn.style.color='inherit';
+    openBtn.style.padding='6px 8px';openBtn.style.borderRadius='8px';
+    openBtn.textContent='Open';
+    openBtn.addEventListener('click',()=>window.open(blobUrl));
+    right.appendChild(openBtn);
+    const size=document.createElement('div');
+    size.style.fontSize='13px';size.style.color='var(--muted)';
+    size.textContent=`${Math.round(blob.size/1024)} KB`;
+    right.appendChild(size);
+    item.appendChild(left);item.appendChild(right);
+    results.appendChild(item);
+  }
+  progress.textContent=`Done — ${ranges.length} file(s) created.`;
+});
+</script>
+</body>
+</html>

@@ -3,150 +3,121 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Online Physics - Temporary Site</title>
-    
-    <!-- Google Fonts for modern typography -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-
+    <title>Tarango's Tools</title>
     <style>
-        /* --- Base Styles & Reset --- */
-        :root {
-            --primary-color: #00aaff;
-            --background-start: #12122c;
-            --background-end: #0a0a1a;
-            --text-color: #e0e0e0;
-            --text-secondary-color: #a0a0b0;
-            --glow-color: rgba(0, 170, 255, 0.5);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html, body {
-            height: 100%;
-            font-family: 'Poppins', sans-serif;
-            color: var(--text-color);
-            overflow: hidden; /* This is the key to making it non-scrollable */
-        }
-
-        /* --- Animated Background --- */
         body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: linear-gradient(135deg, var(--background-start), var(--background-end), #1a0a1a, #0a1a1a);
-            background-size: 400% 400%;
-            animation: gradientAnimation 20s ease infinite;
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1d2671, #c33764);
+            color: white;
+            overflow-x: hidden;
         }
-
-        @keyframes gradientAnimation {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+        header {
+            background: rgba(0,0,0,0.3);
+            padding: 20px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            backdrop-filter: blur(10px);
         }
-
-        /* --- Main Content Container --- */
+        nav a {
+            margin: 0 15px;
+            color: #ffdd00;
+            font-weight: bold;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+        nav a:hover {
+            color: #ffffff;
+        }
+        .logo {
+            font-size: 2rem;
+            font-weight: 900;
+            color: #ffffff;
+        }
         .container {
             text-align: center;
-            padding: 2rem;
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 15px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            max-width: 90%;
-            width: 600px;
-            
-            /* Content fade-in and slide-up animation */
-            opacity: 0;
-            transform: translateY(20px);
-            animation: contentFadeIn 1s ease-out 0.5s forwards;
+            padding: 60px 20px;
         }
-
-        @keyframes contentFadeIn {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* --- Text Styling --- */
         h1 {
-            font-size: 2.2rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+            font-size: 3rem;
+            animation: fadeIn 1.5s;
         }
-
-        .info-text {
-            font-size: 1rem;
-            font-weight: 300;
-            color: var(--text-secondary-color);
-            margin-top: 1.5rem;
-            line-height: 1.6;
+        @keyframes fadeIn {
+            from {opacity: 0; transform: translateY(20px);} to {opacity: 1; transform: translateY(0);}
         }
-
-        /* --- Call-to-Action Button --- */
-        .cta-button {
+        .tool-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            max-width: 1000px;
+            margin: auto;
+        }
+        .tool-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            transition: 0.3s;
+        }
+        .tool-card:hover {
+            transform: translateY(-8px) scale(1.03);
+            background: rgba(255,255,255,0.2);
+        }
+        .btn {
             display: inline-block;
-            margin-top: 2rem;
-            padding: 15px 35px;
-            background-color: var(--primary-color);
-            color: #ffffff;
+            padding: 12px 20px;
+            margin-top: 15px;
             font-size: 1.1rem;
-            font-weight: 600;
+            color: #1d2671;
+            background: #ffdd00;
+            border-radius: 10px;
             text-decoration: none;
-            border-radius: 50px;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 0 15px var(--glow-color);
+            font-weight: bold;
+            transition: 0.3s;
         }
-
-        .cta-button:hover {
-            transform: translateY(-5px) scale(1.05);
-            background-color: #00bfff;
-            box-shadow: 0 0 30px var(--glow-color), 0 0 45px var(--glow-color);
+        .btn:hover {
+            background: #ffffff;
+            color: #c33764;
         }
-
-        /* --- Mobile Friendly Adjustments --- */
-        @media (max-width: 600px) {
-            .container {
-                padding: 1.5rem;
-            }
-
-            h1 {
-                font-size: 1.8rem;
-            }
-
-            .cta-button {
-                padding: 12px 30px;
-                font-size: 1rem;
-            }
-
-            .info-text {
-                font-size: 0.9rem;
-            }
+        footer {
+            text-align: center;
+            padding: 20px;
+            background: rgba(0,0,0,0.3);
+            margin-top: 40px;
         }
     </style>
 </head>
 <body>
 
-    <main class="container">
-        <h1>This is a temporary content site for Online Physics</h1>
-        
-        <a href="https://sites.google.com/view/0nlinephysics/" class="cta-button" target="_blank" rel="noopener noreferrer">
-            Go to Online Physics
-        </a>
+<header>
+    <div class="logo">Tarango's Tools</div>
+    <nav>
+        <a href="#">Home</a>
+        <a href="#tools">Tools</a>
+        <a href="#about">About</a>
+    </nav>
+</header>
 
-        <p class="info-text">
-            Main Content site code.onlinephysics.xyz is currently offline due to a domain update.
-        </p>
-    </main>
+<section class="container" id="tools">
+    <h1>Free Online Tools</h1>
+    <div class="tool-list">
+        <div class="tool-card">
+            <h3>PDF Splitter</h3>
+            <p>Split large PDF into smaller files easily.</p>
+            <a class="btn" href="https://tarangohasan.github.io/tools/pdfsplitter.html">Open Tool</a>
+        </div>
+
+        <div class="tool-card">
+            <h3>Coming Soon...</h3>
+            <p>More tools are being developed...</p>
+        </div>
+    </div>
+</section>
+
+<footer>
+    It's Fully Free
+</footer>
 
 </body>
 </html>
