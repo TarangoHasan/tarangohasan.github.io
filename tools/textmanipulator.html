@@ -1,0 +1,133 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Text Manipulator</title>
+<style>
+:root {
+  --bg: #0f1724;
+  --card: #0b1220;
+  --accent: #06b6d4;
+  --muted: #9aa8b2;
+  --glass: rgba(255, 255, 255, 0.03);
+}
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: Inter, system-ui, Segoe UI, Roboto, Arial;
+  background: linear-gradient(180deg, #041025 0%, #0b1730 100%);
+  color: #e6eef6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.app {
+  width: 800px;
+  max-width: 96%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 8px 30px rgba(2, 6, 23, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+h1 {
+  margin: 0;
+  font-size: 20px;
+}
+p.lead {
+  margin: 6px 0 18px;
+  color: var(--muted);
+  font-size: 13px;
+}
+textarea {
+  width: 100%;
+  min-height: 150px;
+  padding: 8px;
+  border-radius: 8px;
+  background: var(--glass);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  color: inherit;
+  resize: vertical;
+}
+.stats {
+  margin-top: 10px;
+  display: flex;
+  gap: 20px;
+}
+.actions {
+  margin-top: 10px;
+  display: flex;
+  gap: 10px;
+}
+button {
+  background: linear-gradient(90deg, var(--accent), #3b82f6);
+  border: 0;
+  padding: 10px 14px;
+  font-weight: 600;
+  border-radius: 8px;
+  color: #042027;
+  cursor: pointer;
+}
+</style>
+</head>
+<body>
+<div class="app" role="main">
+  <h1>Text Manipulator</h1>
+  <p class="lead">Enter text to manipulate and analyze.</p>
+  <textarea id="text" placeholder="Enter text here..."></textarea>
+  <div class="stats">
+    <div>Words: <span id="word-count">0</span></div>
+    <div>Characters: <span id="char-count">0</span></div>
+    <div>Lines: <span id="line-count">0</span></div>
+    <div>Paragraphs: <span id="para-count">0</span></div>
+  </div>
+  <div class="actions">
+    <button id="upper-btn">Uppercase</button>
+    <button id="lower-btn">Lowercase</button>
+    <button id="sentence-btn">Sentence Case</button>
+  </div>
+</div>
+<script>
+const textInput = document.getElementById('text');
+const wordCount = document.getElementById('word-count');
+const charCount = document.getElementById('char-count');
+const lineCount = document.getElementById('line-count');
+const paraCount = document.getElementById('para-count');
+
+const upperBtn = document.getElementById('upper-btn');
+const lowerBtn = document.getElementById('lower-btn');
+const sentenceBtn = document.getElementById('sentence-btn');
+
+textInput.addEventListener('input', () => {
+  const text = textInput.value;
+  const words = text.trim().split(/\s+/).filter(word => word.length > 0);
+  const lines = text.split('\n');
+  const paragraphs = text.split('\n\n').filter(p => p.trim().length > 0);
+
+  wordCount.textContent = words.length;
+  charCount.textContent = text.length;
+  lineCount.textContent = lines.length;
+  paraCount.textContent = paragraphs.length;
+});
+
+upperBtn.addEventListener('click', () => {
+  textInput.value = textInput.value.toUpperCase();
+  textInput.dispatchEvent(new Event('input'));
+});
+
+lowerBtn.addEventListener('click', () => {
+  textInput.value = textInput.value.toLowerCase();
+  textInput.dispatchEvent(new Event('input'));
+});
+
+sentenceBtn.addEventListener('click', () => {
+  const text = textInput.value.toLowerCase();
+  textInput.value = text.replace(/(^\s*\w|[.!?]\s*\w)/g, c => c.toUpperCase());
+  textInput.dispatchEvent(new Event('input'));
+});
+</script>
+</body>
+</html>
