@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Color Picker</title>
+<style>
+:root {
+  --bg: #0f1724;
+  --card: #0b1220;
+  --accent: #06b6d4;
+  --muted: #9aa8b2;
+  --glass: rgba(255, 255, 255, 0.03);
+}
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: Inter, system-ui, Segoe UI, Roboto, Arial;
+  background: linear-gradient(180deg, #041025 0%, #0b1730 100%);
+  color: #e6eef6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.app {
+  width: 400px;
+  max-width: 96%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 8px 30px rgba(2, 6, 23, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+h1 {
+  margin: 0;
+  font-size: 20px;
+}
+p.lead {
+  margin: 6px 0 18px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.color-display {
+  width: 100%;
+  height: 100px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@jaames/iro/dist/iro.min.js"></script>
+</head>
+<body>
+<div class="app" role="main">
+  <h1>Color Picker</h1>
+  <p class="lead">Select a color to see its values.</p>
+  <div class="color-picker"></div>
+  <div class="color-display"></div>
+  <div id="values"></div>
+</div>
+<script>
+const colorPicker = new iro.ColorPicker('.color-picker', {
+  width: 280,
+  color: "#f00"
+});
+const colorDisplay = document.querySelector('.color-display');
+const values = document.getElementById('values');
+
+colorPicker.on('color:change', (color) => {
+  colorDisplay.style.backgroundColor = color.hexString;
+  values.innerHTML = `
+    <div>HEX: ${color.hexString}</div>
+    <div>RGB: ${color.rgbString}</div>
+    <div>HSL: ${color.hslString}</div>
+  `;
+});
+</script>
+</body>
+</html>
