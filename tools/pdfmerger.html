@@ -1,0 +1,153 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>PDF Merger</title>
+<style>
+:root {
+  --bg: #0f1724;
+  --card: #0b1220;
+  --accent: #06b6d4;
+  --muted: #9aa8b2;
+  --glass: rgba(255, 255, 255, 0.03);
+}
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: Inter, system-ui, Segoe UI, Roboto, Arial;
+  background: linear-gradient(180deg, #041025 0%, #0b1730 100%);
+  color: #e6eef6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.app {
+  width: 800px;
+  max-width: 96%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 8px 30px rgba(2, 6, 23, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+h1 {
+  margin: 0;
+  font-size: 20px;
+}
+p.lead {
+  margin: 6px 0 18px;
+  color: var(--muted);
+  font-size: 13px;
+}
+input[type="file"] {
+  display: block;
+}
+button {
+  background: linear-gradient(90deg, var(--accent), #3b82f6);
+  border: 0;
+  padding: 10px 14px;
+  font-weight: 600;
+  border-radius: 8px;
+  color: #042027;
+  cursor: pointer;
+}
+.file-list {
+  margin-top: 10px;
+  border: 1px dashed var(--glass);
+  border-radius: 8px;
+  padding: 10px;
+}
+.file-item {
+  background: var(--glass);
+  padding: 8px;
+  border-radius: 4px;
+  margin-bottom: 5px;
+  cursor: move;
+}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/pdf-lib/dist/pdf-lib.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs/Sortable.min.js"></script>
+</head>
+<body>
+<div class="app" role="main">
+  <h1>PDF Merger</h1>
+  <p class="lead">Select multiple PDFs to merge them into a single file. Drag to reorder.</p>
+  <input id="files" type="file" accept="application/pdf" multiple />
+  <div class="file-list" id="file-list"></div>
+  <div style="height:10px"></div>
+  <button id="mergeBtn">Merge PDFs</button>
+  <div id="progress" class="muted"></div>
+  <div id="errors" style="margin-top:8px"></div>
+  <div id="download-link"></div>
+</div>
+<script>
+const { PDFDocument } = PDFLib;
+const fileInput = document.getElementById('files');
+const mergeBtn = document.getElementById('mergeBtn');
+const fileList = document.getElementById('file-list');
+const progress = document.getElementById('progress');
+const errors = document.getElementById('errors');
+const downloadLink = document.getElementById('download-link');
+
+let files = [];
+
+fileInput.addEventListener('change', (e) => {
+  files = Array.from(e.target.files);
+  renderFileList();
+});
+
+function renderFileList() {
+  fileList.innerHTML = '';
+  files.forEach((file, index) => {
+    const item = document.createElement('div');
+    item.className = 'file-item';
+    item.textContent = file.name;
+    item.dataset.index = index;
+    fileList.appendChild(item);
+  });
+}
+
+new Sortable(fileList, {
+  animation: 150,
+  onEnd: (e) => {
+    const item = files.splice(e.oldIndex, 1)[0];
+    files.splice(e.newIndex, 0, item);
+    renderFileList();
+  },
+});
+
+mergeBtn.addEventListener('click', async () => {
+  if (files.length < 2) {
+    errors.textContent = 'Please select at least two PDFs to merge.';
+    return;
+  }
+
+  progress.textContent = 'Merging PDFs...';
+  const mergedPdf = await PDFDocument.create();
+
+  for (const file of files) {
+    const pdfBytes = await file.arrayBuffer();
+    const pdf = await PDFDocument.load(pdfBytes);
+    const copiedPages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
+    copiedPages.forEach(page => mergedPdf.addPage(page));
+  }
+
+  const mergedPdfBytes = await mergedPdf.save();
+  const blob = new Blob([mergedPdfBytes], { type: 'application/pdf' });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'merged.pdf';
+  a.textContent = 'Download Merged PDF';
+  downloadLink.innerHTML = '';
+  downloadLink.appendChild(a);
+
+  progress.textContent = 'Done!';
+});
+</script>
+</body>
+</html>

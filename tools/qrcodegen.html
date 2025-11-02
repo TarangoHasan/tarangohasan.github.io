@@ -1,0 +1,121 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>QR Code Generator</title>
+<style>
+:root {
+  --bg: #0f1724;
+  --card: #0b1220;
+  --accent: #06b6d4;
+  --muted: #9aa8b2;
+  --glass: rgba(255, 255, 255, 0.03);
+}
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: Inter, system-ui, Segoe UI, Roboto, Arial;
+  background: linear-gradient(180deg, #041025 0%, #0b1730 100%);
+  color: #e6eef6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.app {
+  width: 600px;
+  max-width: 96%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 8px 30px rgba(2, 6, 23, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+h1 {
+  margin: 0;
+  font-size: 20px;
+}
+p.lead {
+  margin: 6px 0 18px;
+  color: var(--muted);
+  font-size: 13px;
+}
+label {
+  display: block;
+  font-size: 13px;
+  margin-bottom: 6px;
+  color: var(--muted);
+}
+input {
+  width: 100%;
+  padding: 8px;
+  border-radius: 8px;
+  background: var(--glass);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  color: inherit;
+}
+button {
+  background: linear-gradient(90deg, var(--accent), #3b82f6);
+  border: 0;
+  padding: 10px 14px;
+  font-weight: 600;
+  border-radius: 8px;
+  color: #042027;
+  cursor: pointer;
+}
+#qrcode {
+  margin-top: 20px;
+  background: white;
+  padding: 10px;
+  border-radius: 8px;
+  display: inline-block;
+}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+</head>
+<body>
+<div class="app" role="main">
+  <h1>QR Code Generator</h1>
+  <p class="lead">Enter text to generate a QR code.</p>
+  <label for="text">Text</label>
+  <input id="text" type="text" placeholder="Enter text here" />
+  <div style="height:10px"></div>
+  <button id="generateBtn">Generate QR Code</button>
+  <div id="qrcode"></div>
+  <div style="height:10px"></div>
+  <button id="downloadBtn" style="display:none;">Download QR Code</button>
+</div>
+<script>
+const generateBtn = document.getElementById('generateBtn');
+const textInput = document.getElementById('text');
+const qrcodeContainer = document.getElementById('qrcode');
+const downloadBtn = document.getElementById('downloadBtn');
+
+let qrCodeCanvas = null;
+
+generateBtn.addEventListener('click', () => {
+  const text = textInput.value;
+  if (text) {
+    QRCode.toCanvas(text, { errorCorrectionLevel: 'H' }, (err, canvas) => {
+      if (err) throw err;
+      qrcodeContainer.innerHTML = '';
+      qrcodeContainer.appendChild(canvas);
+      qrCodeCanvas = canvas;
+      downloadBtn.style.display = 'block';
+    });
+  }
+});
+
+downloadBtn.addEventListener('click', () => {
+  if (qrCodeCanvas) {
+    const a = document.createElement('a');
+    a.href = qrCodeCanvas.toDataURL('image/png');
+    a.download = 'qrcode.png';
+    a.click();
+  }
+});
+</script>
+</body>
+</html>
