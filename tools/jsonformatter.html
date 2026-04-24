@@ -38,7 +38,7 @@ h1 {
 }
 p.lead {
   margin: 6px 0 18px;
-  color: var-muted;
+  color: var(--muted);
   font-size: 13px;
 }
 textarea {
@@ -46,7 +46,7 @@ textarea {
   min-height: 200px;
   padding: 8px;
   border-radius: 8px;
-  background: var-glass;
+  background: var(--glass);
   border: 1px solid rgba(255, 255, 255, 0.03);
   color: inherit;
   resize: vertical;
@@ -68,12 +68,16 @@ button {
   <p class="lead">Paste your JSON to format and validate it.</p>
   <textarea id="json-input" placeholder="Enter JSON here..."></textarea>
   <div style="height:10px"></div>
-  <button id="formatBtn">Format JSON</button>
+  <div style="display:flex; gap:10px;">
+    <button id="formatBtn">Format JSON</button>
+    <button id="copyBtn">Copy JSON</button>
+  </div>
   <div id="errors" style="margin-top:8px"></div>
 </div>
 <script>
 const jsonInput = document.getElementById('json-input');
 const formatBtn = document.getElementById('formatBtn');
+const copyBtn = document.getElementById('copyBtn');
 const errors = document.getElementById('errors');
 
 formatBtn.addEventListener('click', () => {
@@ -83,6 +87,15 @@ formatBtn.addEventListener('click', () => {
     errors.textContent = 'Valid JSON!';
   } catch (e) {
     errors.textContent = 'Error: ' + e.message;
+  }
+});
+
+copyBtn.addEventListener('click', () => {
+  if (jsonInput.value) {
+    navigator.clipboard.writeText(jsonInput.value);
+    const originalText = copyBtn.textContent;
+    copyBtn.textContent = "Copied!";
+    setTimeout(() => copyBtn.textContent = originalText, 2000);
   }
 });
 </script>

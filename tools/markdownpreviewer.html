@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Markdown Previewer</title>
+<style>
+:root {
+  --bg: #0f1724;
+  --card: #0b1220;
+  --accent: #06b6d4;
+  --muted: #9aa8b2;
+  --glass: rgba(255, 255, 255, 0.03);
+}
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: Inter, system-ui, Segoe UI, Roboto, Arial;
+  background: linear-gradient(180deg, #041025 0%, #0b1730 100%);
+  color: #e6eef6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.app {
+  width: 1000px;
+  max-width: 96%;
+  height: 80vh;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 8px 30px rgba(2, 6, 23, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  display: flex;
+  flex-direction: column;
+}
+h1 {
+  margin: 0;
+  font-size: 20px;
+}
+p.lead {
+  margin: 6px 0 18px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.editor-container {
+  flex: 1;
+  display: flex;
+  gap: 20px;
+  min-height: 0;
+}
+textarea, .preview {
+  flex: 1;
+  padding: 15px;
+  border-radius: 8px;
+  background: var(--glass);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  color: inherit;
+  overflow-y: auto;
+}
+textarea {
+  resize: none;
+  font-family: 'Courier New', Courier, monospace;
+}
+.preview h1, .preview h2, .preview h3 {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 5px;
+}
+.preview code {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+.preview pre {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 10px;
+  border-radius: 8px;
+  overflow-x: auto;
+}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+<div class="app" role="main">
+  <h1>Markdown Previewer</h1>
+  <p class="lead">Type Markdown on the left and see the preview on the right.</p>
+  <div class="editor-container">
+    <textarea id="markdown-input" placeholder="Enter Markdown here..."># Hello Markdown
+
+This is a **live** preview.
+
+## Features
+- Real-time rendering
+- Support for Github Flavored Markdown
+- Dark theme
+
+```javascript
+console.log('Hello, World!');
+```
+</textarea>
+    <div id="preview" class="preview"></div>
+  </div>
+</div>
+<script>
+const markdownInput = document.getElementById('markdown-input');
+const preview = document.getElementById('preview');
+
+function updatePreview() {
+  preview.innerHTML = marked.parse(markdownInput.value);
+}
+
+markdownInput.addEventListener('input', updatePreview);
+
+// Initial render
+updatePreview();
+</script>
+</body>
+</html>

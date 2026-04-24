@@ -38,14 +38,14 @@ h1 {
 }
 p.lead {
   margin: 6px 0 18px;
-  color: var-muted;
+  color: var(--muted);
   font-size: 13px;
 }
 input, select {
   width: 100%;
   padding: 8px;
   border-radius: 8px;
-  background: var-glass;
+  background: var(--glass);
   border: 1px solid rgba(255, 255, 255, 0.03);
   color: inherit;
 }
@@ -59,12 +59,22 @@ input, select {
   <div style="height:10px"></div>
   <select id="fromUnit">
     <option value="cm">Centimeters</option>
+    <option value="m">Meters</option>
+    <option value="km">Kilometers</option>
     <option value="inch">Inches</option>
+    <option value="ft">Feet</option>
+    <option value="yd">Yards</option>
+    <option value="mi">Miles</option>
   </select>
   <div style="height:10px"></div>
   <select id="toUnit">
     <option value="cm">Centimeters</option>
+    <option value="m">Meters</option>
+    <option value="km">Kilometers</option>
     <option value="inch">Inches</option>
+    <option value="ft">Feet</option>
+    <option value="yd">Yards</option>
+    <option value="mi">Miles</option>
   </select>
   <div style="height:10px"></div>
   <input type="text" id="output" placeholder="Result" readonly />
@@ -74,6 +84,16 @@ const input = document.getElementById('input');
 const fromUnit = document.getElementById('fromUnit');
 const toUnit = document.getElementById('toUnit');
 const output = document.getElementById('output');
+
+const factors = {
+  cm: 1,
+  m: 100,
+  km: 100000,
+  inch: 2.54,
+  ft: 30.48,
+  yd: 91.44,
+  mi: 160934.4
+};
 
 function convert() {
   const from = fromUnit.value;
@@ -85,15 +105,10 @@ function convert() {
     return;
   }
 
-  let result;
-  if (from === 'cm' && to === 'inch') {
-    result = value / 2.54;
-  } else if (from === 'inch' && to === 'cm') {
-    result = value * 2.54;
-  } else {
-    result = value;
-  }
-  output.value = result.toFixed(2);
+  const valueInCm = value * factors[from];
+  const result = valueInCm / factors[to];
+
+  output.value = result.toLocaleString(undefined, { maximumFractionDigits: 5 });
 }
 
 input.addEventListener('input', convert);

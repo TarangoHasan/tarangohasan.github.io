@@ -72,12 +72,15 @@ button {
   <button id="decodeBtn">Decode</button>
   <div style="height:10px"></div>
   <textarea id="output" placeholder="Result..."></textarea>
+  <div style="height:10px"></div>
+  <button id="copyBtn">Copy Result</button>
 </div>
 <script>
 const input = document.getElementById('input');
 const output = document.getElementById('output');
 const encodeBtn = document.getElementById('encodeBtn');
 const decodeBtn = document.getElementById('decodeBtn');
+const copyBtn = document.getElementById('copyBtn');
 
 encodeBtn.addEventListener('click', () => {
   try {
@@ -92,6 +95,15 @@ decodeBtn.addEventListener('click', () => {
     output.value = atob(input.value);
   } catch (e) {
     output.value = 'Error: ' + e.message;
+  }
+});
+
+copyBtn.addEventListener('click', () => {
+  if (output.value) {
+    navigator.clipboard.writeText(output.value);
+    const originalText = copyBtn.textContent;
+    copyBtn.textContent = "Copied!";
+    setTimeout(() => copyBtn.textContent = originalText, 2000);
   }
 });
 </script>
