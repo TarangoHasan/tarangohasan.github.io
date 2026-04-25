@@ -65,7 +65,7 @@ button {
 <body>
 <div class="app" role="main">
   <h1>Base64 Encoder/Decoder</h1>
-  <p class="lead">Encode text to Base64 or decode from Base64.</p>
+  <p class="lead">Encode text to Base64 or decode from Base64. Supports Unicode characters.</p>
   <textarea id="input" placeholder="Enter text here..."></textarea>
   <div style="height:10px"></div>
   <button id="encodeBtn">Encode</button>
@@ -82,9 +82,21 @@ const encodeBtn = document.getElementById('encodeBtn');
 const decodeBtn = document.getElementById('decodeBtn');
 const copyBtn = document.getElementById('copyBtn');
 
+function base64EncodeUnicode(str) {
+  return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function(match, p1) {
+    return String.fromCharCode('0x' + p1);
+  }));
+}
+
+function base64DecodeUnicode(str) {
+  return decodeURIComponent(atob(str).split('').map(function(c) {
+    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+  }).join(''));
+}
+
 encodeBtn.addEventListener('click', () => {
   try {
-    output.value = btoa(input.value);
+    output.value = base64EncodeUnicode(input.value);
   } catch (e) {
     output.value = 'Error: ' + e.message;
   }
@@ -92,7 +104,7 @@ encodeBtn.addEventListener('click', () => {
 
 decodeBtn.addEventListener('click', () => {
   try {
-    output.value = atob(input.value);
+    output.value = base64DecodeUnicode(input.value);
   } catch (e) {
     output.value = 'Error: ' + e.message;
   }
