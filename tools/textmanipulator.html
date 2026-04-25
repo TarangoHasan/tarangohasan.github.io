@@ -88,6 +88,7 @@ button {
     <button id="upper-btn">Uppercase</button>
     <button id="lower-btn">Lowercase</button>
     <button id="sentence-btn">Sentence Case</button>
+    <button id="copyBtn">Copy Text</button>
   </div>
 </div>
 <script>
@@ -100,6 +101,7 @@ const paraCount = document.getElementById('para-count');
 const upperBtn = document.getElementById('upper-btn');
 const lowerBtn = document.getElementById('lower-btn');
 const sentenceBtn = document.getElementById('sentence-btn');
+const copyBtn = document.getElementById('copyBtn');
 
 textInput.addEventListener('input', () => {
   const text = textInput.value;
@@ -127,6 +129,15 @@ sentenceBtn.addEventListener('click', () => {
   const text = textInput.value.toLowerCase();
   textInput.value = text.replace(/(^\s*\w|[.!?]\s*\w)/g, c => c.toUpperCase());
   textInput.dispatchEvent(new Event('input'));
+});
+
+copyBtn.addEventListener('click', () => {
+  if (textInput.value) {
+    navigator.clipboard.writeText(textInput.value);
+    const originalText = copyBtn.textContent;
+    copyBtn.textContent = "Copied!";
+    setTimeout(() => copyBtn.textContent = originalText, 2000);
+  }
 });
 </script>
 </body>
