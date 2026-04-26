@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Unix Timestamp Converter</title>
+<style>
+:root {
+  --bg: #0f1724;
+  --card: #0b1220;
+  --accent: #06b6d4;
+  --muted: #9aa8b2;
+  --glass: rgba(255, 255, 255, 0.03);
+}
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: Inter, system-ui, Segoe UI, Roboto, Arial;
+  background: linear-gradient(180deg, #041025 0%, #0b1730 100%);
+  color: #e6eef6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.app {
+  width: 600px;
+  max-width: 96%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 8px 30px rgba(2, 6, 23, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+h1 {
+  margin: 0;
+  font-size: 20px;
+}
+p.lead {
+  margin: 6px 0 18px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.section {
+  margin-bottom: 24px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+.section:last-child {
+  border-bottom: 0;
+}
+label {
+  display: block;
+  font-size: 13px;
+  margin-bottom: 6px;
+  color: var(--muted);
+}
+input, select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  background: var(--glass);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  color: inherit;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+select {
+  width: auto;
+}
+button {
+  background: linear-gradient(90deg, var(--accent), #3b82f6);
+  border: 0;
+  padding: 10px 14px;
+  font-weight: 600;
+  border-radius: 8px;
+  color: #042027;
+  cursor: pointer;
+  margin-top: 10px;
+}
+.result {
+  margin-top: 10px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 8px;
+  font-family: monospace;
+  word-break: break-all;
+}
+.controls {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+</style>
+</head>
+<body>
+<div class="app" role="main">
+  <h1>Unix Timestamp Converter</h1>
+  <p class="lead">Convert between Unix timestamps and human-readable dates.</p>
+
+  <div class="section">
+    <label>Current Unix Timestamp</label>
+    <div class="controls">
+      <input type="text" id="current-ts" readonly />
+      <button id="refresh-btn">Refresh</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <label for="ts-input">Unix Timestamp to Date</label>
+    <div class="controls">
+      <input type="text" id="ts-input" placeholder="e.g. 1704067200" />
+      <select id="ts-unit">
+        <option value="s">Seconds</option>
+        <option value="ms">Milliseconds</option>
+      </select>
+    </div>
+    <div id="date-output" class="result">Enter a timestamp above...</div>
+  </div>
+
+  <div class="section">
+    <label for="date-input">Date to Unix Timestamp</label>
+    <input type="text" id="date-input" placeholder="e.g. 2024-01-01 00:00:00 or ISO string" />
+    <div id="ts-output" class="result">Enter a date string above...</div>
+  </div>
+</div>
+
+<script>
+const currentTs = document.getElementById('current-ts');
+const refreshBtn = document.getElementById('refresh-btn');
+
+const tsInput = document.getElementById('ts-input');
+const tsUnit = document.getElementById('ts-unit');
+const dateOutput = document.getElementById('date-output');
+
+const dateInput = document.getElementById('date-input');
+const tsOutput = document.getElementById('ts-output');
+
+function updateCurrent() {
+  currentTs.value = Math.floor(Date.now() / 1000);
+}
+
+function convertTsToDate() {
+  const val = tsInput.value.trim();
+  if (!val) {
+    dateOutput.textContent = 'Enter a timestamp above...';
+    return;
+  }
+
+  let timestamp = parseInt(val);
+  if (isNaN(timestamp)) {
+    dateOutput.textContent = 'Invalid timestamp';
+    return;
+  }
+
+  if (tsUnit.value === 's') {
+    timestamp *= 1000;
+  }
+
+  const date = new Date(timestamp);
+  if (isNaN(date.getTime())) {
+    dateOutput.textContent = 'Invalid date';
+  } else {
+    dateOutput.innerHTML = `
+      Local: ${date.toString()}<br>
+      UTC: ${date.toUTCString()}<br>
+      ISO: ${date.toISOString()}
+    `;
+  }
+}
+
+function convertDateToTs() {
+  const val = dateInput.value.trim();
+  if (!val) {
+    tsOutput.textContent = 'Enter a date string above...';
+    return;
+  }
+
+  const date = new Date(val);
+  if (isNaN(date.getTime())) {
+    tsOutput.textContent = 'Invalid date format';
+  } else {
+    const ms = date.getTime();
+    const s = Math.floor(ms / 1000);
+    tsOutput.innerHTML = `
+      Seconds: ${s}<br>
+      Milliseconds: ${ms}
+    `;
+  }
+}
+
+refreshBtn.addEventListener('click', updateCurrent);
+tsInput.addEventListener('input', convertTsToDate);
+tsUnit.addEventListener('change', convertTsToDate);
+dateInput.addEventListener('input', convertDateToTs);
+
+// Initialize
+updateCurrent();
+setInterval(updateCurrent, 1000);
+</script>
+</body>
+</html>

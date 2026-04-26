@@ -49,6 +49,16 @@ input, select {
   border: 1px solid rgba(255, 255, 255, 0.03);
   color: inherit;
 }
+button {
+  background: linear-gradient(90deg, var(--accent), #3b82f6);
+  border: 0;
+  padding: 10px 14px;
+  font-weight: 600;
+  border-radius: 8px;
+  color: #042027;
+  cursor: pointer;
+  width: 100%;
+}
 </style>
 </head>
 <body>
@@ -65,6 +75,11 @@ input, select {
     <option value="ft">Feet</option>
     <option value="yd">Yards</option>
     <option value="mi">Miles</option>
+    <option disabled>── Mass ──</option>
+    <option value="g">Grams</option>
+    <option value="kg">Kilograms</option>
+    <option value="lb">Pounds</option>
+    <option value="oz">Ounces</option>
   </select>
   <div style="height:10px"></div>
   <select id="toUnit">
@@ -75,7 +90,14 @@ input, select {
     <option value="ft">Feet</option>
     <option value="yd">Yards</option>
     <option value="mi">Miles</option>
+    <option disabled>── Mass ──</option>
+    <option value="g">Grams</option>
+    <option value="kg">Kilograms</option>
+    <option value="lb">Pounds</option>
+    <option value="oz">Ounces</option>
   </select>
+  <div style="height:10px"></div>
+  <button id="swapBtn">Swap Units</button>
   <div style="height:10px"></div>
   <input type="text" id="output" placeholder="Result" readonly />
 </div>
@@ -84,6 +106,7 @@ const input = document.getElementById('input');
 const fromUnit = document.getElementById('fromUnit');
 const toUnit = document.getElementById('toUnit');
 const output = document.getElementById('output');
+const swapBtn = document.getElementById('swapBtn');
 
 const factors = {
   cm: 1,
@@ -92,7 +115,16 @@ const factors = {
   inch: 2.54,
   ft: 30.48,
   yd: 91.44,
-  mi: 160934.4
+  mi: 160934.4,
+  g: 1,
+  kg: 1000,
+  lb: 453.592,
+  oz: 28.3495
+};
+
+const category = {
+  cm: 'length', m: 'length', km: 'length', inch: 'length', ft: 'length', yd: 'length', mi: 'length',
+  g: 'mass', kg: 'mass', lb: 'mass', oz: 'mass'
 };
 
 function convert() {
@@ -105,8 +137,13 @@ function convert() {
     return;
   }
 
-  const valueInCm = value * factors[from];
-  const result = valueInCm / factors[to];
+  if (category[from] !== category[to]) {
+    output.value = 'Incompatible units';
+    return;
+  }
+
+  const valueInBase = value * factors[from];
+  const result = valueInBase / factors[to];
 
   output.value = result.toLocaleString(undefined, { maximumFractionDigits: 5 });
 }
@@ -114,6 +151,12 @@ function convert() {
 input.addEventListener('input', convert);
 fromUnit.addEventListener('change', convert);
 toUnit.addEventListener('change', convert);
+swapBtn.addEventListener('click', () => {
+  const temp = fromUnit.value;
+  fromUnit.value = toUnit.value;
+  toUnit.value = temp;
+  convert();
+});
 </script>
 </body>
 </html>
