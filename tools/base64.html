@@ -84,7 +84,15 @@ const copyBtn = document.getElementById('copyBtn');
 
 encodeBtn.addEventListener('click', () => {
   try {
-    output.value = btoa(input.value);
+    const encoder = new TextEncoder();
+    const data = encoder.encode(input.value);
+    let binary = '';
+    const bytes = new Uint8Array(data);
+    const len = bytes.byteLength;
+    for (let i = 0; i < len; i++) {
+        binary += String.fromCharCode(bytes[i]);
+    }
+    output.value = btoa(binary);
   } catch (e) {
     output.value = 'Error: ' + e.message;
   }
@@ -92,7 +100,13 @@ encodeBtn.addEventListener('click', () => {
 
 decodeBtn.addEventListener('click', () => {
   try {
-    output.value = atob(input.value);
+    const binary = atob(input.value);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i);
+    }
+    const decoder = new TextDecoder();
+    output.value = decoder.decode(bytes);
   } catch (e) {
     output.value = 'Error: ' + e.message;
   }
