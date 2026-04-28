@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Lorem Ipsum Generator</title>
+<style>
+:root {
+  --bg: #0f1724;
+  --card: #0b1220;
+  --accent: #06b6d4;
+  --muted: #9aa8b2;
+  --glass: rgba(255, 255, 255, 0.03);
+}
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: Inter, system-ui, Segoe UI, Roboto, Arial;
+  background: linear-gradient(180deg, #041025 0%, #0b1730 100%);
+  color: #e6eef6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.app {
+  width: 800px;
+  max-width: 96%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 8px 30px rgba(2, 6, 23, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+h1 {
+  margin: 0;
+  font-size: 20px;
+}
+p.lead {
+  margin: 6px 0 18px;
+  color: var(--muted);
+  font-size: 13px;
+}
+label {
+  display: block;
+  font-size: 13px;
+  margin-bottom: 6px;
+  color: var(--muted);
+}
+input, select, textarea {
+  width: 100%;
+  padding: 8px;
+  border-radius: 8px;
+  background: var(--glass);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  color: inherit;
+}
+textarea {
+  min-height: 200px;
+  resize: vertical;
+  margin-top: 10px;
+}
+button {
+  background: linear-gradient(90deg, var(--accent), #3b82f6);
+  border: 0;
+  padding: 10px 14px;
+  font-weight: 600;
+  border-radius: 8px;
+  color: #042027;
+  cursor: pointer;
+}
+.controls {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+}
+.control-group {
+  flex: 1;
+}
+</style>
+</head>
+<body>
+<div class="app" role="main">
+  <h1>Lorem Ipsum Generator</h1>
+  <p class="lead">Generate placeholder text for your designs.</p>
+  <div class="controls">
+    <div class="control-group">
+      <label for="count">Count</label>
+      <input type="number" id="count" value="3" min="1" max="100" />
+    </div>
+    <div class="control-group">
+      <label for="type">Type</label>
+      <select id="type">
+        <option value="paragraphs">Paragraphs</option>
+        <option value="sentences">Sentences</option>
+        <option value="words">Words</option>
+      </select>
+    </div>
+    <button id="generateBtn">Generate</button>
+  </div>
+  <textarea id="output" readonly placeholder="Generated text will appear here..."></textarea>
+  <div style="height:10px"></div>
+  <button id="copyBtn">Copy Text</button>
+</div>
+<script>
+const countInput = document.getElementById('count');
+const typeSelect = document.getElementById('type');
+const generateBtn = document.getElementById('generateBtn');
+const outputTextarea = document.getElementById('output');
+const copyBtn = document.getElementById('copyBtn');
+
+const loremWords = [
+  "lorem", "ipsum", "dolor", "sit", "amet", "consectetur", "adipiscing", "elit", "sed", "do", "eiusmod", "tempor", "incididunt", "ut", "labore", "et", "dolore", "magna", "aliqua", "ut", "enim", "ad", "minim", "veniam", "quis", "nostrud", "exercitation", "ullamco", "laboris", "nisi", "ut", "aliquip", "ex", "ea", "commodo", "consequat", "duis", "aute", "irure", "dolor", "in", "reprehenderit", "in", "voluptate", "velit", "esse", "cillum", "dolore", "eu", "fugiat", "nulla", "pariatur", "excepteur", "sint", "occaecat", "cupidatat", "non", "proident", "sunt", "in", "culpa", "qui", "officia", "deserunt", "mollit", "anim", "id", "est", "laborum"
+];
+
+function getRandomWord() {
+  return loremWords[Math.floor(Math.random() * loremWords.length)];
+}
+
+function generateSentence() {
+  const length = Math.floor(Math.random() * 10) + 5;
+  let sentence = [];
+  for (let i = 0; i < length; i++) {
+    sentence.push(getRandomWord());
+  }
+  let str = sentence.join(' ');
+  return str.charAt(0).toUpperCase() + str.slice(1) + '.';
+}
+
+function generateParagraph() {
+  const length = Math.floor(Math.random() * 5) + 3;
+  let paragraph = [];
+  for (let i = 0; i < length; i++) {
+    paragraph.push(generateSentence());
+  }
+  return paragraph.join(' ');
+}
+
+function generate() {
+  const count = parseInt(countInput.value);
+  const type = typeSelect.value;
+  let results = [];
+
+  if (type === 'words') {
+    for (let i = 0; i < count; i++) {
+      results.push(getRandomWord());
+    }
+    outputTextarea.value = results.join(' ');
+  } else if (type === 'sentences') {
+    for (let i = 0; i < count; i++) {
+      results.push(generateSentence());
+    }
+    outputTextarea.value = results.join(' ');
+  } else if (type === 'paragraphs') {
+    for (let i = 0; i < count; i++) {
+      results.push(generateParagraph());
+    }
+    outputTextarea.value = results.join('\n\n');
+  }
+}
+
+generateBtn.addEventListener('click', generate);
+
+copyBtn.addEventListener('click', () => {
+  if (outputTextarea.value) {
+    navigator.clipboard.writeText(outputTextarea.value);
+    const originalText = copyBtn.textContent;
+    copyBtn.textContent = "Copied!";
+    setTimeout(() => copyBtn.textContent = originalText, 2000);
+  }
+});
+
+// Initial generation
+generate();
+</script>
+</body>
+</html>
