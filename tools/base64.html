@@ -82,9 +82,27 @@ const encodeBtn = document.getElementById('encodeBtn');
 const decodeBtn = document.getElementById('decodeBtn');
 const copyBtn = document.getElementById('copyBtn');
 
+function unicodeBtoa(str) {
+  const bytes = new TextEncoder().encode(str);
+  let binString = "";
+  for (let i = 0; i < bytes.byteLength; i++) {
+    binString += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binString);
+}
+
+function unicodeAtob(str) {
+  const binString = atob(str);
+  const bytes = new Uint8Array(binString.length);
+  for (let i = 0; i < binString.length; i++) {
+    bytes[i] = binString.charCodeAt(i);
+  }
+  return new TextDecoder().decode(bytes);
+}
+
 encodeBtn.addEventListener('click', () => {
   try {
-    output.value = btoa(input.value);
+    output.value = unicodeBtoa(input.value);
   } catch (e) {
     output.value = 'Error: ' + e.message;
   }
@@ -92,7 +110,7 @@ encodeBtn.addEventListener('click', () => {
 
 decodeBtn.addEventListener('click', () => {
   try {
-    output.value = atob(input.value);
+    output.value = unicodeAtob(input.value || output.value);
   } catch (e) {
     output.value = 'Error: ' + e.message;
   }
