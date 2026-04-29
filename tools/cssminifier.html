@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Base64 Encoder/Decoder</title>
+<title>CSS Minifier</title>
 <style>
 :root {
   --bg: #0f1724;
@@ -43,13 +43,14 @@ p.lead {
 }
 textarea {
   width: 100%;
-  min-height: 100px;
+  min-height: 150px;
   padding: 8px;
   border-radius: 8px;
   background: var(--glass);
   border: 1px solid rgba(255, 255, 255, 0.03);
   color: inherit;
   resize: vertical;
+  font-family: monospace;
 }
 button {
   background: linear-gradient(90deg, var(--accent), #3b82f6);
@@ -64,42 +65,31 @@ button {
 </head>
 <body>
 <div class="app" role="main">
-  <h1>Base64 Encoder/Decoder</h1>
-  <p class="lead">Encode text to Base64 or decode from Base64.</p>
-  <textarea id="input" placeholder="Enter text here..."></textarea>
+  <h1>CSS Minifier</h1>
+  <p class="lead">Minify your CSS by removing comments and whitespace.</p>
+  <textarea id="input" placeholder="Paste CSS here..."></textarea>
   <div style="height:10px"></div>
-  <button id="encodeBtn">Encode</button>
-  <button id="decodeBtn">Decode</button>
+  <button id="minifyBtn">Minify CSS</button>
   <div style="height:10px"></div>
-  <textarea id="output" placeholder="Result..."></textarea>
+  <textarea id="output" placeholder="Minified CSS..." readonly></textarea>
   <div style="height:10px"></div>
-  <button id="copyBtn">Copy Result</button>
+  <button id="copyBtn">Copy Minified CSS</button>
 </div>
 <script>
 const input = document.getElementById('input');
 const output = document.getElementById('output');
-const encodeBtn = document.getElementById('encodeBtn');
-const decodeBtn = document.getElementById('decodeBtn');
+const minifyBtn = document.getElementById('minifyBtn');
 const copyBtn = document.getElementById('copyBtn');
 
-encodeBtn.addEventListener('click', () => {
-  try {
-    const bytes = new TextEncoder().encode(input.value);
-    const binString = Array.from(bytes, (byte) => String.fromCodePoint(byte)).join("");
-    output.value = btoa(binString);
-  } catch (e) {
-    output.value = 'Error: ' + e.message;
-  }
-});
-
-decodeBtn.addEventListener('click', () => {
-  try {
-    const binString = atob(input.value);
-    const bytes = Uint8Array.from(binString, (m) => m.codePointAt(0));
-    output.value = new TextDecoder().decode(bytes);
-  } catch (e) {
-    output.value = 'Error: ' + e.message;
-  }
+minifyBtn.addEventListener('click', () => {
+  let css = input.value;
+  // Remove comments
+  css = css.replace(/\/\*[\s\S]*?\*\//g, '');
+  // Remove whitespace
+  css = css.replace(/\s+/g, ' ');
+  css = css.replace(/\s*([{};:])\s*/g, '$1');
+  css = css.trim();
+  output.value = css;
 });
 
 copyBtn.addEventListener('click', () => {
