@@ -55,47 +55,65 @@ input, select {
 <div class="app" role="main">
   <h1>Unit Converter</h1>
   <p class="lead">Convert between common units.</p>
+
+  <label for="category">Category</label>
+  <select id="category">
+    <option value="length">Length</option>
+    <option value="temperature">Temperature</option>
+  </select>
+  <div style="height:10px"></div>
+
   <input type="number" id="input" placeholder="Enter value" />
   <div style="height:10px"></div>
-  <select id="fromUnit">
-    <option value="cm">Centimeters</option>
-    <option value="m">Meters</option>
-    <option value="km">Kilometers</option>
-    <option value="inch">Inches</option>
-    <option value="ft">Feet</option>
-    <option value="yd">Yards</option>
-    <option value="mi">Miles</option>
-  </select>
+
+  <label for="fromUnit">From</label>
+  <select id="fromUnit"></select>
   <div style="height:10px"></div>
-  <select id="toUnit">
-    <option value="cm">Centimeters</option>
-    <option value="m">Meters</option>
-    <option value="km">Kilometers</option>
-    <option value="inch">Inches</option>
-    <option value="ft">Feet</option>
-    <option value="yd">Yards</option>
-    <option value="mi">Miles</option>
-  </select>
+
+  <label for="toUnit">To</label>
+  <select id="toUnit"></select>
   <div style="height:10px"></div>
+
+  <label for="output">Result</label>
   <input type="text" id="output" placeholder="Result" readonly />
 </div>
 <script>
+const category = document.getElementById('category');
 const input = document.getElementById('input');
 const fromUnit = document.getElementById('fromUnit');
 const toUnit = document.getElementById('toUnit');
 const output = document.getElementById('output');
 
-const factors = {
-  cm: 1,
-  m: 100,
-  km: 100000,
-  inch: 2.54,
-  ft: 30.48,
-  yd: 91.44,
-  mi: 160934.4
+const units = {
+  length: {
+    cm: { name: "Centimeters", factor: 1 },
+    m: { name: "Meters", factor: 100 },
+    km: { name: "Kilometers", factor: 100000 },
+    inch: { name: "Inches", factor: 2.54 },
+    ft: { name: "Feet", factor: 30.48 },
+    yd: { name: "Yards", factor: 91.44 },
+    mi: { name: "Miles", factor: 160934.4 }
+  },
+  temperature: {
+    c: { name: "Celsius" },
+    f: { name: "Fahrenheit" },
+    k: { name: "Kelvin" }
+  }
 };
 
+function updateUnits() {
+  const cat = category.value;
+  const options = Object.entries(units[cat]).map(([key, val]) => `<option value="${key}">${val.name}</option>`).join('');
+  fromUnit.innerHTML = options;
+  toUnit.innerHTML = options;
+  if (cat === 'temperature') {
+    toUnit.selectedIndex = 1;
+  }
+  convert();
+}
+
 function convert() {
+  const cat = category.value;
   const from = fromUnit.value;
   const to = toUnit.value;
   const value = parseFloat(input.value);
@@ -105,15 +123,31 @@ function convert() {
     return;
   }
 
-  const valueInCm = value * factors[from];
-  const result = valueInCm / factors[to];
+  let result;
+  if (cat === 'length') {
+    const valueInCm = value * units.length[from].factor;
+    result = valueInCm / units.length[to].factor;
+  } else if (cat === 'temperature') {
+    let celsius;
+    if (from === 'c') celsius = value;
+    else if (from === 'f') celsius = (value - 32) * 5 / 9;
+    else if (from === 'k') celsius = value - 273.15;
+
+    if (to === 'c') result = celsius;
+    else if (to === 'f') result = (celsius * 9 / 5) + 32;
+    else if (to === 'k') result = celsius + 273.15;
+  }
 
   output.value = result.toLocaleString(undefined, { maximumFractionDigits: 5 });
 }
 
+category.addEventListener('change', updateUnits);
 input.addEventListener('input', convert);
 fromUnit.addEventListener('change', convert);
 toUnit.addEventListener('change', convert);
+
+// Initialize
+updateUnits();
 </script>
 </body>
 </html>
