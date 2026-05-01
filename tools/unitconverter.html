@@ -41,6 +41,12 @@ p.lead {
   color: var(--muted);
   font-size: 13px;
 }
+label {
+  display: block;
+  font-size: 12px;
+  margin-bottom: 4px;
+  color: var(--muted);
+}
 input, select {
   width: 100%;
   padding: 8px;
@@ -48,54 +54,119 @@ input, select {
   background: var(--glass);
   border: 1px solid rgba(255, 255, 255, 0.03);
   color: inherit;
+  box-sizing: border-box;
+}
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
 }
 </style>
 </head>
 <body>
 <div class="app" role="main">
+  <a href="../index.html" style="color: var(--accent); text-decoration: none; font-size: 14px; display: inline-block; margin-bottom: 10px;">&larr; Back to Home</a>
+
   <h1>Unit Converter</h1>
   <p class="lead">Convert between common units.</p>
-  <input type="number" id="input" placeholder="Enter value" />
-  <div style="height:10px"></div>
-  <select id="fromUnit">
-    <option value="cm">Centimeters</option>
-    <option value="m">Meters</option>
-    <option value="km">Kilometers</option>
-    <option value="inch">Inches</option>
-    <option value="ft">Feet</option>
-    <option value="yd">Yards</option>
-    <option value="mi">Miles</option>
+
+  <label for="category">Category</label>
+  <select id="category">
+    <option value="length">Length</option>
+    <option value="weight">Weight</option>
   </select>
-  <div style="height:10px"></div>
-  <select id="toUnit">
-    <option value="cm">Centimeters</option>
-    <option value="m">Meters</option>
-    <option value="km">Kilometers</option>
-    <option value="inch">Inches</option>
-    <option value="ft">Feet</option>
-    <option value="yd">Yards</option>
-    <option value="mi">Miles</option>
-  </select>
-  <div style="height:10px"></div>
-  <input type="text" id="output" placeholder="Result" readonly />
+  <div style="height:15px"></div>
+
+  <div class="grid">
+    <div>
+      <label for="input">From</label>
+      <input type="number" id="input" placeholder="Value" />
+      <div style="height:8px"></div>
+      <select id="fromUnit"></select>
+    </div>
+    <div>
+      <label for="output">To</label>
+      <input type="text" id="output" placeholder="Result" readonly />
+      <div style="height:8px"></div>
+      <select id="toUnit"></select>
+    </div>
+  </div>
 </div>
 <script>
+const categorySelect = document.getElementById('category');
 const input = document.getElementById('input');
 const fromUnit = document.getElementById('fromUnit');
 const toUnit = document.getElementById('toUnit');
 const output = document.getElementById('output');
 
-const factors = {
-  cm: 1,
-  m: 100,
-  km: 100000,
-  inch: 2.54,
-  ft: 30.48,
-  yd: 91.44,
-  mi: 160934.4
+const units = {
+  length: {
+    base: 'm',
+    factors: {
+      cm: 0.01,
+      m: 1,
+      km: 1000,
+      inch: 0.0254,
+      ft: 0.3048,
+      yd: 0.9144,
+      mi: 1609.344
+    },
+    labels: {
+      cm: 'Centimeters',
+      m: 'Meters',
+      km: 'Kilometers',
+      inch: 'Inches',
+      ft: 'Feet',
+      yd: 'Yards',
+      mi: 'Miles'
+    }
+  },
+  weight: {
+    base: 'kg',
+    factors: {
+      g: 0.001,
+      kg: 1,
+      lb: 0.45359237,
+      oz: 0.0283495231
+    },
+    labels: {
+      g: 'Grams',
+      kg: 'Kilograms',
+      lb: 'Pounds',
+      oz: 'Ounces'
+    }
+  }
 };
 
+function populateUnits() {
+  const cat = categorySelect.value;
+  const catUnits = units[cat].labels;
+
+  fromUnit.innerHTML = '';
+  toUnit.innerHTML = '';
+
+  Object.keys(catUnits).forEach(unit => {
+    const optFrom = document.createElement('option');
+    optFrom.value = unit;
+    optFrom.textContent = catUnits[unit];
+    fromUnit.appendChild(optFrom);
+
+    const optTo = document.createElement('option');
+    optTo.value = unit;
+    optTo.textContent = catUnits[unit];
+    toUnit.appendChild(optTo);
+  });
+
+  // Set default "to" unit to something else if possible
+  if (toUnit.options.length > 1) {
+    toUnit.selectedIndex = 1;
+  }
+
+  convert();
+}
+
 function convert() {
+  const cat = categorySelect.value;
   const from = fromUnit.value;
   const to = toUnit.value;
   const value = parseFloat(input.value);
@@ -105,15 +176,22 @@ function convert() {
     return;
   }
 
-  const valueInCm = value * factors[from];
-  const result = valueInCm / factors[to];
+  const factorFrom = units[cat].factors[from];
+  const factorTo = units[cat].factors[to];
 
-  output.value = result.toLocaleString(undefined, { maximumFractionDigits: 5 });
+  const valueInBase = value * factorFrom;
+  const result = valueInBase / factorTo;
+
+  output.value = result.toLocaleString(undefined, { maximumFractionDigits: 6 });
 }
 
+categorySelect.addEventListener('change', populateUnits);
 input.addEventListener('input', convert);
 fromUnit.addEventListener('change', convert);
 toUnit.addEventListener('change', convert);
+
+// Initial population
+populateUnits();
 </script>
 </body>
 </html>

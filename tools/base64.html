@@ -64,6 +64,8 @@ button {
 </head>
 <body>
 <div class="app" role="main">
+  <a href="../index.html" style="color: var(--accent); text-decoration: none; font-size: 14px; display: inline-block; margin-bottom: 10px;">&larr; Back to Home</a>
+
   <h1>Base64 Encoder/Decoder</h1>
   <p class="lead">Encode text to Base64 or decode from Base64.</p>
   <textarea id="input" placeholder="Enter text here..."></textarea>
@@ -82,9 +84,27 @@ const encodeBtn = document.getElementById('encodeBtn');
 const decodeBtn = document.getElementById('decodeBtn');
 const copyBtn = document.getElementById('copyBtn');
 
+function unicodeToB64(str) {
+  const bytes = new TextEncoder().encode(str);
+  let binary = '';
+  for (let i = 0; i < bytes.byteLength; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary);
+}
+
+function b64ToUnicode(str) {
+  const binary = atob(str);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return new TextDecoder().decode(bytes);
+}
+
 encodeBtn.addEventListener('click', () => {
   try {
-    output.value = btoa(input.value);
+    output.value = unicodeToB64(input.value);
   } catch (e) {
     output.value = 'Error: ' + e.message;
   }
@@ -92,7 +112,7 @@ encodeBtn.addEventListener('click', () => {
 
 decodeBtn.addEventListener('click', () => {
   try {
-    output.value = atob(input.value);
+    output.value = b64ToUnicode(input.value);
   } catch (e) {
     output.value = 'Error: ' + e.message;
   }
