@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Epoch Converter</title>
+<style>
+:root {
+  --bg: #0f1724;
+  --card: #0b1220;
+  --accent: #06b6d4;
+  --muted: #9aa8b2;
+  --glass: rgba(255, 255, 255, 0.03);
+}
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: Inter, system-ui, Segoe UI, Roboto, Arial;
+  background: linear-gradient(180deg, #041025 0%, #0b1730 100%);
+  color: #e6eef6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.app {
+  width: 600px;
+  max-width: 96%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 8px 30px rgba(2, 6, 23, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+h1 {
+  margin: 0;
+  font-size: 20px;
+}
+p.lead {
+  margin: 6px 0 18px;
+  color: var(--muted);
+  font-size: 13px;
+}
+label {
+  display: block;
+  font-size: 13px;
+  margin-bottom: 6px;
+  color: var(--muted);
+}
+input {
+  width: 100%;
+  padding: 8px;
+  border-radius: 8px;
+  background: var(--glass);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  color: inherit;
+  box-sizing: border-box;
+}
+button {
+  background: linear-gradient(90deg, var(--accent), #3b82f6);
+  border: 0;
+  padding: 10px 14px;
+  font-weight: 600;
+  border-radius: 8px;
+  color: #042027;
+  cursor: pointer;
+  margin-top: 10px;
+}
+.result-group {
+  margin-top: 20px;
+  padding: 15px;
+  background: var(--glass);
+  border-radius: 8px;
+}
+.result-item {
+  margin-bottom: 10px;
+}
+.result-item:last-child {
+  margin-bottom: 0;
+}
+.result-label {
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+.result-value {
+  font-family: monospace;
+  font-size: 14px;
+  word-break: break-all;
+}
+</style>
+</head>
+<body>
+<div class="app" role="main">
+  <a href="../index.html" style="color: var(--accent); text-decoration: none; font-size: 14px; display: inline-block; margin-bottom: 10px;">&larr; Back to Home</a>
+
+  <h1>Epoch Converter</h1>
+  <p class="lead">Convert Unix timestamps to human-readable dates and vice versa.</p>
+
+  <div>
+    <label for="epoch-input">Unix Timestamp (seconds)</label>
+    <div style="display:flex; gap:10px;">
+      <input type="number" id="epoch-input" placeholder="e.g. 1715602800" />
+      <button id="to-date-btn" style="margin-top:0; white-space:nowrap;">To Date</button>
+    </div>
+  </div>
+
+  <div style="height:20px"></div>
+
+  <div>
+    <label for="date-input">Date String</label>
+    <div style="display:flex; gap:10px;">
+      <input type="text" id="date-input" placeholder="e.g. 2024-05-13T12:00:00Z" />
+      <button id="to-epoch-btn" style="margin-top:0; white-space:nowrap;">To Epoch</button>
+    </div>
+  </div>
+
+  <div class="result-group" id="results" style="display:none;">
+    <div class="result-item">
+      <div class="result-label">Local Date</div>
+      <div class="result-value" id="local-date"></div>
+    </div>
+    <div class="result-item">
+      <div class="result-label">UTC Date</div>
+      <div class="result-value" id="utc-date"></div>
+    </div>
+    <div class="result-item">
+      <div class="result-label">Timestamp (seconds)</div>
+      <div class="result-value" id="timestamp-sec"></div>
+    </div>
+  </div>
+  <div id="errors" style="margin-top:10px; color: #ff4b2b;"></div>
+</div>
+<script>
+const epochInput = document.getElementById('epoch-input');
+const dateInput = document.getElementById('date-input');
+const toDateBtn = document.getElementById('to-date-btn');
+const toEpochBtn = document.getElementById('to-epoch-btn');
+const results = document.getElementById('results');
+const localDateDisplay = document.getElementById('local-date');
+const utcDateDisplay = document.getElementById('utc-date');
+const timestampSecDisplay = document.getElementById('timestamp-sec');
+const errors = document.getElementById('errors');
+
+function displayResult(date) {
+  if (isNaN(date.getTime())) {
+    errors.textContent = 'Invalid date or timestamp.';
+    results.style.display = 'none';
+    return;
+  }
+  errors.textContent = '';
+  results.style.display = 'block';
+  localDateDisplay.textContent = date.toString();
+  utcDateDisplay.textContent = date.toISOString();
+  timestampSecDisplay.textContent = Math.floor(date.getTime() / 1000);
+}
+
+toDateBtn.addEventListener('click', () => {
+  const epoch = parseInt(epochInput.value);
+  if (isNaN(epoch)) {
+    errors.textContent = 'Please enter a valid number.';
+    return;
+  }
+  displayResult(new Date(epoch * 1000));
+});
+
+toEpochBtn.addEventListener('click', () => {
+  let dateStr = dateInput.value.trim();
+  if (!dateStr) {
+    errors.textContent = 'Please enter a date string.';
+    return;
+  }
+  // If it looks like an ISO date without 'Z', append 'Z' for UTC as per guidelines
+  if (dateStr.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/)) {
+    dateStr += 'Z';
+  }
+  displayResult(new Date(dateStr));
+});
+
+// Set current epoch as default
+epochInput.value = Math.floor(Date.now() / 1000);
+</script>
+</body>
+</html>
