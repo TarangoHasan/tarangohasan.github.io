@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Unix Timestamp Converter</title>
+<style>
+:root {
+  --bg: #0f1724;
+  --card: #0b1220;
+  --accent: #06b6d4;
+  --muted: #9aa8b2;
+  --glass: rgba(255, 255, 255, 0.03);
+}
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: Inter, system-ui, Segoe UI, Roboto, Arial;
+  background: linear-gradient(180deg, #041025 0%, #0b1730 100%);
+  color: #e6eef6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.app {
+  width: 600px;
+  max-width: 96%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 8px 30px rgba(2, 6, 23, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+h1 {
+  margin: 0;
+  font-size: 20px;
+}
+p.lead {
+  margin: 6px 0 18px;
+  color: var(--muted);
+  font-size: 13px;
+}
+label {
+  display: block;
+  font-size: 13px;
+  margin-bottom: 6px;
+  color: var(--muted);
+}
+input {
+  width: 100%;
+  padding: 8px;
+  border-radius: 8px;
+  background: var(--glass);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  color: inherit;
+  margin-bottom: 12px;
+}
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+button {
+  background: linear-gradient(90deg, var(--accent), #3b82f6);
+  border: 0;
+  padding: 10px 14px;
+  font-weight: 600;
+  border-radius: 8px;
+  color: #042027;
+  cursor: pointer;
+  width: 100%;
+  margin-bottom: 10px;
+}
+.current-time {
+  background: var(--glass);
+  padding: 15px;
+  border-radius: 8px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+.current-time span {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: var(--accent);
+}
+</style>
+</head>
+<body>
+<div class="app" role="main">
+  <a href="../index.html" style="color: var(--accent); text-decoration: none; font-size: 14px;">← Back to Home</a>
+  <div style="height:10px"></div>
+  <h1>Unix Timestamp Converter</h1>
+  <p class="lead">Convert Unix timestamps to human-readable dates and vice-versa.</p>
+
+  <div class="current-time">
+    <label>Current Unix Timestamp</label>
+    <span id="current-ts">0</span>
+  </div>
+
+  <div class="section">
+    <label for="ts-input">Unix Timestamp (seconds)</label>
+    <input type="number" id="ts-input" placeholder="e.g., 1704067200" />
+    <label>Relative Time</label>
+    <input type="text" id="date-output-relative" readonly placeholder="Waiting for input..." />
+    <label>UTC Date</label>
+    <input type="text" id="date-output-utc" readonly placeholder="Waiting for input..." />
+    <label>Local Date</label>
+    <input type="text" id="date-output-local" readonly placeholder="Waiting for input..." />
+  </div>
+
+  <hr style="border: 0; border-top: 1px solid var(--glass); margin: 20px 0;">
+
+  <div class="section">
+    <label for="date-input">Human Readable Date</label>
+    <input type="text" id="date-input" placeholder="e.g., 2024-01-01 00:00:00" />
+    <label>Unix Timestamp</label>
+    <input type="text" id="ts-output" readonly placeholder="Waiting for input..." />
+  </div>
+
+  <button id="now-btn">Set to Current Time</button>
+</div>
+<script>
+const currentTsEl = document.getElementById('current-ts');
+const tsInput = document.getElementById('ts-input');
+const dateOutputRelative = document.getElementById('date-output-relative');
+const dateOutputUtc = document.getElementById('date-output-utc');
+const dateOutputLocal = document.getElementById('date-output-local');
+
+const dateInput = document.getElementById('date-input');
+const tsOutput = document.getElementById('ts-output');
+const nowBtn = document.getElementById('now-btn');
+
+function updateCurrentTs() {
+  currentTsEl.textContent = Math.floor(Date.now() / 1000);
+}
+
+setInterval(updateCurrentTs, 1000);
+updateCurrentTs();
+
+function formatRelativeTime(seconds) {
+  const diff = seconds - Math.floor(Date.now() / 1000);
+  const absDiff = Math.abs(diff);
+  const rtf = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
+
+  if (absDiff < 60) return rtf.format(diff, 'second');
+  if (absDiff < 3600) return rtf.format(Math.floor(diff / 60), 'minute');
+  if (absDiff < 86400) return rtf.format(Math.floor(diff / 3600), 'hour');
+  return rtf.format(Math.floor(diff / 86400), 'day');
+}
+
+function convertTsToDate() {
+  const ts = parseInt(tsInput.value);
+  if (isNaN(ts)) {
+    dateOutputRelative.value = '';
+    dateOutputUtc.value = '';
+    dateOutputLocal.value = '';
+    return;
+  }
+
+  const date = new Date(ts * 1000);
+  dateOutputRelative.value = formatRelativeTime(ts);
+  dateOutputUtc.value = date.toUTCString();
+  dateOutputLocal.value = date.toString();
+}
+
+function convertDateToTs() {
+  const dateStr = dateInput.value;
+  if (!dateStr) {
+    tsOutput.value = '';
+    return;
+  }
+
+  const date = new Date(dateStr);
+  if (isNaN(date.getTime())) {
+    tsOutput.value = 'Invalid Date';
+    return;
+  }
+
+  tsOutput.value = Math.floor(date.getTime() / 1000);
+}
+
+tsInput.addEventListener('input', convertTsToDate);
+dateInput.addEventListener('input', convertDateToTs);
+
+nowBtn.addEventListener('click', () => {
+  const now = Math.floor(Date.now() / 1000);
+  tsInput.value = now;
+  convertTsToDate();
+
+  const date = new Date();
+  dateInput.value = date.toISOString().replace('T', ' ').split('.')[0];
+  convertDateToTs();
+});
+</script>
+</body>
+</html>
