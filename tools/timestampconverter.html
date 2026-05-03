@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Timestamp Converter</title>
+<style>
+:root {
+  --bg: #0f1724;
+  --card: #0b1220;
+  --accent: #06b6d4;
+  --muted: #9aa8b2;
+  --glass: rgba(255, 255, 255, 0.03);
+}
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: Inter, system-ui, Segoe UI, Roboto, Arial;
+  background: linear-gradient(180deg, #041025 0%, #0b1730 100%);
+  color: #e6eef6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.app {
+  width: 600px;
+  max-width: 96%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 8px 30px rgba(2, 6, 23, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+h1 {
+  margin: 0;
+  font-size: 20px;
+}
+p.lead {
+  margin: 6px 0 18px;
+  color: var(--muted);
+  font-size: 13px;
+}
+label {
+  display: block;
+  font-size: 13px;
+  margin-bottom: 6px;
+  color: var(--muted);
+}
+input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  background: var(--glass);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  color: inherit;
+  margin-bottom: 15px;
+  box-sizing: border-box;
+}
+input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.result-group {
+  background: var(--glass);
+  padding: 15px;
+  border-radius: 8px;
+  margin-top: 10px;
+}
+.result-item {
+  margin-bottom: 10px;
+}
+.result-item:last-child {
+  margin-bottom: 0;
+}
+.result-label {
+  font-size: 12px;
+  color: var(--muted);
+}
+.result-value {
+  font-size: 16px;
+  word-break: break-all;
+}
+button {
+  background: linear-gradient(90deg, var(--accent), #3b82f6);
+  border: 0;
+  padding: 10px 14px;
+  font-weight: 600;
+  border-radius: 8px;
+  color: #042027;
+  cursor: pointer;
+  margin-bottom: 15px;
+}
+</style>
+</head>
+<body>
+<div class="app" role="main">
+  <a href="../index.html" style="color:var(--muted); text-decoration:none; font-size:14px; margin-bottom:10px; display:inline-block;">← Back to Home</a>
+  <h1>Timestamp Converter</h1>
+  <p class="lead">Convert between Unix timestamps and human-readable dates.</p>
+
+  <button id="nowBtn">Use Current Time</button>
+
+  <label for="timestamp">Unix Timestamp (seconds or milliseconds)</label>
+  <input type="number" id="timestamp" placeholder="e.g., 1715856000" />
+
+  <label for="dateString">ISO Date String</label>
+  <input type="text" id="dateString" placeholder="e.g., 2024-05-16T12:00:00Z" />
+
+  <div class="result-group">
+    <div class="result-item">
+      <div class="result-label">Local Date</div>
+      <div id="localDate" class="result-value">-</div>
+    </div>
+    <div class="result-item">
+      <div class="result-label">UTC Date</div>
+      <div id="utcDate" class="result-value">-</div>
+    </div>
+    <div class="result-item">
+      <div class="result-label">Relative Time</div>
+      <div id="relativeTime" class="result-value">-</div>
+    </div>
+  </div>
+</div>
+<script>
+const timestampInput = document.getElementById('timestamp');
+const dateInput = document.getElementById('dateString');
+const nowBtn = document.getElementById('nowBtn');
+
+const localDateEl = document.getElementById('localDate');
+const utcDateEl = document.getElementById('utcDate');
+const relativeTimeEl = document.getElementById('relativeTime');
+
+const rtf = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
+const dtf = new Intl.DateTimeFormat('en', {
+  dateStyle: 'full',
+  timeStyle: 'long'
+});
+const utcDtf = new Intl.DateTimeFormat('en', {
+  dateStyle: 'full',
+  timeStyle: 'long',
+  timeZone: 'UTC'
+});
+
+function updateResults(date) {
+  if (isNaN(date.getTime())) {
+    localDateEl.textContent = 'Invalid Date';
+    utcDateEl.textContent = 'Invalid Date';
+    relativeTimeEl.textContent = '-';
+    return;
+  }
+
+  localDateEl.textContent = dtf.format(date);
+  utcDateEl.textContent = utcDtf.format(date);
+
+  const diffInSeconds = Math.floor((date.getTime() - Date.now()) / 1000);
+
+  let relativeText = '';
+  if (Math.abs(diffInSeconds) < 60) {
+    relativeText = rtf.format(diffInSeconds, 'second');
+  } else if (Math.abs(diffInSeconds) < 3600) {
+    relativeText = rtf.format(Math.floor(diffInSeconds / 60), 'minute');
+  } else if (Math.abs(diffInSeconds) < 86400) {
+    relativeText = rtf.format(Math.floor(diffInSeconds / 3600), 'hour');
+  } else {
+    relativeText = rtf.format(Math.floor(diffInSeconds / 86400), 'day');
+  }
+  relativeTimeEl.textContent = relativeText;
+}
+
+timestampInput.addEventListener('input', () => {
+  let val = parseFloat(timestampInput.value);
+  if (isNaN(val)) return;
+
+  // Detect if it's seconds or milliseconds
+  // If it's less than 10^11, it's likely seconds (up to year 5138)
+  if (val < 100000000000) {
+    val *= 1000;
+  }
+
+  const date = new Date(val);
+  dateInput.value = date.toISOString();
+  updateResults(date);
+});
+
+dateInput.addEventListener('input', () => {
+  let val = dateInput.value;
+  if (!val) return;
+
+  // Append 'Z' if it looks like an ISO string without timezone to force UTC
+  if (val.length >= 10 && !val.includes('Z') && !val.includes('+') && !val.includes('-')) {
+     val += 'Z';
+  }
+
+  const date = new Date(val);
+  if (!isNaN(date.getTime())) {
+    timestampInput.value = Math.floor(date.getTime() / 1000);
+  }
+  updateResults(date);
+});
+
+nowBtn.addEventListener('click', () => {
+  const now = new Date();
+  timestampInput.value = Math.floor(now.getTime() / 1000);
+  dateInput.value = now.toISOString();
+  updateResults(now);
+});
+
+// Initial state
+nowBtn.click();
+</script>
+</body>
+</html>
