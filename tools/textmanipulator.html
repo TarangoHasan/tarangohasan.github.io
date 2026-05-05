@@ -71,10 +71,18 @@ button {
   color: #042027;
   cursor: pointer;
 }
+  .back-link {
+    display: inline-block;
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 13px;
+    margin-bottom: 16px;
+  }
 </style>
 </head>
 <body>
 <div class="app" role="main">
+  <a href="../index.html" class="back-link">← Back to Home</a>
   <h1>Text Manipulator</h1>
   <p class="lead">Enter text to manipulate and analyze.</p>
   <textarea id="text" placeholder="Enter text here..."></textarea>
