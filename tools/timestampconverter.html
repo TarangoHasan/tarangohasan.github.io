@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Unix Timestamp Converter</title>
+<style>
+:root {
+  --bg: #0f1724;
+  --card: #0b1220;
+  --accent: #06b6d4;
+  --muted: #9aa8b2;
+  --glass: rgba(255, 255, 255, 0.03);
+}
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: Inter, system-ui, Segoe UI, Roboto, Arial;
+  background: linear-gradient(180deg, #041025 0%, #0b1730 100%);
+  color: #e6eef6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.app {
+  width: 600px;
+  max-width: 96%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 8px 30px rgba(2, 6, 23, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+h1 {
+  margin: 0;
+  font-size: 20px;
+}
+p.lead {
+  margin: 6px 0 18px;
+  color: var(--muted);
+  font-size: 13px;
+}
+input, textarea {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  background: var(--glass);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  color: inherit;
+  font-family: monospace;
+}
+label {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 4px;
+  margin-top: 10px;
+}
+button {
+  background: linear-gradient(90deg, var(--accent), #3b82f6);
+  border: 0;
+  padding: 10px 14px;
+  font-weight: 600;
+  border-radius: 8px;
+  color: #042027;
+  cursor: pointer;
+  margin-top: 10px;
+}
+.back-link {
+  display: inline-block;
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+.current-time {
+  background: var(--glass);
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 14px;
+  margin-bottom: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+</style>
+</head>
+<body>
+<div class="app" role="main">
+  <a href="../index.html" class="back-link">← Back to Home</a>
+  <h1>Unix Timestamp Converter</h1>
+  <p class="lead">Convert between Unix timestamps and human-readable dates.</p>
+
+  <div class="current-time">
+    Current Unix Timestamp: <span id="current-ts"></span>
+  </div>
+
+  <label for="timestamp">Unix Timestamp (seconds or milliseconds)</label>
+  <div style="display: flex; gap: 10px;">
+    <input type="text" id="timestamp" placeholder="e.g., 1700000000" />
+    <button id="to-date-btn" style="white-space: nowrap;">Convert to Date</button>
+  </div>
+
+  <label for="date-str">Human Readable Date (ISO or Local)</label>
+  <div style="display: flex; gap: 10px;">
+    <input type="text" id="date-str" placeholder="e.g., 2023-11-14T22:13:20" />
+    <button id="to-ts-btn" style="white-space: nowrap;">Convert to Timestamp</button>
+  </div>
+
+  <div id="results" style="margin-top: 20px; display: none;">
+    <label>Local Time</label>
+    <input type="text" id="local-res" readonly />
+    <label>UTC Time (ISO)</label>
+    <input type="text" id="utc-res" readonly />
+    <label>Timestamp (Seconds)</label>
+    <input type="text" id="ts-s-res" readonly />
+    <label>Timestamp (Milliseconds)</label>
+    <input type="text" id="ts-ms-res" readonly />
+  </div>
+
+  <div id="error" style="color: #ff4b2b; margin-top: 10px; font-size: 14px;"></div>
+</div>
+
+<script>
+const currentTsEl = document.getElementById('current-ts');
+const timestampInput = document.getElementById('timestamp');
+const dateInput = document.getElementById('date-str');
+const resultsDiv = document.getElementById('results');
+const localRes = document.getElementById('local-res');
+const utcRes = document.getElementById('utc-res');
+const tsSRes = document.getElementById('ts-s-res');
+const tsMsRes = document.getElementById('ts-ms-res');
+const errorEl = document.getElementById('error');
+
+const toDateBtn = document.getElementById('to-date-btn');
+const toTsBtn = document.getElementById('to-ts-btn');
+
+function updateCurrentTs() {
+  currentTsEl.textContent = Math.floor(Date.now() / 1000);
+}
+setInterval(updateCurrentTs, 1000);
+updateCurrentTs();
+
+function displayResults(date) {
+  if (isNaN(date.getTime())) {
+    errorEl.textContent = "Invalid Date/Timestamp";
+    resultsDiv.style.display = 'none';
+    return;
+  }
+  errorEl.textContent = "";
+  resultsDiv.style.display = 'block';
+  localRes.value = date.toLocaleString();
+  utcRes.value = date.toISOString();
+  tsSRes.value = Math.floor(date.getTime() / 1000);
+  tsMsRes.value = date.getTime();
+}
+
+toDateBtn.addEventListener('click', () => {
+  let val = timestampInput.value.trim();
+  if (!val) return;
+
+  let ts = parseInt(val);
+  // If it's less than 10^11, assume seconds (approx year 5138)
+  if (ts < 100000000000) {
+    ts *= 1000;
+  }
+  displayResults(new Date(ts));
+});
+
+toTsBtn.addEventListener('click', () => {
+  let val = dateInput.value.trim();
+  if (!val) return;
+
+  // Per guidelines: When parsing ISO-like date strings in JavaScript for consistency with UTC outputs (like toISOString),
+  // append 'Z' to the string before passing it to the Date constructor to force UTC interpretation.
+  let parseVal = val;
+  if (/^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}(:\d{2}(\.\d+)?)?)?$/.test(val)) {
+    parseVal += 'Z';
+  }
+
+  displayResults(new Date(parseVal));
+});
+</script>
+</body>
+</html>
