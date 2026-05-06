@@ -67,12 +67,24 @@ button {
   margin-bottom: 5px;
   cursor: move;
 }
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 20px;
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 14px;
+}
+.back-link:hover {
+  text-decoration: underline;
+}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/pdf-lib/dist/pdf-lib.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sortablejs/Sortable.min.js"></script>
 </head>
 <body>
 <div class="app" role="main">
+  <a href="../index.html" class="back-link">← Back to Home</a>
   <h1>PDF Merger</h1>
   <p class="lead">Select multiple PDFs to merge them into a single file. Drag to reorder.</p>
   <input id="files" type="file" accept="application/pdf" multiple />
