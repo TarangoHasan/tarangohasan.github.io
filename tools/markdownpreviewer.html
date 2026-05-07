@@ -63,6 +63,15 @@ textarea {
   resize: none;
   font-family: 'Courier New', Courier, monospace;
 }
+@media (max-width: 768px) {
+  .app {
+    height: auto;
+  }
+  .editor-container {
+    flex-direction: column;
+    height: 800px;
+  }
+}
 .preview h1, .preview h2, .preview h3 {
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   padding-bottom: 5px;

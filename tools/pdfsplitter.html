@@ -32,8 +32,18 @@ html, body {
   padding: 20px;
   box-shadow: 0 8px 30px rgba(2, 6, 23, 0.6);
   border: 1px solid rgba(255, 255, 255, 0.03);
+}
+.app-content {
   display: flex;
   gap: 20px;
+}
+@media (max-width: 768px) {
+  .app-content {
+    flex-direction: column;
+  }
+  .sidebar {
+    width: 100%;
+  }
 }
 .sidebar {
   width: 300px;
@@ -125,6 +135,7 @@ button {
 <body>
 <div class="app" role="main">
   <a href="../index.html" class="back-link">← Back to Home</a>
+  <div class="app-content">
   <div class="sidebar">
     <h1>PDF Page Splitter</h1>
     <p class="lead">Select a PDF, choose ranges, and split.</p>
@@ -148,6 +159,7 @@ button {
       <button id="next-page">Next</button>
     </div>
     <div id="results" class="list"></div>
+  </div>
   </div>
 </div>
 <script>
@@ -210,14 +222,23 @@ nextPageBtn.addEventListener('click', () => {
 
 function parseRanges(text) {
   const ranges = [];
+  if (!text.trim()) return ranges;
   const parts = text.split(',');
-  for (const part of parts) {
+  for (let part of parts) {
+    part = part.trim();
+    if (!part) continue;
     if (part.includes('-')) {
-      const [start, end] = part.split('-').map(Number);
-      ranges.push({ start, end });
+      const [startStr, endStr] = part.split('-');
+      const start = parseInt(startStr.trim());
+      const end = parseInt(endStr.trim());
+      if (!isNaN(start) && !isNaN(end)) {
+        ranges.push({ start, end });
+      }
     } else {
-      const num = Number(part);
-      ranges.push({ start: num, end: num });
+      const num = parseInt(part);
+      if (!isNaN(num)) {
+        ranges.push({ start: num, end: num });
+      }
     }
   }
   return ranges;

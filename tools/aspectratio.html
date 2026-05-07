@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Aspect Ratio Calculator</title>
+<style>
+:root {
+  --bg: #0f1724;
+  --card: #0b1220;
+  --accent: #06b6d4;
+  --muted: #9aa8b2;
+  --glass: rgba(255, 255, 255, 0.03);
+}
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: Inter, system-ui, Segoe UI, Roboto, Arial;
+  background: linear-gradient(180deg, #041025 0%, #0b1730 100%);
+  color: #e6eef6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.app {
+  width: 500px;
+  max-width: 96%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 8px 30px rgba(2, 6, 23, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+h1 {
+  margin: 0;
+  font-size: 20px;
+}
+p.lead {
+  margin: 6px 0 18px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.back-link {
+  display: inline-block;
+  margin-bottom: 20px;
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 14px;
+}
+.back-link:hover {
+  text-decoration: underline;
+}
+.input-group {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+.field {
+  flex: 1;
+}
+label {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  background: var(--glass);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  color: inherit;
+  box-sizing: border-box;
+}
+.presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 15px;
+}
+button {
+  background: var(--glass);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 6px 12px;
+  border-radius: 6px;
+  color: inherit;
+  cursor: pointer;
+  font-size: 12px;
+  transition: 0.2s;
+}
+button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--accent);
+}
+.result-box {
+  margin-top: 20px;
+  padding: 15px;
+  background: var(--glass);
+  border-radius: 8px;
+  text-align: center;
+}
+.ratio-display {
+  font-size: 24px;
+  font-weight: bold;
+  color: var(--accent);
+}
+</style>
+</head>
+<body>
+<div class="app" role="main">
+  <a href="../index.html" class="back-link">← Back to Home</a>
+  <h1>Aspect Ratio Calculator</h1>
+  <p class="lead">Calculate dimensions based on a ratio or find the ratio between two sizes.</p>
+
+  <div class="input-group">
+    <div class="field">
+      <label for="ratioW">Ratio Width</label>
+      <input type="number" id="ratioW" value="16" step="any" />
+    </div>
+    <div class="field">
+      <label for="ratioH">Ratio Height</label>
+      <input type="number" id="ratioH" value="9" step="any" />
+    </div>
+  </div>
+
+  <div class="input-group">
+    <div class="field">
+      <label for="width">Width (px)</label>
+      <input type="number" id="width" value="1920" step="any" />
+    </div>
+    <div class="field">
+      <label for="height">Height (px)</label>
+      <input type="number" id="height" value="1080" step="any" />
+    </div>
+  </div>
+
+  <label>Common Presets</label>
+  <div class="presets">
+    <button onclick="setRatio(16, 9)">16:9 (HD)</button>
+    <button onclick="setRatio(4, 3)">4:3 (Standard)</button>
+    <button onclick="setRatio(1, 1)">1:1 (Square)</button>
+    <button onclick="setRatio(21, 9)">21:9 (Ultrawide)</button>
+    <button onclick="setRatio(9, 16)">9:16 (Vertical)</button>
+    <button onclick="setRatio(2, 3)">2:3 (Photo)</button>
+  </div>
+
+  <div class="result-box">
+    <div class="ratio-display" id="ratioResult">16:9</div>
+    <p id="gcdResult" style="font-size: 12px; color: var(--muted); margin-top: 5px;">GCD: 120</p>
+  </div>
+</div>
+
+<script>
+const ratioW = document.getElementById('ratioW');
+const ratioH = document.getElementById('ratioH');
+const width = document.getElementById('width');
+const height = document.getElementById('height');
+const ratioResult = document.getElementById('ratioResult');
+const gcdResult = document.getElementById('gcdResult');
+
+function gcd(a, b) {
+  return b ? gcd(b, a % b) : a;
+}
+
+function updateFromRatio(changedSide) {
+  const rw = parseFloat(ratioW.value);
+  const rh = parseFloat(ratioH.value);
+  if (!rw || !rh) return;
+
+  if (changedSide === 'width') {
+    const w = parseFloat(width.value);
+    if (w) height.value = Math.round((w * rh / rw) * 100) / 100;
+  } else {
+    const h = parseFloat(height.value);
+    if (h) width.value = Math.round((h * rw / rh) * 100) / 100;
+  }
+  updateRatioDisplay();
+}
+
+function updateFromDimensions() {
+  const w = parseFloat(width.value);
+  const h = parseFloat(height.value);
+  if (!w || !h) return;
+
+  const common = gcd(Math.round(w), Math.round(h));
+  ratioW.value = Math.round(w / common * 100) / 100;
+  ratioH.value = Math.round(h / common * 100) / 100;
+
+  updateRatioDisplay();
+}
+
+function updateRatioDisplay() {
+  const w = parseFloat(width.value);
+  const h = parseFloat(height.value);
+  if (!w || !h) {
+    ratioResult.textContent = "-";
+    gcdResult.textContent = "";
+    return;
+  }
+
+  const common = gcd(Math.round(w), Math.round(h));
+  ratioResult.textContent = `${Math.round(w/common)}:${Math.round(h/common)}`;
+  gcdResult.textContent = `GCD: ${common}`;
+}
+
+function setRatio(w, h) {
+  ratioW.value = w;
+  ratioH.value = h;
+  updateFromRatio('width');
+}
+
+ratioW.addEventListener('input', () => updateFromRatio('width'));
+ratioH.addEventListener('input', () => updateFromRatio('width'));
+width.addEventListener('input', updateFromDimensions);
+height.addEventListener('input', updateFromDimensions);
+
+// Initial calculation
+updateRatioDisplay();
+</script>
+</body>
+</html>

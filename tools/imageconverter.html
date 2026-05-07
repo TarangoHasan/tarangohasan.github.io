@@ -123,7 +123,9 @@ convertBtn.addEventListener('click', () => {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `converted.${format.split('/')[1]}`;
+        let ext = format.split('/')[1];
+        if (ext === 'jpeg') ext = 'jpg';
+        a.download = `converted.${ext}`;
         a.click();
         URL.revokeObjectURL(url);
       }, format);
