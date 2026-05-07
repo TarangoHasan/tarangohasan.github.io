@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Unix Timestamp Converter</title>
+<style>
+:root {
+  --bg: #0f1724;
+  --card: #0b1220;
+  --accent: #06b6d4;
+  --muted: #9aa8b2;
+  --glass: rgba(255, 255, 255, 0.03);
+}
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: Inter, system-ui, Segoe UI, Roboto, Arial;
+  background: linear-gradient(180deg, #041025 0%, #0b1730 100%);
+  color: #e6eef6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.app {
+  width: 600px;
+  max-width: 96%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 8px 30px rgba(2, 6, 23, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+h1 {
+  margin: 0;
+  font-size: 20px;
+}
+p.lead {
+  margin: 6px 0 18px;
+  color: var(--muted);
+  font-size: 13px;
+}
+input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  background: var(--glass);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  color: inherit;
+  margin-bottom: 15px;
+}
+label {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+.back-link {
+  display: inline-block;
+  margin-bottom: 20px;
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 14px;
+}
+.back-link:hover {
+  text-decoration: underline;
+}
+.card {
+  background: var(--glass);
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+}
+button {
+  background: linear-gradient(90deg, var(--accent), #3b82f6);
+  border: 0;
+  padding: 10px 14px;
+  font-weight: 600;
+  border-radius: 8px;
+  color: #042027;
+  cursor: pointer;
+}
+</style>
+</head>
+<body>
+<div class="app" role="main">
+  <a href="../index.html" class="back-link">← Back to Home</a>
+  <h1>Unix Timestamp Converter</h1>
+  <p class="lead">Convert between Unix timestamps and human-readable dates.</p>
+
+  <div class="card">
+    <label for="timestamp">Unix Timestamp (Seconds or Milliseconds)</label>
+    <div style="display: flex; gap: 10px;">
+        <input type="number" id="timestamp" placeholder="e.g., 1700000000" />
+        <button id="nowBtn" style="height: 40px; white-space: nowrap;">Current Time</button>
+    </div>
+    <label for="dateOutput">Human Readable Date (UTC)</label>
+    <input type="text" id="dateOutput" readonly placeholder="Resulting date..." />
+    <label for="relativeOutput">Relative Time</label>
+    <input type="text" id="relativeOutput" readonly placeholder="Relative time..." />
+  </div>
+
+  <div class="card">
+    <label for="dateInput">Date String (ISO 8601)</label>
+    <input type="text" id="dateInput" placeholder="e.g., 2023-11-15T00:00:00Z" />
+    <label for="tsOutput">Unix Timestamp (Seconds)</label>
+    <input type="text" id="tsOutput" readonly placeholder="Resulting timestamp..." />
+  </div>
+</div>
+<script>
+const timestampEl = document.getElementById('timestamp');
+const nowBtn = document.getElementById('nowBtn');
+const dateOutput = document.getElementById('dateOutput');
+const relativeOutput = document.getElementById('relativeOutput');
+
+const dateInput = document.getElementById('dateInput');
+const tsOutput = document.getElementById('tsOutput');
+
+const rtf = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
+
+function formatRelative(ms) {
+    const diff = ms - Date.now();
+    const absDiff = Math.abs(diff);
+
+    if (absDiff < 1000) return 'Just now';
+
+    const seconds = Math.floor(absDiff / 1000);
+    if (seconds < 60) return rtf.format(Math.sign(diff) * seconds, 'second');
+
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return rtf.format(Math.sign(diff) * minutes, 'minute');
+
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return rtf.format(Math.sign(diff) * hours, 'hour');
+
+    const days = Math.floor(hours / 24);
+    return rtf.format(Math.sign(diff) * days, 'day');
+}
+
+function updateFromTimestamp() {
+    let val = parseFloat(timestampEl.value);
+    if (isNaN(val)) {
+        dateOutput.value = '';
+        relativeOutput.value = '';
+        return;
+    }
+
+    // Heuristic: if value is > 10^11, assume it's in milliseconds
+    let ms = val > 100000000000 ? val : val * 1000;
+    const date = new Date(ms);
+
+    if (isNaN(date.getTime())) {
+        dateOutput.value = 'Invalid Date';
+        relativeOutput.value = '';
+    } else {
+        dateOutput.value = date.toISOString();
+        relativeOutput.value = formatRelative(ms);
+    }
+}
+
+function updateFromDate() {
+    let val = dateInput.value;
+    if (!val) {
+        tsOutput.value = '';
+        return;
+    }
+
+    // Append Z if not present for UTC consistency if it looks like a date string without timezone
+    let dateStr = val;
+    if (val.match(/^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}(:\d{2})?)?$/)) {
+        dateStr += 'Z';
+    }
+
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) {
+        tsOutput.value = 'Invalid Date';
+    } else {
+        tsOutput.value = Math.floor(date.getTime() / 1000);
+    }
+}
+
+timestampEl.addEventListener('input', updateFromTimestamp);
+nowBtn.addEventListener('click', () => {
+    timestampEl.value = Math.floor(Date.now() / 1000);
+    updateFromTimestamp();
+});
+
+dateInput.addEventListener('input', updateFromDate);
+
+// Set current as initial
+timestampEl.value = Math.floor(Date.now() / 1000);
+updateFromTimestamp();
+</script>
+</body>
+</html>
