@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Aspect Ratio Calculator</title>
+<style>
+:root {
+  --bg: #0f1724;
+  --card: #0b1220;
+  --accent: #06b6d4;
+  --muted: #9aa8b2;
+  --glass: rgba(255, 255, 255, 0.03);
+}
+html, body {
+  min-height: 100%;
+  margin: 0;
+  font-family: Inter, system-ui, Segoe UI, Roboto, Arial;
+  background: linear-gradient(180deg, #041025 0%, #0b1730 100%);
+  color: #e6eef6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.app {
+  width: 600px;
+  max-width: 96%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 8px 30px rgba(2, 6, 23, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+h1 {
+  margin: 0;
+  font-size: 20px;
+}
+p.lead {
+  margin: 6px 0 18px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.input-group {
+  margin-bottom: 15px;
+}
+label {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  background: var(--glass);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  color: inherit;
+}
+.flex-row {
+  display: flex;
+  gap: 15px;
+}
+.flex-row > div {
+  flex: 1;
+}
+.back-link {
+  display: inline-block;
+  margin-bottom: 20px;
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 14px;
+}
+.back-link:hover {
+  text-decoration: underline;
+}
+.lock-btn {
+  background: var(--glass);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--accent);
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  margin-top: 10px;
+}
+.lock-btn.active {
+  background: var(--accent);
+  color: #042027;
+}
+@media (max-width: 768px) {
+  .flex-row {
+    flex-direction: column;
+  }
+}
+</style>
+</head>
+<body>
+<div class="app" role="main">
+  <a href="../index.html" class="back-link">← Back to Home</a>
+  <h1>Aspect Ratio Calculator</h1>
+  <p class="lead">Calculate dimensions based on aspect ratio or find the ratio from dimensions.</p>
+
+  <div class="input-group">
+    <div class="flex-row">
+      <div>
+        <label for="width">Width (px)</label>
+        <input type="number" id="width" placeholder="1920" />
+      </div>
+      <div>
+        <label for="height">Height (px)</label>
+        <input type="number" id="height" placeholder="1080" />
+      </div>
+    </div>
+  </div>
+
+  <div class="input-group">
+    <div class="flex-row">
+      <div>
+        <label for="ratioW">Ratio Width</label>
+        <input type="number" id="ratioW" placeholder="16" />
+      </div>
+      <div>
+        <label for="ratioH">Ratio Height</label>
+        <input type="number" id="ratioH" placeholder="9" />
+      </div>
+    </div>
+  </div>
+
+  <button id="lockBtn" class="lock-btn">Lock Aspect Ratio</button>
+  <div style="height: 15px;"></div>
+  <div id="result" style="font-size: 14px; color: var(--muted);"></div>
+</div>
+
+<script>
+const widthInput = document.getElementById('width');
+const heightInput = document.getElementById('height');
+const ratioWInput = document.getElementById('ratioW');
+const ratioHInput = document.getElementById('ratioH');
+const lockBtn = document.getElementById('lockBtn');
+const result = document.getElementById('result');
+
+let isLocked = false;
+let currentRatio = 16/9;
+
+function gcd(a, b) {
+  return b === 0 ? a : gcd(b, a % b);
+}
+
+function updateRatio() {
+  const w = parseFloat(widthInput.value);
+  const h = parseFloat(heightInput.value);
+  if (w > 0 && h > 0) {
+    const common = gcd(w, h);
+    ratioWInput.value = w / common;
+    ratioHInput.value = h / common;
+    currentRatio = w / h;
+    result.textContent = `Current Ratio: ${w/common}:${h/common} (${(w/h).toFixed(3)})`;
+  }
+}
+
+function updateDimensions(changed) {
+  const rw = parseFloat(ratioWInput.value);
+  const rh = parseFloat(ratioHInput.value);
+
+  if (rw > 0 && rh > 0) {
+    currentRatio = rw / rh;
+    if (changed === 'width' && widthInput.value) {
+      heightInput.value = Math.round(parseFloat(widthInput.value) / currentRatio);
+    } else if (changed === 'height' && heightInput.value) {
+      widthInput.value = Math.round(parseFloat(heightInput.value) * currentRatio);
+    } else if (changed === 'ratio') {
+       if (widthInput.value) {
+         heightInput.value = Math.round(parseFloat(widthInput.value) / currentRatio);
+       } else if (heightInput.value) {
+         widthInput.value = Math.round(parseFloat(heightInput.value) * currentRatio);
+       }
+    }
+    result.textContent = `Locked Ratio: ${rw}:${rh} (${currentRatio.toFixed(3)})`;
+  }
+}
+
+widthInput.addEventListener('input', () => {
+  if (isLocked) {
+    updateDimensions('width');
+  } else {
+    updateRatio();
+  }
+});
+
+heightInput.addEventListener('input', () => {
+  if (isLocked) {
+    updateDimensions('height');
+  } else {
+    updateRatio();
+  }
+});
+
+ratioWInput.addEventListener('input', () => {
+  updateDimensions('ratio');
+});
+
+ratioHInput.addEventListener('input', () => {
+  updateDimensions('ratio');
+});
+
+lockBtn.addEventListener('click', () => {
+  isLocked = !isLocked;
+  lockBtn.classList.toggle('active', isLocked);
+  lockBtn.textContent = isLocked ? 'Unlock Aspect Ratio' : 'Lock Aspect Ratio';
+  if (isLocked) {
+    updateRatio();
+  }
+});
+
+// Initial values
+widthInput.value = 1920;
+heightInput.value = 1080;
+updateRatio();
+</script>
+</body>
+</html>
