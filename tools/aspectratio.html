@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Aspect Ratio Calculator</title>
+<style>
+:root {
+  --bg: #0f1724;
+  --card: #0b1220;
+  --accent: #06b6d4;
+  --muted: #9aa8b2;
+  --glass: rgba(255, 255, 255, 0.03);
+}
+html, body {
+  min-height: 100%;
+  margin: 0;
+  font-family: Inter, system-ui, Segoe UI, Roboto, Arial;
+  background: linear-gradient(180deg, #041025 0%, #0b1730 100%);
+  color: #e6eef6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.app {
+  width: 500px;
+  max-width: 96%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 8px 30px rgba(2, 6, 23, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+h1 {
+  margin: 0;
+  font-size: 20px;
+}
+p.lead {
+  margin: 6px 0 18px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.input-group {
+  margin-bottom: 15px;
+}
+label {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  background: var(--glass);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  color: inherit;
+  box-sizing: border-box;
+}
+.row {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+.row > div {
+  flex: 1;
+}
+.back-link {
+  display: inline-block;
+  margin-bottom: 20px;
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 14px;
+}
+.back-link:hover {
+  text-decoration: underline;
+}
+.lock-btn {
+  background: var(--glass);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: inherit;
+  padding: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: 0.3s;
+}
+.lock-btn.active {
+  background: var(--accent);
+  color: #042027;
+}
+</style>
+</head>
+<body>
+<div class="app" role="main">
+  <a href="../index.html" class="back-link">← Back to Home</a>
+  <h1>Aspect Ratio Calculator</h1>
+  <p class="lead">Calculate and lock aspect ratios for images and videos.</p>
+
+  <div class="row">
+    <div>
+      <label for="width">Width</label>
+      <input type="number" id="width" placeholder="1920" />
+    </div>
+    <div>
+      <label for="height">Height</label>
+      <input type="number" id="height" placeholder="1080" />
+    </div>
+  </div>
+
+  <button id="lockBtn" class="lock-btn">
+    <span id="lockIcon">🔓</span> <span id="lockText">Ratio Unlocked</span>
+  </button>
+
+  <div style="height:20px"></div>
+
+  <div class="row">
+    <div>
+      <label for="ratioW">Ratio Width</label>
+      <input type="number" id="ratioW" placeholder="16" />
+    </div>
+    <div>
+      <label for="ratioH">Ratio Height</label>
+      <input type="number" id="ratioH" placeholder="9" />
+    </div>
+  </div>
+
+  <div class="input-group">
+    <label>Simplified Ratio</label>
+    <div id="simplified" style="font-size: 18px; font-weight: bold; color: var(--accent);">16:9</div>
+  </div>
+</div>
+
+<script>
+const widthInput = document.getElementById('width');
+const heightInput = document.getElementById('height');
+const ratioWInput = document.getElementById('ratioW');
+const ratioHInput = document.getElementById('ratioH');
+const lockBtn = document.getElementById('lockBtn');
+const lockIcon = document.getElementById('lockIcon');
+const lockText = document.getElementById('lockText');
+const simplifiedDisplay = document.getElementById('simplified');
+
+let isLocked = false;
+let currentRatio = 16 / 9;
+
+function gcd(a, b) {
+  return b ? gcd(b, a % b) : a;
+}
+
+function updateSimplified() {
+  const w = parseFloat(widthInput.value);
+  const h = parseFloat(heightInput.value);
+  if (w && h) {
+    const common = gcd(w, h);
+    simplifiedDisplay.textContent = (w / common) + ":" + (h / common);
+  }
+}
+
+widthInput.addEventListener('input', () => {
+  const w = parseFloat(widthInput.value);
+  if (isLocked && w) {
+    heightInput.value = Math.round(w / currentRatio);
+  } else if (w && parseFloat(heightInput.value)) {
+    updateRatioFromDimensions();
+  }
+  updateSimplified();
+});
+
+heightInput.addEventListener('input', () => {
+  const h = parseFloat(heightInput.value);
+  if (isLocked && h) {
+    widthInput.value = Math.round(h * currentRatio);
+  } else if (h && parseFloat(widthInput.value)) {
+    updateRatioFromDimensions();
+  }
+  updateSimplified();
+});
+
+function updateRatioFromDimensions() {
+  const w = parseFloat(widthInput.value);
+  const h = parseFloat(heightInput.value);
+  if (w && h) {
+    const common = gcd(w, h);
+    ratioWInput.value = w / common;
+    ratioHInput.value = h / common;
+    currentRatio = w / h;
+  }
+}
+
+ratioWInput.addEventListener('input', updateDimensionsFromRatio);
+ratioHInput.addEventListener('input', updateDimensionsFromRatio);
+
+function updateDimensionsFromRatio() {
+  const rw = parseFloat(ratioWInput.value);
+  const rh = parseFloat(ratioHInput.value);
+  if (rw && rh) {
+    currentRatio = rw / rh;
+    const common = gcd(rw, rh);
+    simplifiedDisplay.textContent = (rw / common) + ":" + (rh / common);
+    if (parseFloat(widthInput.value)) {
+        heightInput.value = Math.round(parseFloat(widthInput.value) / currentRatio);
+    } else if (parseFloat(heightInput.value)) {
+        widthInput.value = Math.round(parseFloat(heightInput.value) * currentRatio);
+    }
+  }
+}
+
+lockBtn.addEventListener('click', () => {
+  isLocked = !isLocked;
+  lockBtn.classList.toggle('active', isLocked);
+  lockIcon.textContent = isLocked ? '🔒' : '🔓';
+  lockText.textContent = isLocked ? 'Ratio Locked' : 'Ratio Unlocked';
+  if (isLocked) {
+    const w = parseFloat(widthInput.value);
+    const h = parseFloat(heightInput.value);
+    if (w && h) {
+      currentRatio = w / h;
+    }
+  }
+});
+
+// Init
+widthInput.value = 1920;
+heightInput.value = 1080;
+ratioWInput.value = 16;
+ratioHInput.value = 9;
+updateSimplified();
+</script>
+</body>
+</html>
