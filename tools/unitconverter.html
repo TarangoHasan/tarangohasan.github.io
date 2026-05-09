@@ -13,7 +13,7 @@
   --glass: rgba(255, 255, 255, 0.03);
 }
 html, body {
-  height: 100%;
+  min-height: 100%;
   margin: 0;
   font-family: Inter, system-ui, Segoe UI, Roboto, Arial;
   background: linear-gradient(180deg, #041025 0%, #0b1730 100%);
@@ -78,6 +78,8 @@ label {
     <option value="length">Length</option>
     <option value="weight">Weight</option>
     <option value="temperature">Temperature</option>
+    <option value="volume">Volume</option>
+    <option value="speed">Speed</option>
   </select>
   <div style="height:15px"></div>
 
@@ -127,6 +129,20 @@ const units = {
     c: { name: 'Celsius' },
     f: { name: 'Fahrenheit' },
     k: { name: 'Kelvin' }
+  },
+  volume: {
+    ml: { name: 'Milliliters', factor: 1 },
+    l: { name: 'Liters', factor: 1000 },
+    gal: { name: 'Gallons', factor: 3785.41 },
+    qt: { name: 'Quarts', factor: 946.353 },
+    pt: { name: 'Pints', factor: 473.176 },
+    cup: { name: 'Cups', factor: 236.588 }
+  },
+  speed: {
+    ms: { name: 'm/s', factor: 1 },
+    kmh: { name: 'km/h', factor: 0.277778 },
+    mph: { name: 'mph', factor: 0.44704 },
+    knot: { name: 'knots', factor: 0.514444 }
   }
 };
 
@@ -153,6 +169,10 @@ function populateUnits() {
       toUnit.value = 'kg';
   } else if (cat === 'temperature') {
       toUnit.value = 'f';
+  } else if (cat === 'volume') {
+      toUnit.value = 'l';
+  } else if (cat === 'speed') {
+      toUnit.value = 'kmh';
   }
 
   convert();
