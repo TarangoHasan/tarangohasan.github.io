@@ -13,7 +13,7 @@
   --glass: rgba(255, 255, 255, 0.03);
 }
 html, body {
-  height: 100%;
+  min-height: 100%;
   margin: 0;
   font-family: Inter, system-ui, Segoe UI, Roboto, Arial;
   background: linear-gradient(180deg, #041025 0%, #0b1730 100%);
@@ -45,7 +45,39 @@ p.lead {
   width: 100%;
   height: 100px;
   border-radius: 8px;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
+}
+
+#values {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.value-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--glass);
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-family: monospace;
+}
+
+.copy-btn {
+  background: var(--accent);
+  border: 0;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 4px;
+  color: #042027;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.copy-btn:hover {
+  opacity: 0.8;
 }
 
 .back-link {
@@ -78,14 +110,38 @@ const colorPicker = new iro.ColorPicker('.color-picker', {
 const colorDisplay = document.querySelector('.color-display');
 const values = document.getElementById('values');
 
-colorPicker.on('color:change', (color) => {
+function copyToClipboard(text, btn) {
+  navigator.clipboard.writeText(text).then(() => {
+    const originalText = btn.textContent;
+    btn.textContent = 'Copied!';
+    setTimeout(() => {
+      btn.textContent = originalText;
+    }, 1500);
+  });
+}
+
+function updateColorValues(color) {
   colorDisplay.style.backgroundColor = color.hexString;
   values.innerHTML = `
-    <div>HEX: ${color.hexString}</div>
-    <div>RGB: ${color.rgbString}</div>
-    <div>HSL: ${color.hslString}</div>
+    <div class="value-row">
+      <span>HEX: ${color.hexString}</span>
+      <button class="copy-btn" onclick="copyToClipboard('${color.hexString}', this)">Copy</button>
+    </div>
+    <div class="value-row">
+      <span>RGB: ${color.rgbString}</span>
+      <button class="copy-btn" onclick="copyToClipboard('${color.rgbString}', this)">Copy</button>
+    </div>
+    <div class="value-row">
+      <span>HSL: ${color.hslString}</span>
+      <button class="copy-btn" onclick="copyToClipboard('${color.hslString}', this)">Copy</button>
+    </div>
   `;
-});
+}
+
+colorPicker.on('color:change', updateColorValues);
+
+// Trigger initial update
+updateColorValues(colorPicker.color);
 </script>
 </body>
 </html>
