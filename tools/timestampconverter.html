@@ -13,7 +13,7 @@
   --glass: rgba(255, 255, 255, 0.03);
 }
 html, body {
-  height: 100%;
+  min-height: 100%;
   margin: 0;
   font-family: Inter, system-ui, Segoe UI, Roboto, Arial;
   background: linear-gradient(180deg, #041025 0%, #0b1730 100%);
@@ -81,6 +81,11 @@ button {
   color: #042027;
   cursor: pointer;
 }
+@media (max-width: 768px) {
+  .stats, .actions, .flex-row {
+    flex-direction: column !important;
+  }
+}
 </style>
 </head>
 <body>
@@ -91,7 +96,7 @@ button {
 
   <div class="card">
     <label for="timestamp">Unix Timestamp (Seconds or Milliseconds)</label>
-    <div style="display: flex; gap: 10px;">
+    <div class="flex-row" style="display: flex; gap: 10px;">
         <input type="number" id="timestamp" placeholder="e.g., 1700000000" />
         <button id="nowBtn" style="height: 40px; white-space: nowrap;">Current Time</button>
     </div>
