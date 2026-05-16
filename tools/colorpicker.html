@@ -13,7 +13,7 @@
   --glass: rgba(255, 255, 255, 0.03);
 }
 html, body {
-  height: 100%;
+  min-height: 100%;
   margin: 0;
   font-family: Inter, system-ui, Segoe UI, Roboto, Arial;
   background: linear-gradient(180deg, #041025 0%, #0b1730 100%);
@@ -68,7 +68,11 @@ p.lead {
   <p class="lead">Select a color to see its values.</p>
   <div class="color-picker"></div>
   <div class="color-display"></div>
-  <div id="values"></div>
+  <div id="values">
+    <div id="hexValue"></div>
+    <div id="rgbValue"></div>
+    <div id="hslValue"></div>
+  </div>
 </div>
 <script>
 const colorPicker = new iro.ColorPicker('.color-picker', {
@@ -76,16 +80,21 @@ const colorPicker = new iro.ColorPicker('.color-picker', {
   color: "#f00"
 });
 const colorDisplay = document.querySelector('.color-display');
-const values = document.getElementById('values');
+const hexValue = document.getElementById('hexValue');
+const rgbValue = document.getElementById('rgbValue');
+const hslValue = document.getElementById('hslValue');
 
-colorPicker.on('color:change', (color) => {
+function updateColorValues(color) {
   colorDisplay.style.backgroundColor = color.hexString;
-  values.innerHTML = `
-    <div>HEX: ${color.hexString}</div>
-    <div>RGB: ${color.rgbString}</div>
-    <div>HSL: ${color.hslString}</div>
-  `;
-});
+  hexValue.textContent = `HEX: ${color.hexString}`;
+  rgbValue.textContent = `RGB: ${color.rgbString}`;
+  hslValue.textContent = `HSL: ${color.hslString}`;
+}
+
+colorPicker.on('color:change', updateColorValues);
+
+// Init
+updateColorValues(colorPicker.color);
 </script>
 </body>
 </html>
