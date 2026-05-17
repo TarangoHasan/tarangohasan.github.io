@@ -13,7 +13,7 @@
   --glass: rgba(255, 255, 255, 0.03);
 }
 html, body {
-  height: 100%;
+  min-height: 100%;
   margin: 0;
   font-family: Inter, system-ui, Segoe UI, Roboto, Arial;
   background: linear-gradient(180deg, #041025 0%, #0b1730 100%);
@@ -65,6 +65,7 @@ label {
 .back-link:hover {
   text-decoration: underline;
 }
+@media (max-width: 768px) { .stats, .actions, .flex-row { flex-direction: column !important; } }
 </style>
 </head>
 <body>
@@ -78,6 +79,8 @@ label {
     <option value="length">Length</option>
     <option value="weight">Weight</option>
     <option value="temperature">Temperature</option>
+    <option value="volume">Volume</option>
+    <option value="speed">Speed</option>
   </select>
   <div style="height:15px"></div>
 
@@ -98,7 +101,10 @@ label {
   <div style="height:15px"></div>
 
   <label for="output">Result</label>
-  <input type="text" id="output" placeholder="Result" readonly />
+  <div style="display:flex; gap:10px;">
+    <input type="text" id="output" placeholder="Result" readonly />
+    <button id="copyBtn" style="white-space:nowrap; background: linear-gradient(90deg, var(--accent), #3b82f6); border: 0; padding: 10px 14px; font-weight: 600; border-radius: 8px; color: #042027; cursor: pointer;">Copy</button>
+  </div>
 </div>
 <script>
 const category = document.getElementById('category');
@@ -106,6 +112,7 @@ const input = document.getElementById('input');
 const fromUnit = document.getElementById('fromUnit');
 const toUnit = document.getElementById('toUnit');
 const output = document.getElementById('output');
+const copyBtn = document.getElementById('copyBtn');
 
 const units = {
   length: {
@@ -122,6 +129,18 @@ const units = {
     kg: { name: 'Kilograms', factor: 1000 },
     oz: { name: 'Ounces', factor: 28.3495 },
     lb: { name: 'Pounds', factor: 453.592 }
+  },
+  volume: {
+    ml: { name: 'Milliliters', factor: 1 },
+    l: { name: 'Liters', factor: 1000 },
+    gal: { name: 'Gallons (US)', factor: 3785.41 },
+    m3: { name: 'Cubic Meters', factor: 1000000 }
+  },
+  speed: {
+    'm/s': { name: 'Meters per second', factor: 1 },
+    'km/h': { name: 'Kilometers per hour', factor: 1 / 3.6 },
+    'mph': { name: 'Miles per hour', factor: 0.44704 },
+    'knot': { name: 'Knots', factor: 0.514444 }
   },
   temperature: {
     c: { name: 'Celsius' },
@@ -153,6 +172,10 @@ function populateUnits() {
       toUnit.value = 'kg';
   } else if (cat === 'temperature') {
       toUnit.value = 'f';
+  } else if (cat === 'volume') {
+      toUnit.value = 'l';
+  } else if (cat === 'speed') {
+      toUnit.value = 'km/h';
   }
 
   convert();
@@ -191,6 +214,15 @@ category.addEventListener('change', populateUnits);
 input.addEventListener('input', convert);
 fromUnit.addEventListener('change', convert);
 toUnit.addEventListener('change', convert);
+
+copyBtn.addEventListener('click', () => {
+  if (output.value) {
+    navigator.clipboard.writeText(output.value);
+    const originalText = copyBtn.textContent;
+    copyBtn.textContent = "Copied!";
+    setTimeout(() => copyBtn.textContent = originalText, 2000);
+  }
+});
 
 // Init
 populateUnits();
