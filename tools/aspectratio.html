@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Aspect Ratio Calculator</title>
+<style>
+:root {
+  --bg: #0f1724;
+  --card: #0b1220;
+  --accent: #06b6d4;
+  --muted: #9aa8b2;
+  --glass: rgba(255, 255, 255, 0.03);
+}
+html, body {
+  min-height: 100%;
+  margin: 0;
+  font-family: Inter, system-ui, Segoe UI, Roboto, Arial;
+  background: linear-gradient(180deg, #041025 0%, #0b1730 100%);
+  color: #e6eef6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.app {
+  width: 500px;
+  max-width: 96%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 8px 30px rgba(2, 6, 23, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+h1 {
+  margin: 0;
+  font-size: 20px;
+}
+p.lead {
+  margin: 6px 0 18px;
+  color: var(--muted);
+  font-size: 13px;
+}
+input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  background: var(--glass);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  color: inherit;
+  margin-bottom: 15px;
+  box-sizing: border-box;
+}
+label {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+.back-link {
+  display: inline-block;
+  margin-bottom: 20px;
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 14px;
+}
+.back-link:hover {
+  text-decoration: underline;
+}
+.result-card {
+  background: var(--glass);
+  padding: 15px;
+  border-radius: 8px;
+  text-align: center;
+  margin-top: 10px;
+}
+.result-label {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 5px;
+}
+.result-value {
+  font-size: 24px;
+  font-weight: bold;
+  color: var(--accent);
+}
+</style>
+</head>
+<body>
+<div class="app" role="main">
+  <a href="../index.html" class="back-link">← Back to Home</a>
+  <h1>Aspect Ratio Calculator</h1>
+  <p class="lead">Calculate and simplify aspect ratios.</p>
+
+  <div style="display: flex; gap: 15px;">
+    <div style="flex: 1;">
+      <label for="width">Width</label>
+      <input type="number" id="width" value="1920" />
+    </div>
+    <div style="flex: 1;">
+      <label for="height">Height</label>
+      <input type="number" id="height" value="1080" />
+    </div>
+  </div>
+
+  <div class="result-card">
+    <div class="result-label">Simplified Ratio</div>
+    <div id="ratio" class="result-value">16:9</div>
+  </div>
+
+  <div style="height: 20px;"></div>
+
+  <div style="display: flex; gap: 15px;">
+    <div style="flex: 1;">
+      <label for="newWidth">New Width</label>
+      <input type="number" id="newWidth" placeholder="Calculate height..." />
+    </div>
+    <div style="flex: 1;">
+      <label for="newHeight">New Height</label>
+      <input type="number" id="newHeight" placeholder="Calculate width..." />
+    </div>
+  </div>
+</div>
+
+<script>
+const widthInput = document.getElementById('width');
+const heightInput = document.getElementById('height');
+const ratioDisplay = document.getElementById('ratio');
+const newWidthInput = document.getElementById('newWidth');
+const newHeightInput = document.getElementById('newHeight');
+
+function gcd(a, b) {
+  return b === 0 ? a : gcd(b, a % b);
+}
+
+function updateRatio() {
+  const w = parseInt(widthInput.value);
+  const h = parseInt(heightInput.value);
+
+  if (w > 0 && h > 0) {
+    const common = gcd(w, h);
+    ratioDisplay.textContent = `${w / common}:${h / common}`;
+  } else {
+    ratioDisplay.textContent = '-';
+  }
+
+  // Clear other inputs when base ratio changes
+  newWidthInput.value = '';
+  newHeightInput.value = '';
+}
+
+function calculateNewHeight() {
+  const w = parseInt(widthInput.value);
+  const h = parseInt(heightInput.value);
+  const newW = parseFloat(newWidthInput.value);
+
+  if (w > 0 && h > 0 && newW > 0) {
+    newHeightInput.value = Math.round((newW * h / w) * 100) / 100;
+  }
+}
+
+function calculateNewWidth() {
+  const w = parseInt(widthInput.value);
+  const h = parseInt(heightInput.value);
+  const newH = parseFloat(newHeightInput.value);
+
+  if (w > 0 && h > 0 && newH > 0) {
+    newWidthInput.value = Math.round((newH * w / h) * 100) / 100;
+  }
+}
+
+widthInput.addEventListener('input', updateRatio);
+heightInput.addEventListener('input', updateRatio);
+newWidthInput.addEventListener('input', calculateNewHeight);
+newHeightInput.addEventListener('input', calculateNewWidth);
+
+// Init
+updateRatio();
+</script>
+</body>
+</html>
