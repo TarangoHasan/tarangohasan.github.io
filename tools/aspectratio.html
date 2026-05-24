@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Aspect Ratio Calculator</title>
+<style>
+:root {
+  --bg: #0f1724;
+  --card: #0b1220;
+  --accent: #06b6d4;
+  --muted: #9aa8b2;
+  --glass: rgba(255, 255, 255, 0.03);
+}
+html, body {
+  min-height: 100%;
+  margin: 0;
+  font-family: Inter, system-ui, Segoe UI, Roboto, Arial;
+  background: linear-gradient(180deg, #041025 0%, #0b1730 100%);
+  color: #e6eef6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.app {
+  width: 600px;
+  max-width: 96%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 8px 30px rgba(2, 6, 23, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+h1 {
+  margin: 0;
+  font-size: 20px;
+}
+p.lead {
+  margin: 6px 0 18px;
+  color: var(--muted);
+  font-size: 13px;
+}
+input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  background: var(--glass);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  color: inherit;
+}
+label {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+.back-link {
+  display: inline-block;
+  margin-bottom: 20px;
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 14px;
+}
+.back-link:hover {
+  text-decoration: underline;
+}
+.flex-row {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+.card {
+  background: var(--glass);
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+}
+.result-box {
+  text-align: center;
+  padding: 15px;
+  background: rgba(6, 182, 212, 0.1);
+  border-radius: 8px;
+  border: 1px solid var(--accent);
+}
+.result-label {
+  font-size: 12px;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 5px;
+}
+.result-value {
+  font-size: 24px;
+  font-weight: bold;
+}
+@media (max-width: 768px) {
+  .flex-row {
+    flex-direction: column !important;
+  }
+}
+</style>
+</head>
+<body>
+<div class="app" role="main">
+  <a href="../index.html" class="back-link">← Back to Home</a>
+  <h1>Aspect Ratio Calculator</h1>
+  <p class="lead">Calculate aspect ratios and find missing dimensions.</p>
+
+  <div class="card">
+    <div class="flex-row">
+      <div style="flex: 1;">
+        <label for="width1">Width (W1)</label>
+        <input type="number" id="width1" value="1920" />
+      </div>
+      <div style="flex: 1;">
+        <label for="height1">Height (H1)</label>
+        <input type="number" id="height1" value="1080" />
+      </div>
+    </div>
+    <div class="result-box">
+      <div class="result-label">Simplified Ratio</div>
+      <div id="ratioResult" class="result-value">16:9</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <p style="font-size: 13px; color: var(--muted); margin-bottom: 15px;">Calculate new dimensions based on the ratio above.</p>
+    <div class="flex-row">
+      <div style="flex: 1;">
+        <label for="width2">New Width (W2)</label>
+        <input type="number" id="width2" placeholder="Enter W2" />
+      </div>
+      <div style="flex: 1;">
+        <label for="height2">New Height (H2)</label>
+        <input type="number" id="height2" placeholder="Enter H2" />
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const w1 = document.getElementById('width1');
+const h1 = document.getElementById('height1');
+const w2 = document.getElementById('width2');
+const h2 = document.getElementById('height2');
+const ratioResult = document.getElementById('ratioResult');
+
+function gcd(a, b) {
+  return b === 0 ? a : gcd(b, a % b);
+}
+
+function updateRatio() {
+  const width = parseFloat(w1.value);
+  const height = parseFloat(h1.value);
+
+  if (width > 0 && height > 0) {
+    const common = gcd(width, height);
+    ratioResult.textContent = `${width / common}:${height / common}`;
+
+    // Update W2 or H2 if one is already present
+    if (w2.value) updateW2();
+    else if (h2.value) updateH2();
+  } else {
+    ratioResult.textContent = '-';
+  }
+}
+
+function updateW2() {
+  const width1 = parseFloat(w1.value);
+  const height1 = parseFloat(h1.value);
+  const width2 = parseFloat(w2.value);
+
+  if (width1 > 0 && height1 > 0 && width2 > 0) {
+    h2.value = Math.round((width2 * height1) / width1);
+  }
+}
+
+function updateH2() {
+  const width1 = parseFloat(w1.value);
+  const height1 = parseFloat(h1.value);
+  const height2 = parseFloat(h2.value);
+
+  if (width1 > 0 && height1 > 0 && height2 > 0) {
+    w2.value = Math.round((height2 * width1) / height1);
+  }
+}
+
+w1.addEventListener('input', updateRatio);
+h1.addEventListener('input', updateRatio);
+w2.addEventListener('input', updateW2);
+h2.addEventListener('input', updateH2);
+
+// Initialize
+updateRatio();
+</script>
+</body>
+</html>
