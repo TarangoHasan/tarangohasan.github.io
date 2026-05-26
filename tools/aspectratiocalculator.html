@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Aspect Ratio Calculator</title>
+<style>
+:root {
+  --bg: #0f1724;
+  --card: #0b1220;
+  --accent: #06b6d4;
+  --muted: #9aa8b2;
+  --glass: rgba(255, 255, 255, 0.03);
+}
+html, body {
+  min-height: 100%;
+  margin: 0;
+  font-family: Inter, system-ui, Segoe UI, Roboto, Arial;
+  background: linear-gradient(180deg, #041025 0%, #0b1730 100%);
+  color: #e6eef6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.app {
+  width: 500px;
+  max-width: 96%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 8px 30px rgba(2, 6, 23, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+h1 {
+  margin: 0;
+  font-size: 20px;
+}
+p.lead {
+  margin: 6px 0 18px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.back-link {
+  display: inline-block;
+  margin-bottom: 20px;
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 14px;
+}
+.back-link:hover {
+  text-decoration: underline;
+}
+.input-group {
+  margin-bottom: 15px;
+}
+label {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  background: var(--glass);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  color: inherit;
+  box-sizing: border-box;
+}
+.flex-row {
+  display: flex;
+  gap: 15px;
+}
+.flex-row > div {
+  flex: 1;
+}
+.result-box {
+  margin-top: 20px;
+  padding: 15px;
+  background: var(--glass);
+  border-radius: 8px;
+  text-align: center;
+}
+.ratio-display {
+  font-size: 24px;
+  font-weight: bold;
+  color: var(--accent);
+}
+@media (max-width: 768px) {
+  .flex-row {
+    flex-direction: column !important;
+  }
+}
+</style>
+</head>
+<body>
+<div class="app" role="main">
+  <a href="../index.html" class="back-link">← Back to Home</a>
+  <h1>Aspect Ratio Calculator</h1>
+  <p class="lead">Calculate aspect ratios and dimensions easily.</p>
+
+  <div class="flex-row">
+    <div class="input-group">
+      <label for="width">Width</label>
+      <input type="number" id="width" value="1920" />
+    </div>
+    <div class="input-group">
+      <label for="height">Height</label>
+      <input type="number" id="height" value="1080" />
+    </div>
+  </div>
+
+  <div class="result-box">
+    <label>Simplified Ratio</label>
+    <div id="ratio" class="ratio-display">16:9</div>
+  </div>
+
+  <div style="height: 20px;"></div>
+  <p class="lead">Change one dimension to calculate the other based on the ratio above.</p>
+
+  <div class="flex-row">
+    <div class="input-group">
+      <label for="new-width">New Width</label>
+      <input type="number" id="new-width" placeholder="New Width" />
+    </div>
+    <div class="input-group">
+      <label for="new-height">New Height</label>
+      <input type="number" id="new-height" placeholder="New Height" />
+    </div>
+  </div>
+
+</div>
+
+<script>
+const widthInput = document.getElementById('width');
+const heightInput = document.getElementById('height');
+const ratioDisplay = document.getElementById('ratio');
+const newWidthInput = document.getElementById('new-width');
+const newHeightInput = document.getElementById('new-height');
+
+function gcd(a, b) {
+  return b ? gcd(b, a % b) : a;
+}
+
+function updateRatio() {
+  const w = parseFloat(widthInput.value);
+  const h = parseFloat(heightInput.value);
+
+  if (w > 0 && h > 0) {
+    // For simplified ratio we still need integers for GCD, or we just display the decimal ratio
+    // Most users expect integer ratios (16:9). If they enter 16.5, GCD might not work as expected.
+    // Let's stick to parseInt for the *Simplified Ratio* display logic if they are integers,
+    // but parseFloat for the calculation logic.
+    const common = gcd(Math.round(w), Math.round(h));
+    ratioDisplay.textContent = `${Math.round(w) / common}:${Math.round(h) / common}`;
+
+    // Clear new inputs when base ratio changes to avoid confusion
+    // or we could recalculate them. Let's just keep them for now.
+  } else {
+    ratioDisplay.textContent = '0:0';
+  }
+}
+
+widthInput.addEventListener('input', updateRatio);
+heightInput.addEventListener('input', updateRatio);
+
+newWidthInput.addEventListener('input', () => {
+  const w = parseFloat(widthInput.value);
+  const h = parseFloat(heightInput.value);
+  const nw = parseFloat(newWidthInput.value);
+
+  if (w > 0 && h > 0 && nw > 0) {
+    newHeightInput.value = (nw * h / w).toLocaleString(undefined, { maximumFractionDigits: 2 });
+  } else {
+    newHeightInput.value = '';
+  }
+});
+
+newHeightInput.addEventListener('input', () => {
+  const w = parseFloat(widthInput.value);
+  const h = parseFloat(heightInput.value);
+  const nh = parseFloat(newHeightInput.value);
+
+  if (w > 0 && h > 0 && nh > 0) {
+    newWidthInput.value = (nh * w / h).toLocaleString(undefined, { maximumFractionDigits: 2 });
+  } else {
+    newWidthInput.value = '';
+  }
+});
+
+// Init
+updateRatio();
+</script>
+</body>
+</html>
