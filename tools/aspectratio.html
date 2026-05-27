@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Aspect Ratio Calculator</title>
+<style>
+:root {
+  --bg: #0f1724;
+  --card: #0b1220;
+  --accent: #06b6d4;
+  --muted: #9aa8b2;
+  --glass: rgba(255, 255, 255, 0.03);
+}
+html, body {
+  min-height: 100%;
+  margin: 0;
+  font-family: Inter, system-ui, Segoe UI, Roboto, Arial;
+  background: linear-gradient(180deg, #041025 0%, #0b1730 100%);
+  color: #e6eef6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.app {
+  width: 500px;
+  max-width: 96%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 8px 30px rgba(2, 6, 23, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+h1 {
+  margin: 0;
+  font-size: 20px;
+}
+p.lead {
+  margin: 6px 0 18px;
+  color: var(--muted);
+  font-size: 13px;
+}
+label {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  background: var(--glass);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  color: inherit;
+  box-sizing: border-box;
+}
+.row {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+.col {
+  flex: 1;
+}
+.result-box {
+  background: var(--glass);
+  padding: 15px;
+  border-radius: 8px;
+  text-align: center;
+  margin-top: 10px;
+}
+.result-label {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 5px;
+}
+.result-value {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--accent);
+}
+.back-link {
+  display: inline-block;
+  margin-bottom: 20px;
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 14px;
+}
+.back-link:hover {
+  text-decoration: underline;
+}
+@media (max-width: 480px) {
+  .row {
+    flex-direction: column;
+  }
+}
+</style>
+</head>
+<body>
+<div class="app" role="main">
+  <a href="../index.html" class="back-link">← Back to Home</a>
+  <h1>Aspect Ratio Calculator</h1>
+  <p class="lead">Calculate dimensions and simplified aspect ratios.</p>
+
+  <div class="row">
+    <div class="col">
+      <label for="w1">Original Width</label>
+      <input type="number" id="w1" value="1920" />
+    </div>
+    <div class="col">
+      <label for="h1">Original Height</label>
+      <input type="number" id="h1" value="1080" />
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col">
+      <label for="w2">New Width</label>
+      <input type="number" id="w2" placeholder="Calculate..." />
+    </div>
+    <div class="col">
+      <label for="h2">New Height</label>
+      <input type="number" id="h2" placeholder="Calculate..." />
+    </div>
+  </div>
+
+  <div class="result-box">
+    <div class="result-label">Simplified Ratio</div>
+    <div id="ratio-display" class="result-value">16:9</div>
+  </div>
+</div>
+
+<script>
+const w1 = document.getElementById('w1');
+const h1 = document.getElementById('h1');
+const w2 = document.getElementById('w2');
+const h2 = document.getElementById('h2');
+const ratioDisplay = document.getElementById('ratio-display');
+
+function gcd(a, b) {
+  return b === 0 ? a : gcd(b, a % b);
+}
+
+function updateRatio() {
+  const width = parseInt(w1.value);
+  const height = parseInt(h1.value);
+
+  if (width > 0 && height > 0) {
+    const common = gcd(width, height);
+    ratioDisplay.textContent = `${width / common}:${height / common}`;
+  } else {
+    ratioDisplay.textContent = '-';
+  }
+}
+
+w1.addEventListener('input', () => {
+  updateRatio();
+  if (w2.value && h1.value && w1.value) {
+    h2.value = Math.round((w2.value * h1.value) / w1.value);
+  }
+});
+
+h1.addEventListener('input', () => {
+  updateRatio();
+  if (h2.value && w1.value && h1.value) {
+    w2.value = Math.round((h2.value * w1.value) / h1.value);
+  }
+});
+
+w2.addEventListener('input', () => {
+  if (w1.value && h1.value && w2.value) {
+    h2.value = Math.round((w2.value * h1.value) / w1.value);
+  }
+});
+
+h2.addEventListener('input', () => {
+  if (w1.value && h1.value && h2.value) {
+    w2.value = Math.round((h2.value * w1.value) / h1.value);
+  }
+});
+
+// Initialize
+updateRatio();
+</script>
+</body>
+</html>
