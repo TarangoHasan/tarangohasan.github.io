@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Aspect Ratio Calculator</title>
+<style>
+:root {
+  --bg: #0f1724;
+  --card: #0b1220;
+  --accent: #06b6d4;
+  --muted: #9aa8b2;
+  --glass: rgba(255, 255, 255, 0.03);
+}
+html, body {
+  min-height: 100%;
+  margin: 0;
+  font-family: Inter, system-ui, Segoe UI, Roboto, Arial;
+  background: linear-gradient(180deg, #041025 0%, #0b1730 100%);
+  color: #e6eef6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.app {
+  width: 400px;
+  max-width: 96%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 8px 30px rgba(2, 6, 23, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+h1 {
+  margin: 0;
+  font-size: 20px;
+}
+p.lead {
+  margin: 6px 0 18px;
+  color: var(--muted);
+  font-size: 13px;
+}
+label {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+input {
+  width: 100%;
+  padding: 8px;
+  border-radius: 8px;
+  background: var(--glass);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  color: inherit;
+  margin-bottom: 15px;
+}
+.results {
+  background: var(--glass);
+  padding: 15px;
+  border-radius: 8px;
+  margin-top: 10px;
+}
+.result-item {
+  margin-bottom: 8px;
+}
+.result-item:last-child {
+  margin-bottom: 0;
+}
+.result-label {
+  font-size: 12px;
+  color: var(--muted);
+}
+.result-value {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--accent);
+}
+.back-link {
+  display: inline-block;
+  margin-bottom: 20px;
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 14px;
+}
+.back-link:hover {
+  text-decoration: underline;
+}
+</style>
+</head>
+<body>
+<div class="app" role="main">
+  <a href="../index.html" class="back-link">← Back to Home</a>
+  <h1>Aspect Ratio Calculator</h1>
+  <p class="lead">Calculate aspect ratio and simplified ratio.</p>
+
+  <label for="width">Width</label>
+  <input type="number" id="width" placeholder="e.g. 1920" value="1920" />
+
+  <label for="height">Height</label>
+  <input type="number" id="height" placeholder="e.g. 1080" value="1080" />
+
+  <div class="results">
+    <div class="result-item">
+      <div class="result-label">Aspect Ratio</div>
+      <div class="result-value" id="ratio">1.78:1</div>
+    </div>
+    <div class="result-item">
+      <div class="result-label">Simplified Ratio</div>
+      <div class="result-value" id="simplified">16:9</div>
+    </div>
+  </div>
+</div>
+<script>
+const widthInput = document.getElementById('width');
+const heightInput = document.getElementById('height');
+const ratioDisplay = document.getElementById('ratio');
+const simplifiedDisplay = document.getElementById('simplified');
+
+function gcd(a, b) {
+  return b === 0 ? a : gcd(b, a % b);
+}
+
+function calculate() {
+  const w = parseFloat(widthInput.value);
+  const h = parseFloat(heightInput.value);
+
+  if (isNaN(w) || isNaN(h) || w <= 0 || h <= 0) {
+    ratioDisplay.textContent = '-';
+    simplifiedDisplay.textContent = '-';
+    return;
+  }
+
+  const ratio = (w / h).toFixed(2);
+  ratioDisplay.textContent = `${ratio}:1`;
+
+  const common = gcd(w, h);
+  simplifiedDisplay.textContent = `${w / common}:${h / common}`;
+}
+
+widthInput.addEventListener('input', calculate);
+heightInput.addEventListener('input', calculate);
+
+// Initial calculation
+calculate();
+</script>
+</body>
+</html>
