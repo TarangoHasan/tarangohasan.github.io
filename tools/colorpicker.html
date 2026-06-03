@@ -13,7 +13,7 @@
   --glass: rgba(255, 255, 255, 0.03);
 }
 html, body {
-  height: 100%;
+  min-height: 100%;
   margin: 0;
   font-family: Inter, system-ui, Segoe UI, Roboto, Arial;
   background: linear-gradient(180deg, #041025 0%, #0b1730 100%);
@@ -45,7 +45,35 @@ p.lead {
   width: 100%;
   height: 100px;
   border-radius: 8px;
+  margin-bottom: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.value-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--glass);
+  padding: 10px 15px;
+  border-radius: 8px;
   margin-bottom: 10px;
+  font-family: monospace;
+}
+
+.copy-btn {
+  background: var(--accent);
+  border: 0;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 4px;
+  color: #042027;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.copy-btn:hover {
+  opacity: 0.9;
 }
 
 .back-link {
@@ -78,14 +106,35 @@ const colorPicker = new iro.ColorPicker('.color-picker', {
 const colorDisplay = document.querySelector('.color-display');
 const values = document.getElementById('values');
 
-colorPicker.on('color:change', (color) => {
+function updateColorValues(color) {
   colorDisplay.style.backgroundColor = color.hexString;
   values.innerHTML = `
-    <div>HEX: ${color.hexString}</div>
-    <div>RGB: ${color.rgbString}</div>
-    <div>HSL: ${color.hslString}</div>
+    <div class="value-row">
+      <span>HEX: ${color.hexString}</span>
+      <button class="copy-btn" onclick="copyText('${color.hexString}', this)">Copy</button>
+    </div>
+    <div class="value-row">
+      <span>RGB: ${color.rgbString}</span>
+      <button class="copy-btn" onclick="copyText('${color.rgbString}', this)">Copy</button>
+    </div>
+    <div class="value-row">
+      <span>HSL: ${color.hslString}</span>
+      <button class="copy-btn" onclick="copyText('${color.hslString}', this)">Copy</button>
+    </div>
   `;
-});
+}
+
+function copyText(text, btn) {
+  navigator.clipboard.writeText(text);
+  const original = btn.textContent;
+  btn.textContent = 'Copied!';
+  setTimeout(() => btn.textContent = original, 1500);
+}
+
+colorPicker.on('color:change', updateColorValues);
+
+// Initialize
+updateColorValues(colorPicker.color);
 </script>
 </body>
 </html>
