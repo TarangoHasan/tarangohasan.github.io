@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Aspect Ratio Calculator</title>
+<style>
+:root {
+  --bg: #0f1724;
+  --card: #0b1220;
+  --accent: #06b6d4;
+  --muted: #9aa8b2;
+  --glass: rgba(255, 255, 255, 0.03);
+}
+html, body {
+  min-height: 100%;
+  margin: 0;
+  font-family: Inter, system-ui, Segoe UI, Roboto, Arial;
+  background: linear-gradient(180deg, #041025 0%, #0b1730 100%);
+  color: #e6eef6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.app {
+  width: 500px;
+  max-width: 96%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 8px 30px rgba(2, 6, 23, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+h1 {
+  margin: 0;
+  font-size: 22px;
+}
+p.lead {
+  margin: 6px 0 24px;
+  color: var(--muted);
+  font-size: 14px;
+}
+.flex-row {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+.flex-item {
+  flex: 1;
+}
+label {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  background: var(--glass);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  color: inherit;
+  font-size: 16px;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.results {
+  background: var(--glass);
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+.result-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.result-item:last-child {
+  margin-bottom: 0;
+}
+.result-label {
+  font-size: 13px;
+  color: var(--muted);
+}
+.result-value {
+  font-family: monospace;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--accent);
+}
+.back-link {
+  display: inline-block;
+  margin-bottom: 20px;
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 14px;
+}
+.back-link:hover {
+  text-decoration: underline;
+}
+@media (max-width: 768px) {
+  .flex-row {
+    flex-direction: column !important;
+  }
+}
+</style>
+</head>
+<body>
+<div class="app" role="main">
+  <a href="../index.html" class="back-link">← Back to Home</a>
+  <h1>Aspect Ratio Calculator</h1>
+  <p class="lead">Calculate aspect ratios and simplified fractions.</p>
+
+  <div class="flex-row">
+    <div class="flex-item">
+      <label for="width">Width (px)</label>
+      <input type="number" id="width" value="1920" />
+    </div>
+    <div class="flex-item">
+      <label for="height">Height (px)</label>
+      <input type="number" id="height" value="1080" />
+    </div>
+  </div>
+
+  <div class="results">
+    <div class="result-item">
+      <span class="result-label">Ratio (W:1)</span>
+      <span class="result-value" id="ratio">1.78:1</span>
+    </div>
+    <div class="result-item">
+      <span class="result-label">Simplified Ratio</span>
+      <span class="result-value" id="simplified">16:9</span>
+    </div>
+  </div>
+</div>
+<script>
+const widthInput = document.getElementById('width');
+const heightInput = document.getElementById('height');
+const ratioOutput = document.getElementById('ratio');
+const simplifiedOutput = document.getElementById('simplified');
+
+function gcd(a, b) {
+  return b ? gcd(b, a % b) : a;
+}
+
+function calculate() {
+  const w = parseFloat(widthInput.value);
+  const h = parseFloat(heightInput.value);
+
+  if (isNaN(w) || isNaN(h) || w <= 0 || h <= 0) {
+    ratioOutput.textContent = '-';
+    simplifiedOutput.textContent = '-';
+    return;
+  }
+
+  // W:1 Ratio
+  const ratio = (w / h).toFixed(2);
+  ratioOutput.textContent = `${ratio}:1`;
+
+  // Simplified Ratio
+  const common = gcd(Math.round(w), Math.round(h));
+  const sw = Math.round(w) / common;
+  const sh = Math.round(h) / common;
+  simplifiedOutput.textContent = `${sw}:${sh}`;
+}
+
+widthInput.addEventListener('input', calculate);
+heightInput.addEventListener('input', calculate);
+
+// Initial calculation
+calculate();
+</script>
+</body>
+</html>
