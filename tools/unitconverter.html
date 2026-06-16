@@ -78,6 +78,8 @@ label {
     <option value="length">Length</option>
     <option value="weight">Weight</option>
     <option value="temperature">Temperature</option>
+    <option value="volume">Volume</option>
+    <option value="speed">Speed</option>
   </select>
   <div style="height:15px"></div>
 
@@ -120,8 +122,20 @@ const units = {
   weight: {
     g: { name: 'Grams', factor: 1 },
     kg: { name: 'Kilograms', factor: 1000 },
-    oz: { name: 'Ounces', factor: 28.3495 },
-    lb: { name: 'Pounds', factor: 453.592 }
+    oz: { name: 'Ounces', factor: 28.349523125 },
+    lb: { name: 'Pounds', factor: 453.59237 }
+  },
+  volume: {
+    ml: { name: 'Milliliters', factor: 1 },
+    l: { name: 'Liters', factor: 1000 },
+    gal: { name: 'Gallons (US)', factor: 3785.411784 },
+    m3: { name: 'Cubic Meters', factor: 1000000 }
+  },
+  speed: {
+    ms: { name: 'm/s', factor: 1 },
+    kmh: { name: 'km/h', factor: 0.2777777777777778 },
+    mph: { name: 'mph', factor: 0.44704 },
+    knots: { name: 'Knots', factor: 0.5144444444444444 }
   },
   temperature: {
     c: { name: 'Celsius' },
@@ -148,11 +162,15 @@ function populateUnits() {
   });
 
   if (cat === 'length') {
-      toUnit.value = 'm';
+    toUnit.value = 'm';
   } else if (cat === 'weight') {
-      toUnit.value = 'kg';
+    toUnit.value = 'kg';
   } else if (cat === 'temperature') {
-      toUnit.value = 'f';
+    toUnit.value = 'f';
+  } else if (cat === 'volume') {
+    toUnit.value = 'l';
+  } else if (cat === 'speed') {
+    toUnit.value = 'kmh';
   }
 
   convert();
