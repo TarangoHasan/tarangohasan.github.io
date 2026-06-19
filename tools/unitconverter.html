@@ -13,7 +13,7 @@
   --glass: rgba(255, 255, 255, 0.03);
 }
 html, body {
-  height: 100%;
+  min-height: 100%;
   margin: 0;
   font-family: Inter, system-ui, Segoe UI, Roboto, Arial;
   background: linear-gradient(180deg, #041025 0%, #0b1730 100%);
@@ -65,6 +65,11 @@ label {
 .back-link:hover {
   text-decoration: underline;
 }
+@media (max-width: 768px) {
+  .unit-selection {
+    flex-direction: column !important;
+  }
+}
 </style>
 </head>
 <body>
@@ -78,6 +83,8 @@ label {
     <option value="length">Length</option>
     <option value="weight">Weight</option>
     <option value="temperature">Temperature</option>
+    <option value="volume">Volume</option>
+    <option value="speed">Speed</option>
   </select>
   <div style="height:15px"></div>
 
@@ -85,7 +92,7 @@ label {
   <input type="number" id="input" placeholder="Enter value" />
   <div style="height:15px"></div>
 
-  <div style="display: flex; gap: 10px;">
+  <div class="unit-selection" style="display: flex; gap: 10px;">
     <div style="flex: 1;">
       <label for="fromUnit">From</label>
       <select id="fromUnit"></select>
@@ -120,8 +127,20 @@ const units = {
   weight: {
     g: { name: 'Grams', factor: 1 },
     kg: { name: 'Kilograms', factor: 1000 },
-    oz: { name: 'Ounces', factor: 28.3495 },
-    lb: { name: 'Pounds', factor: 453.592 }
+    oz: { name: 'Ounces', factor: 28.349523125 },
+    lb: { name: 'Pounds', factor: 453.59237 }
+  },
+  volume: {
+    ml: { name: 'Milliliters', factor: 1 },
+    l: { name: 'Liters', factor: 1000 },
+    gal: { name: 'Gallons (US)', factor: 3785.411784 },
+    m3: { name: 'Cubic Meters', factor: 1000000 }
+  },
+  speed: {
+    ms: { name: 'Meters per Second', factor: 1 },
+    kmh: { name: 'Kilometers per Hour', factor: 0.2777777777777778 },
+    mph: { name: 'Miles per Hour', factor: 0.44704 },
+    knots: { name: 'Knots', factor: 0.5144444444444445 }
   },
   temperature: {
     c: { name: 'Celsius' },
@@ -153,6 +172,10 @@ function populateUnits() {
       toUnit.value = 'kg';
   } else if (cat === 'temperature') {
       toUnit.value = 'f';
+  } else if (cat === 'volume') {
+      toUnit.value = 'l';
+  } else if (cat === 'speed') {
+      toUnit.value = 'kmh';
   }
 
   convert();
