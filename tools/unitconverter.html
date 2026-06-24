@@ -65,6 +65,21 @@ label {
 .back-link:hover {
   text-decoration: underline;
 }
+  .flex-row {
+    display: flex;
+    gap: 10px;
+  }
+  .flex-row > div {
+    flex: 1;
+  }
+  .spacer {
+    height: 15px;
+  }
+  @media (max-width: 768px) {
+    .unit-selection {
+      flex-direction: column !important;
+    }
+  }
 </style>
 </head>
 <body>
@@ -78,24 +93,26 @@ label {
     <option value="length">Length</option>
     <option value="weight">Weight</option>
     <option value="temperature">Temperature</option>
+    <option value="volume">Volume</option>
+    <option value="speed">Speed</option>
   </select>
-  <div style="height:15px"></div>
+  <div class="spacer"></div>
 
   <label for="input">Value</label>
   <input type="number" id="input" placeholder="Enter value" />
-  <div style="height:15px"></div>
+  <div class="spacer"></div>
 
-  <div style="display: flex; gap: 10px;">
-    <div style="flex: 1;">
+  <div class="flex-row unit-selection">
+    <div>
       <label for="fromUnit">From</label>
       <select id="fromUnit"></select>
     </div>
-    <div style="flex: 1;">
+    <div>
       <label for="toUnit">To</label>
       <select id="toUnit"></select>
     </div>
   </div>
-  <div style="height:15px"></div>
+  <div class="spacer"></div>
 
   <label for="output">Result</label>
   <input type="text" id="output" placeholder="Result" readonly />
@@ -120,13 +137,25 @@ const units = {
   weight: {
     g: { name: 'Grams', factor: 1 },
     kg: { name: 'Kilograms', factor: 1000 },
-    oz: { name: 'Ounces', factor: 28.3495 },
-    lb: { name: 'Pounds', factor: 453.592 }
+    oz: { name: 'Ounces', factor: 28.349523125 },
+    lb: { name: 'Pounds', factor: 453.59237 }
   },
   temperature: {
     c: { name: 'Celsius' },
     f: { name: 'Fahrenheit' },
     k: { name: 'Kelvin' }
+  },
+  volume: {
+    ml: { name: 'Milliliters', factor: 1 },
+    l: { name: 'Liters', factor: 1000 },
+    gal: { name: 'Gallons (US)', factor: 3785.411784 },
+    m3: { name: 'Cubic Meters', factor: 1000000 }
+  },
+  speed: {
+    ms: { name: 'm/s', factor: 1 },
+    kmh: { name: 'km/h', factor: 0.2777777777777778 },
+    mph: { name: 'mph', factor: 0.44704 },
+    knots: { name: 'Knots', factor: 0.5144444444444445 }
   }
 };
 
@@ -153,6 +182,10 @@ function populateUnits() {
       toUnit.value = 'kg';
   } else if (cat === 'temperature') {
       toUnit.value = 'f';
+  } else if (cat === 'volume') {
+      toUnit.value = 'l';
+  } else if (cat === 'speed') {
+      toUnit.value = 'kmh';
   }
 
   convert();
