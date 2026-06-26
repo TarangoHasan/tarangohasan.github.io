@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>BPM Counter</title>
+<style>
+:root {
+  --bg: #0f1724;
+  --card: #0b1220;
+  --accent: #06b6d4;
+  --muted: #9aa8b2;
+  --glass: rgba(255, 255, 255, 0.03);
+}
+html, body {
+  min-height: 100%;
+  margin: 0;
+  font-family: Inter, system-ui, Segoe UI, Roboto, Arial;
+  background: linear-gradient(180deg, #041025 0%, #0b1730 100%);
+  color: #e6eef6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.app {
+  width: 400px;
+  max-width: 96%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 8px 30px rgba(2, 6, 23, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  text-align: center;
+}
+h1 {
+  margin: 0;
+  font-size: 20px;
+}
+p.lead {
+  margin: 6px 0 18px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.bpm-display {
+  font-size: 64px;
+  font-weight: 700;
+  margin: 20px 0;
+  color: var(--accent);
+}
+.tap-area {
+  width: 100%;
+  height: 150px;
+  background: var(--glass);
+  border: 2px dashed rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+  font-weight: 600;
+  transition: background 0.1s;
+}
+.tap-area:active {
+  background: rgba(255, 255, 255, 0.06);
+}
+.stats {
+  margin-top: 15px;
+  font-size: 14px;
+  color: var(--muted);
+}
+button {
+  margin-top: 20px;
+  background: var(--glass);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 8px 16px;
+  border-radius: 8px;
+  color: inherit;
+  cursor: pointer;
+}
+button:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+.back-link {
+  display: inline-block;
+  margin-bottom: 20px;
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 14px;
+}
+.back-link:hover {
+  text-decoration: underline;
+}
+</style>
+</head>
+<body>
+<div class="app" role="main">
+  <a href="../index.html" class="back-link">← Back to Home</a>
+  <h1>BPM Counter</h1>
+  <p class="lead">Tap or press any key to count BPM.</p>
+
+  <div class="bpm-display" id="bpm">0</div>
+
+  <div class="tap-area" id="tap-area">
+    TAP HERE
+  </div>
+
+  <div class="stats">
+    Taps: <span id="tap-count">0</span>
+  </div>
+
+  <button id="reset">Reset</button>
+</div>
+<script>
+const bpmDisplay = document.getElementById('bpm');
+const tapArea = document.getElementById('tap-area');
+const tapCountDisplay = document.getElementById('tap-count');
+const resetBtn = document.getElementById('reset');
+
+let taps = [];
+const maxTaps = 10;
+
+function handleTap() {
+  const now = Date.now();
+  taps.push(now);
+
+  if (taps.length > maxTaps) {
+    taps.shift();
+  }
+
+  if (taps.length > 1) {
+    const totalInterval = taps[taps.length - 1] - taps[0];
+    const avgInterval = totalInterval / (taps.length - 1);
+    const bpm = Math.round(60000 / avgInterval);
+    bpmDisplay.textContent = bpm;
+  }
+
+  tapCountDisplay.textContent = taps.length;
+}
+
+function reset() {
+  taps = [];
+  bpmDisplay.textContent = '0';
+  tapCountDisplay.textContent = '0';
+}
+
+tapArea.addEventListener('mousedown', (e) => {
+  e.preventDefault();
+  handleTap();
+});
+
+window.addEventListener('keydown', (e) => {
+  if (e.code === 'Space' || e.key === ' ') {
+    e.preventDefault();
+  }
+  handleTap();
+});
+
+resetBtn.addEventListener('click', reset);
+</script>
+</body>
+</html>
