@@ -14,7 +14,7 @@
   --glass: rgba(255, 255, 255, 0.03);
 }
 html, body {
-  height: 100%;
+  min-height: 100%;
   margin: 0;
   font-family: Inter, system-ui, Segoe UI, Roboto, Arial;
   background: linear-gradient(180deg, #041025 0%, #0b1730 100%);
@@ -61,6 +61,13 @@ textarea {
   margin-top: 10px;
   display: flex;
   gap: 10px;
+}
+
+@media (max-width: 768px) {
+  .stats, .actions {
+    flex-direction: column !important;
+    gap: 10px;
+  }
 }
 button {
   background: linear-gradient(90deg, var(--accent), #3b82f6);
@@ -118,7 +125,7 @@ const copyBtn = document.getElementById('copyBtn');
 textInput.addEventListener('input', () => {
   const text = textInput.value;
   const words = text.trim().split(/\s+/).filter(word => word.length > 0);
-  const lines = text.split('\n');
+  const lines = text.trim() === '' ? [] : text.split('\n');
   const paragraphs = text.split('\n\n').filter(p => p.trim().length > 0);
 
   wordCount.textContent = words.length;
