@@ -78,14 +78,19 @@ const colorPicker = new iro.ColorPicker('.color-picker', {
 const colorDisplay = document.querySelector('.color-display');
 const values = document.getElementById('values');
 
-colorPicker.on('color:change', (color) => {
+function updateColorValues(color) {
   colorDisplay.style.backgroundColor = color.hexString;
   values.innerHTML = `
     <div>HEX: ${color.hexString}</div>
     <div>RGB: ${color.rgbString}</div>
     <div>HSL: ${color.hslString}</div>
   `;
-});
+}
+
+colorPicker.on('color:change', updateColorValues);
+
+// Init
+updateColorValues(colorPicker.color);
 </script>
 </body>
 </html>
