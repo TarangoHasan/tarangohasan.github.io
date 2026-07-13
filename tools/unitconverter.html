@@ -80,6 +80,7 @@ label {
     <option value="temperature">Temperature</option>
     <option value="volume">Volume</option>
     <option value="speed">Speed</option>
+    <option value="area">Area</option>
   </select>
   <div style="height:15px"></div>
 
@@ -141,6 +142,13 @@ const units = {
     kmh: { name: 'Kilometers per hour (km/h)', factor: 0.2777777777777778 },
     mph: { name: 'Miles per hour (mph)', factor: 0.44704 },
     knots: { name: 'Knots', factor: 0.5144444444444445 }
+  },
+  area: {
+    m2: { name: 'Square Meters (m2)', factor: 1 },
+    km2: { name: 'Square Kilometers (km2)', factor: 1000000 },
+    ft2: { name: 'Square Feet (ft2)', factor: 0.09290304 },
+    mi2: { name: 'Square Miles (mi2)', factor: 2589988.110336 },
+    ac: { name: 'Acres', factor: 4046.8564224 }
   }
 };
 
@@ -171,6 +179,8 @@ function populateUnits() {
       toUnit.value = 'l';
   } else if (cat === 'speed') {
       toUnit.value = 'kmh';
+  } else if (cat === 'area') {
+      toUnit.value = 'm2';
   }
 
   convert();
