@@ -117,7 +117,7 @@ const copyBtn = document.getElementById('copyBtn');
 textInput.addEventListener('input', () => {
   const text = textInput.value;
   const words = text.trim().split(/\s+/).filter(word => word.length > 0);
-  const lines = text.split('\n');
+  const lines = text.length > 0 ? text.split('\n') : [];
   const paragraphs = text.split('\n\n').filter(p => p.trim().length > 0);
 
   wordCount.textContent = words.length;
