@@ -82,6 +82,7 @@ button {
   <div style="height:10px"></div>
   <div style="display:flex; gap:10px;">
     <button id="formatBtn">Format JSON</button>
+    <button id="minifyBtn">Minify JSON</button>
     <button id="copyBtn">Copy JSON</button>
   </div>
   <div id="errors" style="margin-top:8px"></div>
@@ -89,6 +90,7 @@ button {
 <script>
 const jsonInput = document.getElementById('json-input');
 const formatBtn = document.getElementById('formatBtn');
+const minifyBtn = document.getElementById('minifyBtn');
 const copyBtn = document.getElementById('copyBtn');
 const errors = document.getElementById('errors');
 
@@ -97,6 +99,16 @@ formatBtn.addEventListener('click', () => {
     const jsonObj = JSON.parse(jsonInput.value);
     jsonInput.value = JSON.stringify(jsonObj, null, 2);
     errors.textContent = 'Valid JSON!';
+  } catch (e) {
+    errors.textContent = 'Error: ' + e.message;
+  }
+});
+
+minifyBtn.addEventListener('click', () => {
+  try {
+    const jsonObj = JSON.parse(jsonInput.value);
+    jsonInput.value = JSON.stringify(jsonObj);
+    errors.textContent = 'Minified JSON!';
   } catch (e) {
     errors.textContent = 'Error: ' + e.message;
   }
