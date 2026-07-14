@@ -99,6 +99,8 @@ button {
     <button id="upper-btn">Uppercase</button>
     <button id="lower-btn">Lowercase</button>
     <button id="sentence-btn">Sentence Case</button>
+    <button id="reverse-btn">Reverse</button>
+    <button id="clear-btn">Clear</button>
     <button id="copyBtn">Copy Text</button>
   </div>
 </div>
@@ -112,13 +114,15 @@ const paraCount = document.getElementById('para-count');
 const upperBtn = document.getElementById('upper-btn');
 const lowerBtn = document.getElementById('lower-btn');
 const sentenceBtn = document.getElementById('sentence-btn');
+const reverseBtn = document.getElementById('reverse-btn');
+const clearBtn = document.getElementById('clear-btn');
 const copyBtn = document.getElementById('copyBtn');
 
 textInput.addEventListener('input', () => {
   const text = textInput.value;
   const words = text.trim().split(/\s+/).filter(word => word.length > 0);
   const lines = text.length > 0 ? text.split('\n') : [];
-  const paragraphs = text.split('\n\n').filter(p => p.trim().length > 0);
+  const paragraphs = text.split(/\n\s*\n/).filter(p => p.trim().length > 0);
 
   wordCount.textContent = words.length;
   charCount.textContent = text.length;
@@ -139,6 +143,16 @@ lowerBtn.addEventListener('click', () => {
 sentenceBtn.addEventListener('click', () => {
   const text = textInput.value.toLowerCase();
   textInput.value = text.replace(/(^\s*\w|[.!?]\s*\w)/g, c => c.toUpperCase());
+  textInput.dispatchEvent(new Event('input'));
+});
+
+reverseBtn.addEventListener('click', () => {
+  textInput.value = textInput.value.split('').reverse().join('');
+  textInput.dispatchEvent(new Event('input'));
+});
+
+clearBtn.addEventListener('click', () => {
+  textInput.value = '';
   textInput.dispatchEvent(new Event('input'));
 });
 
