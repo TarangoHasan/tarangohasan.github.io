@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>URL Encoder/Decoder</title>
+<style>
+:root {
+  --bg: #0f1724;
+  --card: #0b1220;
+  --accent: #06b6d4;
+  --muted: #9aa8b2;
+  --glass: rgba(255, 255, 255, 0.03);
+}
+html, body {
+  min-height: 100%;
+  margin: 0;
+  font-family: Inter, system-ui, Segoe UI, Roboto, Arial;
+  background: linear-gradient(180deg, #041025 0%, #0b1730 100%);
+  color: #e6eef6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.app {
+  width: 800px;
+  max-width: 96%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 8px 30px rgba(2, 6, 23, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+h1 {
+  margin: 0;
+  font-size: 20px;
+}
+p.lead {
+  margin: 6px 0 18px;
+  color: var(--muted);
+  font-size: 13px;
+}
+textarea {
+  width: 100%;
+  min-height: 100px;
+  padding: 8px;
+  border-radius: 8px;
+  background: var(--glass);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  color: inherit;
+  resize: vertical;
+  box-sizing: border-box;
+}
+button {
+  background: linear-gradient(90deg, var(--accent), #3b82f6);
+  border: 0;
+  padding: 10px 14px;
+  font-weight: 600;
+  border-radius: 8px;
+  color: #042027;
+  cursor: pointer;
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 20px;
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 14px;
+}
+.back-link:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .actions {
+    flex-direction: column !important;
+    display: flex;
+    gap: 10px;
+  }
+}
+</style>
+</head>
+<body>
+<div class="app" role="main">
+  <a href="../index.html" class="back-link">← Back to Home</a>
+  <h1>URL Encoder/Decoder</h1>
+  <p class="lead">Encode or decode URLs easily.</p>
+  <textarea id="input" placeholder="Enter URL or text here..."></textarea>
+  <div style="height:10px"></div>
+  <div class="actions">
+    <button id="encodeBtn">Encode</button>
+    <button id="decodeBtn">Decode</button>
+  </div>
+  <div style="height:10px"></div>
+  <textarea id="output" placeholder="Result..." readonly></textarea>
+  <div style="height:10px"></div>
+  <button id="copyBtn">Copy Result</button>
+  <div id="error" style="margin-top:8px; color: #ff4b2b;"></div>
+</div>
+<script>
+const input = document.getElementById('input');
+const output = document.getElementById('output');
+const encodeBtn = document.getElementById('encodeBtn');
+const decodeBtn = document.getElementById('decodeBtn');
+const copyBtn = document.getElementById('copyBtn');
+const errorEl = document.getElementById('error');
+
+encodeBtn.addEventListener('click', () => {
+  errorEl.textContent = "";
+  try {
+    output.value = encodeURIComponent(input.value);
+  } catch (e) {
+    errorEl.textContent = "Error: " + e.message;
+  }
+});
+
+decodeBtn.addEventListener('click', () => {
+  errorEl.textContent = "";
+  try {
+    output.value = decodeURIComponent(input.value);
+  } catch (e) {
+    errorEl.textContent = "Error: " + e.message;
+  }
+});
+
+copyBtn.addEventListener('click', () => {
+  if (output.value) {
+    navigator.clipboard.writeText(output.value);
+    const originalText = copyBtn.textContent;
+    copyBtn.textContent = "Copied!";
+    setTimeout(() => copyBtn.textContent = originalText, 2000);
+  }
+});
+</script>
+</body>
+</html>
