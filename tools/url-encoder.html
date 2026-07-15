@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Base64 Encoder/Decoder</title>
+<title>URL Encoder/Decoder</title>
 <style>
 :root {
   --bg: #0f1724;
@@ -85,18 +85,19 @@ button {
 <body>
 <div class="app" role="main">
   <a href="../index.html" class="back-link">← Back to Home</a>
-  <h1>Base64 Encoder/Decoder</h1>
-  <p class="lead">Encode text to Base64 or decode from Base64.</p>
-  <textarea id="input" placeholder="Enter text here..."></textarea>
+  <h1>URL Encoder/Decoder</h1>
+  <p class="lead">Encode or decode URLs easily.</p>
+  <textarea id="input" placeholder="Enter URL or text here..."></textarea>
   <div style="height:10px"></div>
   <div class="actions">
     <button id="encodeBtn">Encode</button>
     <button id="decodeBtn">Decode</button>
   </div>
   <div style="height:10px"></div>
-  <textarea id="output" placeholder="Result..."></textarea>
+  <textarea id="output" placeholder="Result..." readonly></textarea>
   <div style="height:10px"></div>
   <button id="copyBtn">Copy Result</button>
+  <div id="error" style="margin-top:8px; color: #ff4b2b;"></div>
 </div>
 <script>
 const input = document.getElementById('input');
@@ -104,32 +105,23 @@ const output = document.getElementById('output');
 const encodeBtn = document.getElementById('encodeBtn');
 const decodeBtn = document.getElementById('decodeBtn');
 const copyBtn = document.getElementById('copyBtn');
+const errorEl = document.getElementById('error');
 
 encodeBtn.addEventListener('click', () => {
+  errorEl.textContent = "";
   try {
-    const encoder = new TextEncoder();
-    const data = encoder.encode(input.value);
-    let binary = "";
-    for (let i = 0; i < data.length; i++) {
-      binary += String.fromCharCode(data[i]);
-    }
-    output.value = btoa(binary);
+    output.value = encodeURIComponent(input.value);
   } catch (e) {
-    output.value = 'Error: ' + e.message;
+    errorEl.textContent = "Error: " + e.message;
   }
 });
 
 decodeBtn.addEventListener('click', () => {
+  errorEl.textContent = "";
   try {
-    const binary = atob(input.value.trim());
-    const bytes = new Uint8Array(binary.length);
-    for (let i = 0; i < binary.length; i++) {
-      bytes[i] = binary.charCodeAt(i);
-    }
-    const decoder = new TextDecoder();
-    output.value = decoder.decode(bytes);
+    output.value = decodeURIComponent(input.value);
   } catch (e) {
-    output.value = 'Error: ' + e.message;
+    errorEl.textContent = "Error: " + e.message;
   }
 });
 
