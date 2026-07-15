@@ -50,6 +50,7 @@ textarea {
   border: 1px solid rgba(255, 255, 255, 0.03);
   color: inherit;
   resize: vertical;
+  box-sizing: border-box;
 }
 button {
   background: linear-gradient(90deg, var(--accent), #3b82f6);
@@ -71,6 +72,14 @@ button {
 .back-link:hover {
   text-decoration: underline;
 }
+
+@media (max-width: 768px) {
+  .actions {
+    flex-direction: column !important;
+    display: flex;
+    gap: 10px;
+  }
+}
 </style>
 </head>
 <body>
@@ -80,8 +89,10 @@ button {
   <p class="lead">Encode text to Base64 or decode from Base64.</p>
   <textarea id="input" placeholder="Enter text here..."></textarea>
   <div style="height:10px"></div>
-  <button id="encodeBtn">Encode</button>
-  <button id="decodeBtn">Decode</button>
+  <div class="actions">
+    <button id="encodeBtn">Encode</button>
+    <button id="decodeBtn">Decode</button>
+  </div>
   <div style="height:10px"></div>
   <textarea id="output" placeholder="Result..."></textarea>
   <div style="height:10px"></div>
