@@ -50,6 +50,7 @@ textarea {
   border: 1px solid rgba(255, 255, 255, 0.03);
   color: inherit;
   resize: vertical;
+  box-sizing: border-box;
 }
 .stats {
   margin-top: 10px;
@@ -81,6 +82,17 @@ button {
 .back-link:hover {
   text-decoration: underline;
 }
+
+@media (max-width: 768px) {
+  .stats, .actions {
+    flex-direction: column !important;
+    display: flex !important;
+    gap: 10px;
+  }
+  .actions[style*="grid"] {
+    grid-template-columns: 1fr !important;
+  }
+}
 </style>
 </head>
 <body>
@@ -94,6 +106,14 @@ button {
     <div>Characters: <span id="char-count">0</span></div>
     <div>Lines: <span id="line-count">0</span></div>
     <div>Paragraphs: <span id="para-count">0</span></div>
+  </div>
+  <div class="actions" style="margin-top: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+    <input type="text" id="find-input" placeholder="Find..." style="min-height: auto; width: 100%; padding: 8px; border-radius: 8px; background: var(--glass); border: 1px solid rgba(255, 255, 255, 0.03); color: inherit; box-sizing: border-box;" />
+    <input type="text" id="replace-input" placeholder="Replace with..." style="min-height: auto; width: 100%; padding: 8px; border-radius: 8px; background: var(--glass); border: 1px solid rgba(255, 255, 255, 0.03); color: inherit; box-sizing: border-box;" />
+  </div>
+  <div class="actions">
+    <button id="replace-btn">Replace All</button>
+    <button id="extra-spaces-btn">Remove Extra Spaces</button>
   </div>
   <div class="actions">
     <button id="upper-btn">Uppercase</button>
@@ -110,6 +130,11 @@ const wordCount = document.getElementById('word-count');
 const charCount = document.getElementById('char-count');
 const lineCount = document.getElementById('line-count');
 const paraCount = document.getElementById('para-count');
+
+const findInput = document.getElementById('find-input');
+const replaceInput = document.getElementById('replace-input');
+const replaceBtn = document.getElementById('replace-btn');
+const extraSpacesBtn = document.getElementById('extra-spaces-btn');
 
 const upperBtn = document.getElementById('upper-btn');
 const lowerBtn = document.getElementById('lower-btn');
@@ -128,6 +153,22 @@ textInput.addEventListener('input', () => {
   charCount.textContent = text.length;
   lineCount.textContent = lines.length;
   paraCount.textContent = paragraphs.length;
+});
+
+replaceBtn.addEventListener('click', () => {
+  const findText = findInput.value;
+  const replaceText = replaceInput.value;
+  if (findText) {
+    const text = textInput.value;
+    textInput.value = text.split(findText).join(replaceText);
+    textInput.dispatchEvent(new Event('input'));
+  }
+});
+
+extraSpacesBtn.addEventListener('click', () => {
+  const text = textInput.value;
+  textInput.value = text.replace(/\s+/g, ' ').trim();
+  textInput.dispatchEvent(new Event('input'));
 });
 
 upperBtn.addEventListener('click', () => {
