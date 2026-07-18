@@ -72,9 +72,10 @@ p.lead {
   <a href="../index.html" class="back-link">← Back to Home</a>
   <h1>Color Picker</h1>
   <p class="lead">Select a color to see its values.</p>
-  <div class="color-picker"></div>
+  <div class="color-picker" style="display: flex; justify-content: center; margin-bottom: 15px;"></div>
   <div class="color-display"></div>
-  <div id="values"></div>
+  <input type="text" id="hexInput" placeholder="#ff0000" style="width: 100%; padding: 10px; border-radius: 8px; background: var(--glass); border: 1px solid rgba(255, 255, 255, 0.03); color: inherit; box-sizing: border-box; margin-bottom: 15px; font-family: monospace; font-size: 16px; text-align: center;" />
+  <div id="values" style="display: flex; flex-direction: column; gap: 8px; font-size: 14px; text-align: left; margin-top: 10px;"></div>
 </div>
 <script>
 const colorPicker = new iro.ColorPicker('.color-picker', {
@@ -82,6 +83,7 @@ const colorPicker = new iro.ColorPicker('.color-picker', {
   color: "#f00"
 });
 const colorDisplay = document.querySelector('.color-display');
+const hexInput = document.getElementById('hexInput');
 const values = document.getElementById('values');
 
 function updateColorValues(color) {
@@ -91,9 +93,25 @@ function updateColorValues(color) {
     <div>RGB: ${color.rgbString}</div>
     <div>HSL: ${color.hslString}</div>
   `;
+  if (document.activeElement !== hexInput) {
+    hexInput.value = color.hexString;
+  }
 }
 
 colorPicker.on('color:change', updateColorValues);
+
+hexInput.addEventListener('input', () => {
+  const value = hexInput.value.trim();
+  // regex validation for 3, 4, 6, or 8 digit hex code
+  if (/^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/.test(value)) {
+    const hex = value.startsWith('#') ? value : '#' + value;
+    try {
+      colorPicker.color.set(hex);
+    } catch (e) {
+      // ignore invalid set
+    }
+  }
+});
 
 // Init
 updateColorValues(colorPicker.color);
