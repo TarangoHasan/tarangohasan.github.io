@@ -1,0 +1,507 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Stopwatch & Timer</title>
+<style>
+:root {
+  --bg: #0f1724;
+  --card: #0b1220;
+  --accent: #06b6d4;
+  --muted: #9aa8b2;
+  --glass: rgba(255, 255, 255, 0.03);
+}
+* {
+  box-sizing: border-box;
+}
+html, body {
+  min-height: 100%;
+  margin: 0;
+  font-family: Inter, system-ui, Segoe UI, Roboto, Arial;
+  background: linear-gradient(180deg, #041025 0%, #0b1730 100%);
+  color: #e6eef6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.app {
+  width: 600px;
+  max-width: 96%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 8px 30px rgba(2, 6, 23, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  text-align: center;
+}
+h1 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+}
+p.lead {
+  margin: 6px 0 20px;
+  color: var(--muted);
+  font-size: 14px;
+}
+.back-link {
+  display: inline-block;
+  margin-bottom: 20px;
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 14px;
+}
+.back-link:hover {
+  text-decoration: underline;
+}
+
+/* Tabs UI */
+.tabs {
+  display: flex;
+  background: var(--glass);
+  padding: 4px;
+  border-radius: 8px;
+  margin-bottom: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.02);
+}
+.tab-btn {
+  flex: 1;
+  background: none;
+  border: none;
+  padding: 10px;
+  color: var(--muted);
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  font-size: 14px;
+}
+.tab-btn.active {
+  background: linear-gradient(90deg, var(--accent), #3b82f6);
+  color: #042027;
+}
+
+/* Common display and input */
+.display {
+  font-size: 48px;
+  font-family: monospace;
+  margin: 20px 0;
+  padding: 20px;
+  background: var(--glass);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.02);
+  letter-spacing: 1px;
+}
+.controls {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+button.control-btn {
+  background: linear-gradient(90deg, var(--accent), #3b82f6);
+  border: 0;
+  padding: 12px 20px;
+  font-weight: 600;
+  border-radius: 8px;
+  color: #042027;
+  cursor: pointer;
+  min-width: 90px;
+  transition: opacity 0.2s ease, transform 0.1s ease;
+  font-size: 14px;
+}
+button.control-btn:hover {
+  opacity: 0.9;
+}
+button.control-btn:active {
+  transform: scale(0.97);
+}
+button.control-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Laps */
+.laps-container {
+  margin-top: 20px;
+}
+.laps-header {
+  display: flex;
+  justify-content: space-between;
+  color: var(--muted);
+  font-size: 13px;
+  padding: 6px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+.laps {
+  max-height: 200px;
+  overflow-y: auto;
+  text-align: left;
+  background: var(--glass);
+  border-radius: 8px;
+  padding: 8px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.02);
+}
+.lap-item {
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  justify-content: space-between;
+  font-family: monospace;
+  font-size: 14px;
+}
+.lap-item:last-child {
+  border-bottom: none;
+}
+
+/* Timer inputs */
+.timer-inputs {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+.input-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 80px;
+}
+.input-group label {
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  letter-spacing: 0.5px;
+}
+.input-group input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  background: var(--glass);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  color: #e6eef6;
+  text-align: center;
+  font-size: 18px;
+  font-family: monospace;
+}
+.input-group input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+/* Tab Views */
+.tab-content {
+  display: none;
+}
+.tab-content.active {
+  display: block;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .app {
+    padding: 20px 15px;
+  }
+  .display {
+    font-size: 36px;
+    padding: 15px;
+  }
+  .controls {
+    flex-direction: column !important;
+    gap: 10px;
+  }
+  button.control-btn {
+    width: 100%;
+  }
+  .timer-inputs {
+    gap: 10px;
+  }
+  .input-group {
+    width: 70px;
+  }
+}
+</style>
+</head>
+<body>
+<div class="app" role="main">
+  <a href="../index.html" class="back-link">← Back to Home</a>
+  <h1>Stopwatch & Timer</h1>
+  <p class="lead">Dual-mode timing tool with audio completion chime.</p>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('stopwatch')">Stopwatch</button>
+    <button class="tab-btn" onclick="switchTab('timer')">Countdown Timer</button>
+  </div>
+
+  <!-- Stopwatch Panel -->
+  <div id="stopwatch-tab" class="tab-content active">
+    <div class="display" id="display">00:00:00.000</div>
+    <div class="controls">
+      <button id="startBtn" class="control-btn">Start</button>
+      <button id="stopBtn" class="control-btn" disabled>Pause</button>
+      <button id="lapBtn" class="control-btn" disabled>Lap</button>
+      <button id="resetBtn" class="control-btn">Reset</button>
+    </div>
+    <div class="laps-container">
+      <div class="laps-header">
+        <span>Lap #</span>
+        <span>Split Time</span>
+      </div>
+      <div class="laps" id="laps">
+        <div style="text-align: center; color: var(--muted); padding: 15px 0;" id="no-laps">No laps recorded yet.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Countdown Timer Panel -->
+  <div id="timer-tab" class="tab-content">
+    <div class="timer-inputs">
+      <div class="input-group">
+        <label for="timer-hours">Hours</label>
+        <input type="number" id="timer-hours" min="0" max="23" value="0" placeholder="00" />
+      </div>
+      <div class="input-group">
+        <label for="timer-minutes">Min</label>
+        <input type="number" id="timer-minutes" min="0" max="59" value="5" placeholder="05" />
+      </div>
+      <div class="input-group">
+        <label for="timer-seconds">Sec</label>
+        <input type="number" id="timer-seconds" min="0" max="59" value="0" placeholder="00" />
+      </div>
+    </div>
+    <div class="display" id="timer-display">00:05:00</div>
+    <div class="controls">
+      <button id="timer-startBtn" class="control-btn">Start</button>
+      <button id="timer-pauseBtn" class="control-btn" disabled>Pause</button>
+      <button id="timer-resetBtn" class="control-btn">Reset</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Tab Switching
+function switchTab(mode) {
+  const tabs = document.querySelectorAll('.tab-btn');
+  const contents = document.querySelectorAll('.tab-content');
+
+  tabs.forEach(tab => {
+    if (tab.textContent.toLowerCase().includes(mode)) {
+      tab.classList.add('active');
+    } else {
+      tab.classList.remove('active');
+    }
+  });
+
+  if (mode === 'stopwatch') {
+    document.getElementById('stopwatch-tab').classList.add('active');
+  } else {
+    document.getElementById('timer-tab').classList.add('active');
+  }
+}
+
+// Stopwatch Logic
+let stopwatchInterval = null;
+let stopwatchRunning = false;
+let startTime = 0;
+let elapsedTime = 0;
+let lapCounter = 0;
+
+const display = document.getElementById('display');
+const startBtn = document.getElementById('startBtn');
+const stopBtn = document.getElementById('stopBtn');
+const lapBtn = document.getElementById('lapBtn');
+const resetBtn = document.getElementById('resetBtn');
+const lapsContainer = document.getElementById('laps');
+const noLaps = document.getElementById('no-laps');
+
+function formatTime(ms) {
+  const totalMs = Math.floor(ms);
+  const hours = Math.floor(totalMs / 3600000);
+  const minutes = Math.floor((totalMs % 3600000) / 60000);
+  const seconds = Math.floor((totalMs % 60000) / 1000);
+  const millis = totalMs % 1000;
+  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${String(millis).padStart(3, '0')}`;
+}
+
+function updateStopwatch() {
+  const now = Date.now();
+  elapsedTime = now - startTime;
+  display.textContent = formatTime(elapsedTime);
+}
+
+function startStopwatch() {
+  if (stopwatchRunning) return;
+  stopwatchRunning = true;
+  startTime = Date.now() - elapsedTime;
+  stopwatchInterval = setInterval(updateStopwatch, 10);
+  startBtn.disabled = true;
+  stopBtn.disabled = false;
+  lapBtn.disabled = false;
+}
+
+function stopStopwatch() {
+  if (!stopwatchRunning) return;
+  stopwatchRunning = false;
+  clearInterval(stopwatchInterval);
+  startBtn.disabled = false;
+  stopBtn.disabled = true;
+  lapBtn.disabled = true;
+}
+
+function resetStopwatch() {
+  stopwatchRunning = false;
+  clearInterval(stopwatchInterval);
+  elapsedTime = 0;
+  display.textContent = '00:00:00.000';
+  startBtn.disabled = false;
+  stopBtn.disabled = true;
+  lapBtn.disabled = true;
+  lapsContainer.innerHTML = '<div style="text-align: center; color: var(--muted); padding: 15px 0;" id="no-laps">No laps recorded yet.</div>';
+  lapCounter = 0;
+}
+
+function recordLap() {
+  if (!stopwatchRunning) return;
+  lapCounter++;
+  const lapTime = formatTime(elapsedTime);
+  const lapDiv = document.createElement('div');
+  lapDiv.className = 'lap-item';
+  lapDiv.innerHTML = `<span>Lap ${lapCounter}</span><span>${lapTime}</span>`;
+  const noLapsDiv = lapsContainer.querySelector('#no-laps');
+  if (noLapsDiv) noLapsDiv.remove();
+  lapsContainer.appendChild(lapDiv);
+  lapsContainer.scrollTop = lapsContainer.scrollHeight;
+}
+
+startBtn.addEventListener('click', startStopwatch);
+stopBtn.addEventListener('click', stopStopwatch);
+lapBtn.addEventListener('click', recordLap);
+resetBtn.addEventListener('click', resetStopwatch);
+
+// Countdown Timer Logic
+let timerInterval = null;
+let timerRunning = false;
+let timerPaused = false;
+let totalTimerMs = 0;
+let timerRemaining = 0;
+
+const timerDisplay = document.getElementById('timer-display');
+const timerHours = document.getElementById('timer-hours');
+const timerMinutes = document.getElementById('timer-minutes');
+const timerSeconds = document.getElementById('timer-seconds');
+const timerStartBtn = document.getElementById('timer-startBtn');
+const timerPauseBtn = document.getElementById('timer-pauseBtn');
+const timerResetBtn = document.getElementById('timer-resetBtn');
+
+function formatTimer(ms) {
+  const totalSec = Math.ceil(ms / 1000);
+  const h = Math.floor(totalSec / 3600);
+  const m = Math.floor((totalSec % 3600) / 60);
+  const s = totalSec % 60;
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+}
+
+function updateTimer() {
+  if (timerPaused) return;
+  const now = Date.now();
+  timerRemaining = totalTimerMs - (now - timerStartReference);
+  if (timerRemaining <= 0) {
+    timerRemaining = 0;
+    timerDisplay.textContent = '00:00:00';
+    clearInterval(timerInterval);
+    timerRunning = false;
+    timerStartBtn.disabled = false;
+    timerPauseBtn.disabled = true;
+    // Play chime
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.frequency.value = 880;
+      osc.type = 'sine';
+      gain.gain.setValueAtTime(0.3, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 1.5);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 1.5);
+    } catch (e) {
+      // audio not available
+    }
+    return;
+  }
+  timerDisplay.textContent = formatTimer(timerRemaining);
+}
+
+let timerStartReference = 0;
+
+function startTimer() {
+  if (timerRunning) return;
+  const h = parseInt(timerHours.value, 10) || 0;
+  const m = parseInt(timerMinutes.value, 10) || 0;
+  const s = parseInt(timerSeconds.value, 10) || 0;
+  totalTimerMs = (h * 3600 + m * 60 + s) * 1000;
+  if (totalTimerMs <= 0) return;
+  timerRunning = true;
+  timerPaused = false;
+  timerStartReference = Date.now();
+  timerInterval = setInterval(updateTimer, 100);
+  timerStartBtn.disabled = true;
+  timerPauseBtn.disabled = false;
+  timerHours.disabled = true;
+  timerMinutes.disabled = true;
+  timerSeconds.disabled = true;
+}
+
+function pauseTimer() {
+  if (!timerRunning || timerPaused) return;
+  timerPaused = true;
+  clearInterval(timerInterval);
+  timerPauseBtn.textContent = 'Resume';
+}
+
+function resumeTimer() {
+  if (!timerPaused) return;
+  timerPaused = false;
+  totalTimerMs = timerRemaining;
+  timerStartReference = Date.now();
+  timerInterval = setInterval(updateTimer, 100);
+  timerPauseBtn.textContent = 'Pause';
+}
+
+function resetTimer() {
+  clearInterval(timerInterval);
+  timerRunning = false;
+  timerPaused = false;
+  timerDisplay.textContent = formatTimer(
+    ((parseInt(timerHours.value, 10) || 0) * 3600 +
+     (parseInt(timerMinutes.value, 10) || 0) * 60 +
+     (parseInt(timerSeconds.value, 10) || 0)) * 1000
+  );
+  timerStartBtn.disabled = false;
+  timerPauseBtn.disabled = true;
+  timerPauseBtn.textContent = 'Pause';
+  timerHours.disabled = false;
+  timerMinutes.disabled = false;
+  timerSeconds.disabled = false;
+}
+
+timerStartBtn.addEventListener('click', startTimer);
+timerPauseBtn.addEventListener('click', () => {
+  if (timerPaused) {
+    resumeTimer();
+  } else {
+    pauseTimer();
+  }
+});
+timerResetBtn.addEventListener('click', resetTimer);
+
+// Init timer display
+resetTimer();
+</script>
+</body>
+</html>
