@@ -142,7 +142,10 @@ input, select {
   <div class="result-box">
     <label>Calculated Ratio</label>
     <div id="ratio-text" class="ratio-display">-</div>
-    <button id="calc-ratio-btn" class="preset-btn" style="margin-top: 10px;">Calculate Ratio from W & H</button>
+    <div style="display: flex; gap: 10px; justify-content: center; margin-top: 10px;">
+      <button id="calc-ratio-btn" class="preset-btn">Calculate Ratio from W & H</button>
+      <button id="copy-btn" class="preset-btn">Copy Ratio</button>
+    </div>
   </div>
 
   <div class="presets">
@@ -161,10 +164,26 @@ const ratioWInput = document.getElementById('ratioW');
 const ratioHInput = document.getElementById('ratioH');
 const ratioText = document.getElementById('ratio-text');
 const calcRatioBtn = document.getElementById('calc-ratio-btn');
+const copyBtn = document.getElementById('copy-btn');
 const presetBtns = document.querySelectorAll('.preset-btn');
 
 function gcd(a, b) {
-  return b === 0 ? a : gcd(b, a % b);
+  if (isNaN(a) || isNaN(b) || a <= 0 || b <= 0) return 1;
+  const getDecimals = num => {
+    const str = num.toString();
+    const dotIdx = str.indexOf('.');
+    return dotIdx === -1 ? 0 : str.length - dotIdx - 1;
+  };
+  const maxDec = Math.min(Math.max(getDecimals(a), getDecimals(b)), 6);
+  const factor = Math.pow(10, maxDec);
+  let x = Math.round(a * factor);
+  let y = Math.round(b * factor);
+  while (y !== 0) {
+    const t = y;
+    y = x % y;
+    x = t;
+  }
+  return x / factor;
 }
 
 function updateFromDimensions() {
@@ -173,8 +192,8 @@ function updateFromDimensions() {
 
   if (w && h) {
     const common = gcd(w, h);
-    ratioWInput.value = w / common;
-    ratioHInput.value = h / common;
+    ratioWInput.value = Number((w / common).toFixed(4));
+    ratioHInput.value = Number((h / common).toFixed(4));
     updateRatioText(w, h);
   }
 }
@@ -204,7 +223,9 @@ function updateWidth() {
 function updateRatioText(w, h) {
   if (w && h) {
     const common = gcd(w, h);
-    ratioText.textContent = `${w / common}:${h / common}`;
+    const rw = Number((w / common).toFixed(4));
+    const rh = Number((h / common).toFixed(4));
+    ratioText.textContent = `${rw}:${rh}`;
   } else {
     ratioText.textContent = '-';
   }
@@ -227,12 +248,30 @@ ratioHInput.addEventListener('input', updateHeight);
 
 calcRatioBtn.addEventListener('click', updateFromDimensions);
 
+copyBtn.addEventListener('click', () => {
+  const text = ratioText.textContent;
+  if (text && text !== '-') {
+    navigator.clipboard.writeText(text).then(() => {
+      const originalText = copyBtn.textContent;
+      copyBtn.textContent = 'Copied!';
+      setTimeout(() => {
+        copyBtn.textContent = originalText;
+      }, 1500);
+    }).catch(err => {
+      console.error('Failed to copy text: ', err);
+    });
+  }
+});
+
 presetBtns.forEach(btn => {
-  btn.addEventListener('click', () => {
-    ratioWInput.value = btn.dataset.w;
-    ratioHInput.value = btn.dataset.h;
-    updateHeight();
-  });
+  // Only bind to elements that have data-w (actual preset buttons, not action buttons in the box)
+  if (btn.dataset.w) {
+    btn.addEventListener('click', () => {
+      ratioWInput.value = btn.dataset.w;
+      ratioHInput.value = btn.dataset.h;
+      updateHeight();
+    });
+  }
 });
 
 </script>
