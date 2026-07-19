@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>UUID Generator & Validator</title>
+<style>
+:root {
+  --bg: #0f1724;
+  --card: #0b1220;
+  --accent: #06b6d4;
+  --muted: #9aa8b2;
+  --glass: rgba(255, 255, 255, 0.03);
+}
+html, body {
+  min-height: 100%;
+  margin: 0;
+  font-family: Inter, system-ui, Segoe UI, Roboto, Arial;
+  background: linear-gradient(180deg, #041025 0%, #0b1730 100%);
+  color: #e6eef6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.app {
+  width: 700px;
+  max-width: 96%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 8px 30px rgba(2, 6, 23, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+h1 {
+  margin: 0;
+  font-size: 20px;
+}
+p.lead {
+  margin: 6px 0 18px;
+  color: var(--muted);
+  font-size: 13px;
+}
+label {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+input, select, textarea {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  background: var(--glass);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  color: inherit;
+  box-sizing: border-box;
+}
+textarea {
+  font-family: monospace;
+  font-size: 13px;
+  resize: vertical;
+}
+.back-link {
+  display: inline-block;
+  margin-bottom: 20px;
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 14px;
+}
+.back-link:hover {
+  text-decoration: underline;
+}
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  user-select: none;
+  cursor: pointer;
+}
+.checkbox-group input {
+  width: auto;
+  cursor: pointer;
+}
+.card {
+  background: var(--glass);
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+.actions {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+button {
+  background: linear-gradient(90deg, var(--accent), #3b82f6);
+  border: 0;
+  padding: 10px 16px;
+  font-weight: 600;
+  border-radius: 8px;
+  color: #042027;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+button:hover {
+  opacity: 0.9;
+}
+button.secondary {
+  background: var(--glass);
+  color: #e6eef6;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+button.secondary:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+.validation-result {
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  display: none;
+}
+.validation-result.valid {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  color: #34d399;
+}
+.validation-result.invalid {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #f87171;
+}
+.parser-details {
+  margin-top: 8px;
+  font-family: monospace;
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: 1fr !important;
+  }
+  .actions {
+    flex-direction: column !important;
+    gap: 10px;
+  }
+}
+</style>
+</head>
+<body>
+<div class="app" role="main">
+  <a href="../index.html" class="back-link">← Back to Home</a>
+  <h1>UUID Generator & Validator</h1>
+  <p class="lead">Generate, format, and validate universally unique identifiers (UUIDs).</p>
+
+  <div class="card">
+    <h3 style="margin-top: 0; margin-bottom: 12px; font-size: 15px;">Generate UUIDs</h3>
+    <div class="grid">
+      <div>
+        <label for="uuid-version">Version</label>
+        <select id="uuid-version">
+          <option value="4">v4 (Random)</option>
+          <option value="1">v1 (Time-based)</option>
+        </select>
+      </div>
+      <div>
+        <label for="uuid-count">Quantity</label>
+        <input type="number" id="uuid-count" value="5" min="1" max="500" />
+      </div>
+    </div>
+
+    <div class="grid" style="grid-template-columns: 1fr 1fr;">
+      <label class="checkbox-group">
+        <input type="checkbox" id="uuid-hyphens" checked />
+        <span>Include Hyphens</span>
+      </label>
+      <label class="checkbox-group">
+        <input type="checkbox" id="uuid-uppercase" />
+        <span>Uppercase</span>
+      </label>
+    </div>
+
+    <div style="height:10px"></div>
+
+    <div class="actions">
+      <button id="generate-btn">Generate</button>
+      <button id="copy-btn" class="secondary">Copy All</button>
+    </div>
+
+    <label for="output">Generated UUIDs</label>
+    <textarea id="output" rows="8" readonly placeholder="Click Generate to create UUIDs..."></textarea>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top: 0; margin-bottom: 12px; font-size: 15px;">Validate & Parse UUID</h3>
+    <label for="validate-input">Enter UUID to Validate</label>
+    <input type="text" id="validate-input" placeholder="e.g., f81d4fae-7dec-11d0-a765-00a0c91e6bf6" />
+
+    <div id="validation-box" class="validation-result"></div>
+    <div id="parser-info" class="parser-details" style="display: none;"></div>
+  </div>
+</div>
+
+<script>
+const uuidVersion = document.getElementById('uuid-version');
+const uuidCount = document.getElementById('uuid-count');
+const uuidHyphens = document.getElementById('uuid-hyphens');
+const uuidUppercase = document.getElementById('uuid-uppercase');
+const generateBtn = document.getElementById('generate-btn');
+const copyBtn = document.getElementById('copy-btn');
+const output = document.getElementById('output');
+
+const validateInput = document.getElementById('validate-input');
+const validationBox = document.getElementById('validation-box');
+const parserInfo = document.getElementById('parser-info');
+
+// Simple fast UUID v4 generator
+function generateV4() {
+  const arr = new Uint8Array(16);
+  crypto.getRandomValues(arr);
+
+  // Set version to 4
+  arr[6] = (arr[6] & 0x0f) | 0x40;
+  // Set variant to RFC4122
+  arr[8] = (arr[8] & 0x3f) | 0x80;
+
+  return arr;
+}
+
+// Simple fast UUID v1 generator using BigInt to handle the full 100-nanosecond Gregorian interval precision safely
+let lastV1Time = 0n;
+let lastV1ClockSeq = 0;
+let v1Node = null;
+
+function generateV1() {
+  // Epoch offset between UUID epoch (15 Oct 1582) and Unix epoch (1 Jan 1970)
+  // UUID epoch is 122192928000000000 100-nanosecond intervals before Unix epoch
+  const UUID_EPOCH_OFFSET = 122192928000000000n;
+
+  let nowMs = BigInt(Date.now());
+  if (nowMs <= lastV1Time) {
+    nowMs = lastV1Time + 1n;
+  }
+  lastV1Time = nowMs;
+
+  const intervals = (nowMs * 10000n) + UUID_EPOCH_OFFSET;
+
+  // Split intervals into high, mid, low
+  const time_low = Number(intervals & 0xffffffffn);
+  const time_mid = Number((intervals / 0x100000000n) & 0xffffn);
+  const time_hi_and_version = Number(((intervals / 0x1000000000000n) & 0x0fffn) | 0x1000n); // v1
+
+  if (!v1Node) {
+    v1Node = new Uint8Array(6);
+    crypto.getRandomValues(v1Node);
+    // Multicast bit set to 1 to show it's a random node ID, conforming to RFC 4122
+    v1Node[0] |= 0x01;
+  }
+
+  if (lastV1ClockSeq === 0) {
+    const seq = new Uint16Array(1);
+    crypto.getRandomValues(seq);
+    lastV1ClockSeq = seq[0] & 0x3fff; // 14 bits
+  } else {
+    lastV1ClockSeq = (lastV1ClockSeq + 1) & 0x3fff;
+  }
+
+  const clock_seq_low = lastV1ClockSeq & 0xff;
+  const clock_seq_hi_and_reserved = ((lastV1ClockSeq >> 8) & 0x3f) | 0x80;
+
+  const arr = new Uint8Array(16);
+  arr[0] = (time_low >> 24) & 0xff;
+  arr[1] = (time_low >> 16) & 0xff;
+  arr[2] = (time_low >> 8) & 0xff;
+  arr[3] = time_low & 0xff;
+
+  arr[4] = (time_mid >> 8) & 0xff;
+  arr[5] = time_mid & 0xff;
+
+  arr[6] = (time_hi_and_version >> 8) & 0xff;
+  arr[7] = time_hi_and_version & 0xff;
+
+  arr[8] = clock_seq_hi_and_reserved;
+  arr[9] = clock_seq_low;
+
+  for (let i = 0; i < 6; i++) {
+    arr[10 + i] = v1Node[i];
+  }
+
+  return arr;
+}
+
+function bytesToHex(arr) {
+  const hex = [];
+  for (let i = 0; i < arr.length; i++) {
+    hex.push(arr[i].toString(16).padStart(2, '0'));
+  }
+  return hex;
+}
+
+function formatUUID(bytes, useHyphens, uppercase) {
+  const hex = bytesToHex(bytes);
+  let str = '';
+  if (useHyphens) {
+    str = `${hex.slice(0, 4).join('')}-${hex.slice(4, 6).join('')}-${hex.slice(6, 8).join('')}-${hex.slice(8, 10).join('')}-${hex.slice(10, 16).join('')}`;
+  } else {
+    str = hex.join('');
+  }
+  return uppercase ? str.toUpperCase() : str.toLowerCase();
+}
+
+function handleGenerate() {
+  const version = uuidVersion.value;
+  let count = parseInt(uuidCount.value, 10);
+  if (isNaN(count) || count < 1) count = 1;
+  if (count > 500) count = 500;
+  uuidCount.value = count;
+
+  const useHyphens = uuidHyphens.checked;
+  const uppercase = uuidUppercase.checked;
+
+  const uuids = [];
+  for (let i = 0; i < count; i++) {
+    const bytes = version === '1' ? generateV1() : generateV4();
+    uuids.push(formatUUID(bytes, useHyphens, uppercase));
+  }
+
+  output.value = uuids.join('\n');
+}
+
+function handleCopy() {
+  if (output.value) {
+    navigator.clipboard.writeText(output.value).then(() => {
+      const originalText = copyBtn.textContent;
+      copyBtn.textContent = 'Copied!';
+      setTimeout(() => {
+        copyBtn.textContent = originalText;
+      }, 1500);
+    });
+  }
+}
+
+function handleValidate() {
+  const val = validateInput.value.trim();
+  if (!val) {
+    validationBox.style.display = 'none';
+    parserInfo.style.display = 'none';
+    return;
+  }
+
+  // Regex to match UUIDs with or without hyphens, optional braces
+  const uuidRegex = /^(?:\{)?([0-9a-fA-F]{8})(?:-)?([0-9a-fA-F]{4})(?:-)?([0-9a-fA-F]{4})(?:-)?([0-9a-fA-F]{4})(?:-)?([0-9a-fA-F]{12})(?:\})?$/;
+  const match = val.match(uuidRegex);
+
+  validationBox.style.display = 'block';
+
+  if (!match) {
+    validationBox.textContent = '❌ Invalid UUID format.';
+    validationBox.className = 'validation-result invalid';
+    parserInfo.style.display = 'none';
+    return;
+  }
+
+  // Extract blocks to rebuild standardized and parse version/variant
+  const b1 = match[1], b2 = match[2], b3 = match[3], b4 = match[4], b5 = match[5];
+  const cleanHex = b1 + b2 + b3 + b4 + b5;
+  const versionDigit = parseInt(cleanHex.charAt(12), 16);
+  const variantByte = parseInt(cleanHex.substring(16, 18), 16);
+
+  let variant = 'Unknown';
+  if ((variantByte & 0x80) === 0x00) variant = 'NCS backward compatible';
+  else if ((variantByte & 0xc0) === 0x80) variant = 'RFC 4122 (Standard)';
+  else if ((variantByte & 0xe0) === 0xc0) variant = 'Microsoft backward compatible';
+  else if ((variantByte & 0xe0) === 0xe0) variant = 'Reserved for future definition';
+
+  validationBox.textContent = `✓ Valid UUID (Version ${versionDigit})`;
+  validationBox.className = 'validation-result valid';
+
+  let timestampStr = 'N/A (Not v1)';
+  if (versionDigit === 1) {
+    // Reconstruct timestamp from v1 uuid blocks: time_low, time_mid, time_hi
+    const m_hi = b3.substring(1); // strip version digit
+    const m_mid = b2;
+    const m_low = b1;
+    const hexTime = m_hi + m_mid + m_low;
+    const intervals = parseInt(hexTime, 16);
+    // UUID epochs to Unix Epoch MS
+    const ms = Math.floor((intervals - 122192928000000000) / 10000);
+    try {
+      timestampStr = new Date(ms).toISOString();
+    } catch(e) {
+      timestampStr = 'Invalid timestamp inside v1 UUID';
+    }
+  }
+
+  parserInfo.style.display = 'block';
+  parserInfo.innerHTML = `
+    <strong>Normalized:</strong> ${b1}-${b2}-${b3}-${b4}-${b5}<br>
+    <strong>Version:</strong> ${versionDigit}<br>
+    <strong>Variant:</strong> ${variant}<br>
+    <strong>V1 Timestamp:</strong> ${timestampStr}
+  `;
+}
+
+generateBtn.addEventListener('click', handleGenerate);
+copyBtn.addEventListener('click', handleCopy);
+validateInput.addEventListener('input', handleValidate);
+
+// Initial run
+handleGenerate();
+</script>
+</body>
+</html>
