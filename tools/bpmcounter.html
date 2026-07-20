@@ -121,6 +121,9 @@ const resetBtn = document.getElementById('reset-btn');
 
 function handleTap() {
   const now = performance.now();
+  if (taps.length > 0 && (now - taps[taps.length - 1]) > 3000) {
+    taps = [];
+  }
   taps.push(now);
 
   if (taps.length > 10) {
