@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Text Diff Checker</title>
+<style>
+:root {
+  --bg: #0f1724;
+  --card: #0b1220;
+  --accent: #06b6d4;
+  --muted: #9aa8b2;
+  --glass: rgba(255, 255, 255, 0.03);
+  --diff-add: rgba(16, 185, 129, 0.2);
+  --diff-add-border: rgba(16, 185, 129, 0.4);
+  --diff-add-text: #34d399;
+  --diff-remove: rgba(239, 68, 68, 0.2);
+  --diff-remove-border: rgba(239, 68, 68, 0.4);
+  --diff-remove-text: #f87171;
+}
+html, body {
+  min-height: 100%;
+  margin: 0;
+  font-family: Inter, system-ui, Segoe UI, Roboto, Arial;
+  background: linear-gradient(180deg, #041025 0%, #0b1730 100%);
+  color: #e6eef6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.app {
+  width: 1000px;
+  max-width: 96%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 8px 30px rgba(2, 6, 23, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  box-sizing: border-box;
+}
+h1 {
+  margin: 0;
+  font-size: 20px;
+}
+p.lead {
+  margin: 6px 0 18px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.back-link {
+  display: inline-block;
+  margin-bottom: 20px;
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 14px;
+}
+.back-link:hover {
+  text-decoration: underline;
+}
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+label {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+textarea {
+  width: 100%;
+  min-height: 150px;
+  padding: 10px;
+  border-radius: 8px;
+  background: var(--glass);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  color: inherit;
+  font-family: monospace;
+  font-size: 13px;
+  resize: vertical;
+  box-sizing: border-box;
+}
+.controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.btn-group {
+  display: flex;
+  gap: 10px;
+}
+button {
+  background: linear-gradient(90deg, var(--accent), #3b82f6);
+  border: 0;
+  padding: 10px 16px;
+  font-weight: 600;
+  border-radius: 8px;
+  color: #042027;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+button:hover {
+  opacity: 0.9;
+}
+button.secondary {
+  background: var(--glass);
+  color: #e6eef6;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+button.secondary:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+button.active {
+  background: var(--accent);
+  color: #042027;
+}
+.diff-viewer {
+  background: #070d19;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  overflow-x: auto;
+  font-family: monospace;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.diff-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-width: 600px;
+}
+.diff-pane {
+  padding: 10px 0;
+}
+.diff-pane:first-child {
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+}
+.diff-line {
+  display: flex;
+  min-height: 1.5em;
+  padding: 0 10px;
+}
+.line-num {
+  width: 40px;
+  color: var(--muted);
+  text-align: right;
+  padding-right: 10px;
+  user-select: none;
+  opacity: 0.5;
+}
+.line-content {
+  flex: 1;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+.added {
+  background: var(--diff-add);
+  border-left: 3px solid var(--diff-add-border);
+}
+.added .line-content {
+  color: var(--diff-add-text);
+}
+.removed {
+  background: var(--diff-remove);
+  border-left: 3px solid var(--diff-remove-border);
+}
+.removed .line-content {
+  color: var(--diff-remove-text);
+}
+.empty-line {
+  background: rgba(255, 255, 255, 0.01);
+}
+.diff-unified {
+  padding: 10px 0;
+}
+
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: 1fr !important;
+  }
+  .controls {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  .btn-group {
+    flex-direction: column !important;
+  }
+  .diff-split {
+    grid-template-columns: 1fr !important;
+  }
+  .diff-pane:first-child {
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+}
+</style>
+</head>
+<body>
+<div class="app" role="main">
+  <a href="../index.html" class="back-link">← Back to Home</a>
+  <h1>Text Diff Checker</h1>
+  <p class="lead">Compare two texts side-by-side or inline with visual highlights.</p>
+
+  <div class="grid">
+    <div>
+      <label for="text-original">Original Text</label>
+      <textarea id="text-original" placeholder="Paste your original text here..."></textarea>
+    </div>
+    <div>
+      <label for="text-modified">Modified Text</label>
+      <textarea id="text-modified" placeholder="Paste your modified text here..."></textarea>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div class="btn-group">
+      <button id="compare-btn">Compare Texts</button>
+      <button id="clear-btn" class="secondary">Clear All</button>
+    </div>
+    <div class="btn-group">
+      <button id="view-split" class="active secondary">Side-by-Side</button>
+      <button id="view-unified" class="secondary">Inline</button>
+    </div>
+  </div>
+
+  <div class="diff-viewer" id="diff-viewer" style="display: none;">
+    <!-- Rendered Diff Output -->
+  </div>
+</div>
+
+<script>
+const originalTextEl = document.getElementById('text-original');
+const modifiedTextEl = document.getElementById('text-modified');
+const compareBtn = document.getElementById('compare-btn');
+const clearBtn = document.getElementById('clear-btn');
+const viewSplitBtn = document.getElementById('view-split');
+const viewUnifiedBtn = document.getElementById('view-unified');
+const diffViewer = document.getElementById('diff-viewer');
+
+let currentViewMode = 'split'; // 'split' or 'unified'
+let lastDiff = null;
+
+function computeDiff(originalLines, modifiedLines) {
+  const n = originalLines.length;
+  const m = modifiedLines.length;
+
+  // LCS DP table
+  const dp = Array.from({ length: n + 1 }, () => Array(m + 1).fill(0));
+  for (let i = 1; i <= n; i++) {
+    for (let j = 1; j <= m; j++) {
+      if (originalLines[i - 1] === modifiedLines[j - 1]) {
+        dp[i][j] = dp[i - 1][j - 1] + 1;
+      } else {
+        dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+      }
+    }
+  }
+
+  // Backtrack to build diff
+  let i = n, j = m;
+  const diff = [];
+  while (i > 0 || j > 0) {
+    if (i > 0 && j > 0 && originalLines[i - 1] === modifiedLines[j - 1]) {
+      diff.unshift({ type: 'equal', value: originalLines[i - 1], originalLineNum: i, modifiedLineNum: j });
+      i--;
+      j--;
+    } else if (j > 0 && (i === 0 || dp[i][j - 1] >= dp[i - 1][j])) {
+      diff.unshift({ type: 'added', value: modifiedLines[j - 1], modifiedLineNum: j });
+      j--;
+    } else {
+      diff.unshift({ type: 'removed', value: originalLines[i - 1], originalLineNum: i });
+      i--;
+    }
+  }
+  return diff;
+}
+
+function renderDiff() {
+  if (!lastDiff) return;
+
+  diffViewer.style.display = 'block';
+  diffViewer.innerHTML = '';
+
+  if (currentViewMode === 'split') {
+    const splitContainer = document.createElement('div');
+    splitContainer.className = 'diff-split';
+
+    const leftPane = document.createElement('div');
+    leftPane.className = 'diff-pane';
+    const rightPane = document.createElement('div');
+    rightPane.className = 'diff-pane';
+
+    // Align lines side-by-side using placeholders
+    let leftLineNum = 1;
+    let rightLineNum = 1;
+
+    // We can group consecutive removes and adds to render them next to each other
+    let idx = 0;
+    while (idx < lastDiff.length) {
+      const item = lastDiff[idx];
+
+      if (item.type === 'equal') {
+        // Equal line on both sides
+        leftPane.appendChild(createLineElement(leftLineNum++, item.value, 'equal', ' '));
+        rightPane.appendChild(createLineElement(rightLineNum++, item.value, 'equal', ' '));
+        idx++;
+      } else {
+        // Collect consecutive removes and adds
+        const removes = [];
+        const adds = [];
+
+        while (idx < lastDiff.length && lastDiff[idx].type === 'removed') {
+          removes.push(lastDiff[idx++]);
+        }
+        while (idx < lastDiff.length && lastDiff[idx].type === 'added') {
+          adds.push(lastDiff[idx++]);
+        }
+
+        const maxCount = Math.max(removes.length, adds.length);
+        for (let k = 0; k < maxCount; k++) {
+          if (k < removes.length) {
+            leftPane.appendChild(createLineElement(leftLineNum++, removes[k].value, 'removed', '-'));
+          } else {
+            leftPane.appendChild(createEmptyLineElement());
+          }
+
+          if (k < adds.length) {
+            rightPane.appendChild(createLineElement(rightLineNum++, adds[k].value, 'added', '+'));
+          } else {
+            rightPane.appendChild(createEmptyLineElement());
+          }
+        }
+      }
+    }
+
+    splitContainer.appendChild(leftPane);
+    splitContainer.appendChild(rightPane);
+    diffViewer.appendChild(splitContainer);
+  } else {
+    // Unified view
+    const unifiedContainer = document.createElement('div');
+    unifiedContainer.className = 'diff-unified';
+
+    let leftLineNum = 1;
+    let rightLineNum = 1;
+
+    lastDiff.forEach(item => {
+      if (item.type === 'equal') {
+        unifiedContainer.appendChild(createUnifiedLineElement(leftLineNum++, rightLineNum++, item.value, 'equal', ' '));
+      } else if (item.type === 'removed') {
+        unifiedContainer.appendChild(createUnifiedLineElement(leftLineNum++, '', item.value, 'removed', '-'));
+      } else if (item.type === 'added') {
+        unifiedContainer.appendChild(createUnifiedLineElement('', rightLineNum++, item.value, 'added', '+'));
+      }
+    });
+
+    diffViewer.appendChild(unifiedContainer);
+  }
+}
+
+function createLineElement(lineNum, text, type, prefix) {
+  const line = document.createElement('div');
+  line.className = `diff-line ${type}`;
+
+  const numSpan = document.createElement('span');
+  numSpan.className = 'line-num';
+  numSpan.textContent = lineNum;
+
+  const contentSpan = document.createElement('span');
+  contentSpan.className = 'line-content';
+  contentSpan.textContent = prefix + ' ' + text;
+
+  line.appendChild(numSpan);
+  line.appendChild(contentSpan);
+  return line;
+}
+
+function createEmptyLineElement() {
+  const line = document.createElement('div');
+  line.className = 'diff-line empty-line';
+
+  const numSpan = document.createElement('span');
+  numSpan.className = 'line-num';
+  numSpan.textContent = '';
+
+  const contentSpan = document.createElement('span');
+  contentSpan.className = 'line-content';
+  contentSpan.textContent = ' ';
+
+  line.appendChild(numSpan);
+  line.appendChild(contentSpan);
+  return line;
+}
+
+function createUnifiedLineElement(leftNum, rightNum, text, type, prefix) {
+  const line = document.createElement('div');
+  line.className = `diff-line ${type}`;
+
+  const leftNumSpan = document.createElement('span');
+  leftNumSpan.className = 'line-num';
+  leftNumSpan.textContent = leftNum;
+
+  const rightNumSpan = document.createElement('span');
+  rightNumSpan.className = 'line-num';
+  rightNumSpan.textContent = rightNum;
+
+  const contentSpan = document.createElement('span');
+  contentSpan.className = 'line-content';
+  contentSpan.textContent = prefix + ' ' + text;
+
+  line.appendChild(leftNumSpan);
+  line.appendChild(rightNumSpan);
+  line.appendChild(contentSpan);
+  return line;
+}
+
+compareBtn.addEventListener('click', () => {
+  const originalLines = originalTextEl.value.split('\n');
+  const modifiedLines = modifiedTextEl.value.split('\n');
+
+  lastDiff = computeDiff(originalLines, modifiedLines);
+  renderDiff();
+});
+
+clearBtn.addEventListener('click', () => {
+  originalTextEl.value = '';
+  modifiedTextEl.value = '';
+  lastDiff = null;
+  diffViewer.innerHTML = '';
+  diffViewer.style.display = 'none';
+});
+
+viewSplitBtn.addEventListener('click', () => {
+  currentViewMode = 'split';
+  viewSplitBtn.classList.add('active');
+  viewUnifiedBtn.classList.remove('active');
+  renderDiff();
+});
+
+viewUnifiedBtn.addEventListener('click', () => {
+  currentViewMode = 'unified';
+  viewUnifiedBtn.classList.add('active');
+  viewSplitBtn.classList.remove('active');
+  renderDiff();
+});
+</script>
+</body>
+</html>
