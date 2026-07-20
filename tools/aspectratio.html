@@ -139,6 +139,11 @@ input, select {
     </div>
   </div>
 
+  <div style="margin-bottom: 20px; display: flex; align-items: center; gap: 8px; font-size: 14px;">
+    <input type="checkbox" id="lockRatio" checked style="width: auto; cursor: pointer;" />
+    <label for="lockRatio" style="display: inline; margin-bottom: 0; cursor: pointer; user-select: none;">Lock Aspect Ratio</label>
+  </div>
+
   <div class="result-box">
     <label>Calculated Ratio</label>
     <div id="ratio-text" class="ratio-display">-</div>
@@ -198,7 +203,10 @@ function updateFromDimensions() {
   }
 }
 
+const lockRatioCheckbox = document.getElementById('lockRatio');
+
 function updateHeight() {
+  if (!lockRatioCheckbox.checked) return;
   const w = parseFloat(widthInput.value);
   const rw = parseFloat(ratioWInput.value);
   const rh = parseFloat(ratioHInput.value);
@@ -210,6 +218,7 @@ function updateHeight() {
 }
 
 function updateWidth() {
+  if (!lockRatioCheckbox.checked) return;
   const h = parseFloat(heightInput.value);
   const rw = parseFloat(ratioWInput.value);
   const rh = parseFloat(ratioHInput.value);
@@ -233,18 +242,41 @@ function updateRatioText(w, h) {
 
 widthInput.addEventListener('input', (e) => {
   if (document.activeElement === widthInput) {
-    updateHeight();
+    if (lockRatioCheckbox.checked) {
+      updateHeight();
+    } else {
+      updateRatioText(parseFloat(widthInput.value), parseFloat(heightInput.value));
+    }
   }
 });
 
 heightInput.addEventListener('input', (e) => {
   if (document.activeElement === heightInput) {
-    updateWidth();
+    if (lockRatioCheckbox.checked) {
+      updateWidth();
+    } else {
+      updateRatioText(parseFloat(widthInput.value), parseFloat(heightInput.value));
+    }
   }
 });
 
-ratioWInput.addEventListener('input', updateHeight);
-ratioHInput.addEventListener('input', updateHeight);
+ratioWInput.addEventListener('input', () => {
+  if (lockRatioCheckbox.checked) {
+    updateHeight();
+  }
+});
+
+ratioHInput.addEventListener('input', () => {
+  if (lockRatioCheckbox.checked) {
+    updateHeight();
+  }
+});
+
+lockRatioCheckbox.addEventListener('change', () => {
+  if (lockRatioCheckbox.checked) {
+    updateHeight();
+  }
+});
 
 calcRatioBtn.addEventListener('click', updateFromDimensions);
 
