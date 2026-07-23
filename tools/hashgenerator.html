@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Hash Generator</title>
+<style>
+:root {
+  --bg: #0f1724;
+  --card: #0b1220;
+  --accent: #06b6d4;
+  --muted: #9aa8b2;
+  --glass: rgba(255, 255, 255, 0.03);
+}
+html, body {
+  min-height: 100%;
+  margin: 0;
+  font-family: Inter, system-ui, Segoe UI, Roboto, Arial;
+  background: linear-gradient(180deg, #041025 0%, #0b1730 100%);
+  color: #e6eef6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.app {
+  width: 800px;
+  max-width: 96%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 8px 30px rgba(2, 6, 23, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+h1 {
+  margin: 0;
+  font-size: 24px;
+}
+p.lead {
+  margin: 6px 0 18px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.back-link {
+  display: inline-block;
+  margin-bottom: 20px;
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 14px;
+}
+.back-link:hover {
+  text-decoration: underline;
+}
+.form-group {
+  margin-bottom: 15px;
+}
+label {
+  display: block;
+  font-size: 13px;
+  margin-bottom: 6px;
+  color: var(--muted);
+}
+textarea {
+  width: 100%;
+  min-height: 100px;
+  padding: 10px;
+  border-radius: 8px;
+  background: var(--glass);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  color: inherit;
+  font-family: monospace;
+  font-size: 14px;
+  resize: vertical;
+  box-sizing: border-box;
+}
+textarea:focus, select:focus, input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+select, input[type="text"] {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  background: var(--glass);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  color: inherit;
+  box-sizing: border-box;
+}
+.options-bar {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  user-select: none;
+}
+.checkbox-group input {
+  cursor: pointer;
+}
+.hash-results {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+.hash-row {
+  background: var(--glass);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  padding: 12px 15px;
+}
+.hash-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+.hash-name {
+  font-weight: 600;
+  color: var(--accent);
+  font-size: 14px;
+}
+.hash-actions {
+  display: flex;
+  gap: 10px;
+}
+.copy-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--muted);
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+.copy-btn:hover {
+  background: var(--accent);
+  color: #042027;
+  border-color: var(--accent);
+}
+.hash-val {
+  font-family: monospace;
+  font-size: 13px;
+  word-break: break-all;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  min-height: 1.5em;
+  display: block;
+}
+.error-msg {
+  color: #ff4b2b;
+  font-size: 13px;
+  margin-top: 5px;
+}
+
+@media (max-width: 768px) {
+  .app {
+    padding: 15px;
+  }
+  .options-bar {
+    flex-direction: column !important;
+    gap: 10px;
+  }
+}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js" integrity="sha512-E8QSvWZ0eCLGk4km3hxSsNmGWbLtSCSUcewDQPQWZF6pEU8GlT8a5fF32wOl1i8ftdMhssTrF/OhyGWwonTcXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</head>
+<body>
+<div class="app" role="main">
+  <a href="../index.html" class="back-link">← Back to Home</a>
+  <h1>Hash Generator</h1>
+  <p class="lead">Generate cryptographic hashes (MD5, SHA-1, SHA-256, etc.) in real-time.</p>
+
+  <div class="form-group">
+    <label for="input-format">Input Format</label>
+    <select id="input-format">
+      <option value="text">Plain Text (UTF-8)</option>
+      <option value="hex">HEX Encoded</option>
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label for="hash-input">Input Data</label>
+    <textarea id="hash-input" placeholder="Type or paste text to generate hashes..."></textarea>
+    <div id="input-error" class="error-msg" style="display: none;"></div>
+  </div>
+
+  <div class="options-bar">
+    <label class="checkbox-group">
+      <input type="checkbox" id="uppercase-toggle" />
+      <span>Uppercase Hashes</span>
+    </label>
+  </div>
+
+  <div class="hash-results">
+    <!-- MD5 -->
+    <div class="hash-row">
+      <div class="hash-header">
+        <span class="hash-name">MD5</span>
+        <button class="copy-btn" data-target="md5-val">Copy</button>
+      </div>
+      <span class="hash-val" id="md5-val"></span>
+    </div>
+
+    <!-- SHA-1 -->
+    <div class="hash-row">
+      <div class="hash-header">
+        <span class="hash-name">SHA-1</span>
+        <button class="copy-btn" data-target="sha1-val">Copy</button>
+      </div>
+      <span class="hash-val" id="sha1-val"></span>
+    </div>
+
+    <!-- SHA-224 -->
+    <div class="hash-row">
+      <div class="hash-header">
+        <span class="hash-name">SHA-224</span>
+        <button class="copy-btn" data-target="sha224-val">Copy</button>
+      </div>
+      <span class="hash-val" id="sha224-val"></span>
+    </div>
+
+    <!-- SHA-256 -->
+    <div class="hash-row">
+      <div class="hash-header">
+        <span class="hash-name">SHA-256</span>
+        <button class="copy-btn" data-target="sha256-val">Copy</button>
+      </div>
+      <span class="hash-val" id="sha256-val"></span>
+    </div>
+
+    <!-- SHA-384 -->
+    <div class="hash-row">
+      <div class="hash-header">
+        <span class="hash-name">SHA-384</span>
+        <button class="copy-btn" data-target="sha384-val">Copy</button>
+      </div>
+      <span class="hash-val" id="sha384-val"></span>
+    </div>
+
+    <!-- SHA-512 -->
+    <div class="hash-row">
+      <div class="hash-header">
+        <span class="hash-name">SHA-512</span>
+        <button class="copy-btn" data-target="sha512-val">Copy</button>
+      </div>
+      <span class="hash-val" id="sha512-val"></span>
+    </div>
+
+    <!-- SHA-3 -->
+    <div class="hash-row">
+      <div class="hash-header">
+        <span class="hash-name">SHA-3 (512-bit)</span>
+        <button class="copy-btn" data-target="sha3-val">Copy</button>
+      </div>
+      <span class="hash-val" id="sha3-val"></span>
+    </div>
+  </div>
+</div>
+
+<script>
+const hashInput = document.getElementById('hash-input');
+const inputFormat = document.getElementById('input-format');
+const uppercaseToggle = document.getElementById('uppercase-toggle');
+const inputError = document.getElementById('input-error');
+
+const md5Val = document.getElementById('md5-val');
+const sha1Val = document.getElementById('sha1-val');
+const sha224Val = document.getElementById('sha224-val');
+const sha256Val = document.getElementById('sha256-val');
+const sha384Val = document.getElementById('sha384-val');
+const sha512Val = document.getElementById('sha512-val');
+const sha3Val = document.getElementById('sha3-val');
+
+function calculateHashes() {
+  const val = hashInput.value;
+  inputError.style.display = 'none';
+
+  if (!val) {
+    clearAllHashes();
+    return;
+  }
+
+  let words;
+  if (inputFormat.value === 'hex') {
+    // Validate HEX
+    const hexClean = val.replace(/\s+/g, '');
+    if (!/^[0-9a-fA-F]*$/.test(hexClean)) {
+      inputError.textContent = 'Invalid HEX input characters.';
+      inputError.style.display = 'block';
+      clearAllHashes();
+      return;
+    }
+    if (hexClean.length % 2 !== 0) {
+      inputError.textContent = 'HEX input length must be even (currently odd).';
+      inputError.style.display = 'block';
+      clearAllHashes();
+      return;
+    }
+    try {
+      words = CryptoJS.enc.Hex.parse(hexClean);
+    } catch (e) {
+      inputError.textContent = 'Error parsing HEX input: ' + e.message;
+      inputError.style.display = 'block';
+      clearAllHashes();
+      return;
+    }
+  } else {
+    words = CryptoJS.enc.Utf8.parse(val);
+  }
+
+  try {
+    const md5 = CryptoJS.MD5(words).toString();
+    const sha1 = CryptoJS.SHA1(words).toString();
+    const sha224 = CryptoJS.SHA224(words).toString();
+    const sha256 = CryptoJS.SHA256(words).toString();
+    const sha384 = CryptoJS.SHA384(words).toString();
+    const sha512 = CryptoJS.SHA512(words).toString();
+    const sha3 = CryptoJS.SHA3(words, { outputLength: 512 }).toString();
+
+    const upper = uppercaseToggle.checked;
+
+    md5Val.textContent = upper ? md5.toUpperCase() : md5.toLowerCase();
+    sha1Val.textContent = upper ? sha1.toUpperCase() : sha1.toLowerCase();
+    sha224Val.textContent = upper ? sha224.toUpperCase() : sha224.toLowerCase();
+    sha256Val.textContent = upper ? sha256.toUpperCase() : sha256.toLowerCase();
+    sha384Val.textContent = upper ? sha384.toUpperCase() : sha384.toLowerCase();
+    sha512Val.textContent = upper ? sha512.toUpperCase() : sha512.toLowerCase();
+    sha3Val.textContent = upper ? sha3.toUpperCase() : sha3.toLowerCase();
+  } catch (e) {
+    inputError.textContent = 'Error hashing data: ' + e.message;
+    inputError.style.display = 'block';
+    clearAllHashes();
+  }
+}
+
+function clearAllHashes() {
+  md5Val.textContent = '';
+  sha1Val.textContent = '';
+  sha224Val.textContent = '';
+  sha256Val.textContent = '';
+  sha384Val.textContent = '';
+  sha512Val.textContent = '';
+  sha3Val.textContent = '';
+}
+
+// Attach Copy Event Listeners
+document.querySelectorAll('.copy-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const targetId = btn.dataset.target;
+    const targetEl = document.getElementById(targetId);
+    if (targetEl && targetEl.textContent) {
+      navigator.clipboard.writeText(targetEl.textContent).then(() => {
+        const originalText = btn.textContent;
+        btn.textContent = 'Copied!';
+        btn.style.background = 'var(--accent)';
+        btn.style.color = '#042027';
+        setTimeout(() => {
+          btn.textContent = originalText;
+          btn.style.background = '';
+          btn.style.color = '';
+        }, 1500);
+      });
+    }
+  });
+});
+
+hashInput.addEventListener('input', calculateHashes);
+inputFormat.addEventListener('change', calculateHashes);
+uppercaseToggle.addEventListener('change', calculateHashes);
+
+// Initial run
+calculateHashes();
+</script>
+</body>
+</html>
