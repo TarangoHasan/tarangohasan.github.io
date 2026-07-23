@@ -416,6 +416,12 @@ function updateTimer() {
     timerRunning = false;
     timerStartBtn.disabled = false;
     timerPauseBtn.disabled = true;
+
+    // Enable timer inputs when timer finishes
+    timerHours.disabled = false;
+    timerMinutes.disabled = false;
+    timerSeconds.disabled = false;
+
     // Play chime
     try {
       const ctx = new (window.AudioContext || window.webkitAudioContext)();
