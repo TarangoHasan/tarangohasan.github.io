@@ -95,6 +95,7 @@ button {
   <div style="height:10px"></div>
   <button id="generateBtn">Generate QR Code</button>
   <div id="qrcode"></div>
+  <div id="errors" style="margin-top:8px; color: #ff4b2b;"></div>
   <div style="height:10px"></div>
   <button id="downloadBtn" style="display:none;">Download QR Code</button>
 </div>
@@ -103,19 +104,41 @@ const generateBtn = document.getElementById('generateBtn');
 const textInput = document.getElementById('text');
 const qrcodeContainer = document.getElementById('qrcode');
 const downloadBtn = document.getElementById('downloadBtn');
+const errors = document.getElementById('errors');
 
 let qrCodeCanvas = null;
 
+function clearQR() {
+  qrcodeContainer.innerHTML = '';
+  qrCodeCanvas = null;
+  downloadBtn.style.display = 'none';
+}
+
 generateBtn.addEventListener('click', () => {
-  const text = textInput.value;
+  const text = textInput.value.trim();
+  errors.textContent = '';
   if (text) {
     QRCode.toCanvas(text, { errorCorrectionLevel: 'H' }, (err, canvas) => {
-      if (err) throw err;
+      if (err) {
+        errors.textContent = 'Error generating QR Code: ' + err.message;
+        clearQR();
+        return;
+      }
       qrcodeContainer.innerHTML = '';
       qrcodeContainer.appendChild(canvas);
       qrCodeCanvas = canvas;
       downloadBtn.style.display = 'block';
     });
+  } else {
+    errors.textContent = 'Please enter text/URL to generate a QR Code.';
+    clearQR();
+  }
+});
+
+textInput.addEventListener('input', () => {
+  if (!textInput.value.trim()) {
+    errors.textContent = '';
+    clearQR();
   }
 });
 
