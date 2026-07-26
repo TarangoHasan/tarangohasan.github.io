@@ -12,6 +12,9 @@
   --muted: #9aa8b2;
   --glass: rgba(255, 255, 255, 0.03);
 }
+* {
+  box-sizing: border-box;
+}
 html, body {
   min-height: 100%;
   margin: 0;
@@ -28,7 +31,7 @@ html, body {
   max-width: 96%;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
   border-radius: 12px;
-  padding: 20px;
+  padding: 24px;
   box-shadow: 0 8px 30px rgba(2, 6, 23, 0.6);
   border: 1px solid rgba(255, 255, 255, 0.03);
 }
@@ -43,25 +46,42 @@ p.lead {
 }
 textarea {
   width: 100%;
-  min-height: 200px;
-  padding: 8px;
+  min-height: 250px;
+  padding: 12px;
   border-radius: 8px;
   background: var(--glass);
   border: 1px solid rgba(255, 255, 255, 0.03);
   color: inherit;
+  font-family: monospace;
+  font-size: 14px;
   resize: vertical;
   box-sizing: border-box;
+}
+textarea:focus {
+  outline: none;
+  border-color: var(--accent);
 }
 button {
   background: linear-gradient(90deg, var(--accent), #3b82f6);
   border: 0;
-  padding: 10px 14px;
+  padding: 10px 16px;
   font-weight: 600;
   border-radius: 8px;
   color: #042027;
   cursor: pointer;
+  transition: opacity 0.2s;
 }
-
+button:hover {
+  opacity: 0.9;
+}
+button.secondary {
+  background: var(--glass);
+  color: #e6eef6;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+button.secondary:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
 .back-link {
   display: inline-block;
   margin-bottom: 20px;
@@ -72,10 +92,36 @@ button {
 .back-link:hover {
   text-decoration: underline;
 }
+.flex-row {
+  display: flex;
+  gap: 10px;
+}
+.validation-result {
+  margin-top: 15px;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  display: none;
+}
+.validation-result.valid {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  display: block;
+}
+.validation-result.invalid {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #f87171;
+  display: block;
+}
 
 @media (max-width: 768px) {
   .flex-row {
     flex-direction: column !important;
+  }
+  button {
+    width: 100%;
   }
 }
 </style>
@@ -84,15 +130,15 @@ button {
 <div class="app" role="main">
   <a href="../index.html" class="back-link">← Back to Home</a>
   <h1>JSON Formatter/Validator</h1>
-  <p class="lead">Paste your JSON to format and validate it.</p>
-  <textarea id="json-input" placeholder="Enter JSON here..."></textarea>
+  <p class="lead">Paste your JSON data to automatically format, validate, and minify it.</p>
+  <textarea id="json-input" placeholder="Paste or type your JSON here..."></textarea>
   <div style="height:10px"></div>
-  <div class="flex-row" style="display:flex; gap:10px;">
+  <div class="flex-row">
     <button id="formatBtn">Format JSON</button>
-    <button id="minifyBtn">Minify JSON</button>
-    <button id="copyBtn">Copy JSON</button>
+    <button id="minifyBtn" class="secondary">Minify JSON</button>
+    <button id="copyBtn" class="secondary">Copy JSON</button>
   </div>
-  <div id="errors" style="margin-top:8px"></div>
+  <div id="errors" class="validation-result"></div>
 </div>
 <script>
 const jsonInput = document.getElementById('json-input');
@@ -101,23 +147,47 @@ const minifyBtn = document.getElementById('minifyBtn');
 const copyBtn = document.getElementById('copyBtn');
 const errors = document.getElementById('errors');
 
+function showResult(text, isValid) {
+  errors.textContent = text;
+  if (isValid) {
+    errors.className = 'validation-result valid';
+  } else {
+    errors.className = 'validation-result invalid';
+  }
+}
+
+function hideResult() {
+  errors.style.display = 'none';
+  errors.className = 'validation-result';
+}
+
 formatBtn.addEventListener('click', () => {
+  const val = jsonInput.value.trim();
+  if (!val) {
+    showResult('Please enter JSON text to format.', false);
+    return;
+  }
   try {
-    const jsonObj = JSON.parse(jsonInput.value);
+    const jsonObj = JSON.parse(val);
     jsonInput.value = JSON.stringify(jsonObj, null, 2);
-    errors.textContent = 'Valid JSON!';
+    showResult('✓ Valid JSON - Formatted successfully!', true);
   } catch (e) {
-    errors.textContent = 'Error: ' + e.message;
+    showResult('❌ Invalid JSON: ' + e.message, false);
   }
 });
 
 minifyBtn.addEventListener('click', () => {
+  const val = jsonInput.value.trim();
+  if (!val) {
+    showResult('Please enter JSON text to minify.', false);
+    return;
+  }
   try {
-    const jsonObj = JSON.parse(jsonInput.value);
+    const jsonObj = JSON.parse(val);
     jsonInput.value = JSON.stringify(jsonObj);
-    errors.textContent = 'Minified JSON!';
+    showResult('✓ Valid JSON - Minified successfully!', true);
   } catch (e) {
-    errors.textContent = 'Error: ' + e.message;
+    showResult('❌ Invalid JSON: ' + e.message, false);
   }
 });
 
@@ -127,6 +197,12 @@ copyBtn.addEventListener('click', () => {
     const originalText = copyBtn.textContent;
     copyBtn.textContent = "Copied!";
     setTimeout(() => copyBtn.textContent = originalText, 2000);
+  }
+});
+
+jsonInput.addEventListener('input', () => {
+  if (!jsonInput.value.trim()) {
+    hideResult();
   }
 });
 </script>
