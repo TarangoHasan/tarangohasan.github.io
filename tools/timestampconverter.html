@@ -12,6 +12,9 @@
   --muted: #9aa8b2;
   --glass: rgba(255, 255, 255, 0.03);
 }
+* {
+  box-sizing: border-box;
+}
 html, body {
   min-height: 100%;
   margin: 0;
@@ -24,11 +27,11 @@ html, body {
   padding: 24px;
 }
 .app {
-  width: 600px;
+  width: 650px;
   max-width: 96%;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
   border-radius: 12px;
-  padding: 20px;
+  padding: 24px;
   box-shadow: 0 8px 30px rgba(2, 6, 23, 0.6);
   border: 1px solid rgba(255, 255, 255, 0.03);
 }
@@ -41,7 +44,7 @@ p.lead {
   color: var(--muted);
   font-size: 13px;
 }
-input {
+input, select {
   width: 100%;
   padding: 10px;
   border-radius: 8px;
@@ -49,13 +52,17 @@ input {
   border: 1px solid rgba(255, 255, 255, 0.03);
   color: inherit;
   margin-bottom: 15px;
-  box-sizing: border-box;
+}
+input:focus, select:focus {
+  outline: none;
+  border-color: var(--accent);
 }
 label {
   display: block;
   font-size: 12px;
   color: var(--muted);
   margin-bottom: 4px;
+  font-weight: 500;
 }
 .back-link {
   display: inline-block;
@@ -69,15 +76,14 @@ label {
 }
 .card {
   background: var(--glass);
-  padding: 15px;
+  padding: 18px;
   border-radius: 8px;
   margin-bottom: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.02);
 }
-
-@media (max-width: 768px) {
-  .flex-row {
-    flex-direction: column !important;
-  }
+.flex-row {
+  display: flex;
+  gap: 10px;
 }
 button {
   background: linear-gradient(90deg, var(--accent), #3b82f6);
@@ -87,6 +93,27 @@ button {
   border-radius: 8px;
   color: #042027;
   cursor: pointer;
+  transition: opacity 0.2s;
+}
+button:hover {
+  opacity: 0.9;
+}
+button.secondary {
+  background: var(--glass);
+  color: #e6eef6;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+button.secondary:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+@media (max-width: 768px) {
+  .flex-row {
+    flex-direction: column !important;
+  }
+  button {
+    width: 100%;
+  }
 }
 </style>
 </head>
@@ -94,37 +121,150 @@ button {
 <div class="app" role="main">
   <a href="../index.html" class="back-link">← Back to Home</a>
   <h1>Unix Timestamp Converter</h1>
-  <p class="lead">Convert between Unix timestamps and human-readable dates.</p>
+  <p class="lead">Convert between Unix timestamps and human-readable dates with microsecond/nanosecond precision.</p>
+
+  <!-- Live Clock Card -->
+  <div class="card" style="text-align: center;">
+    <label>Live Unix Timestamp Clock (UTC)</label>
+    <div style="font-size: 26px; font-weight: bold; font-family: monospace; color: var(--accent); margin: 8px 0;" id="live-clock-val">0</div>
+    <div style="font-size: 12px; color: var(--muted); margin-bottom: 12px;" id="live-clock-utc">YYYY-MM-DD HH:mm:ss UTC</div>
+    <div class="flex-row" style="justify-content: center; max-width: 320px; margin: 0 auto;">
+      <button id="clock-toggle-btn" class="secondary" style="height: 38px; font-size: 12px;">Pause Clock</button>
+      <button id="clock-use-btn" style="height: 38px; font-size: 12px;">Use Current Time</button>
+    </div>
+  </div>
 
   <div class="card">
-    <label for="timestamp">Unix Timestamp (Seconds or Milliseconds)</label>
-    <div class="flex-row" style="display: flex; gap: 10px;">
-        <input type="number" id="timestamp" placeholder="e.g., 1700000000" />
-        <button id="nowBtn" style="height: 40px; white-space: nowrap;">Current Time</button>
+    <div class="flex-row" style="margin-bottom: 15px;">
+      <div style="flex: 2;">
+        <label for="timestamp">Unix Timestamp</label>
+        <input type="number" id="timestamp" placeholder="e.g., 1700000000" style="margin-bottom: 0;" />
+      </div>
+      <div style="flex: 1;">
+        <label for="timestamp-scale">Scale</label>
+        <select id="timestamp-scale" style="margin-bottom: 0;">
+          <option value="s">Seconds (s)</option>
+          <option value="ms">Milliseconds (ms)</option>
+          <option value="us">Microseconds (μs)</option>
+          <option value="ns">Nanoseconds (ns)</option>
+        </select>
+      </div>
     </div>
-    <label for="dateOutput">Human Readable Date (UTC)</label>
+
+    <label for="dateOutput">Human Readable Date (ISO / UTC)</label>
     <input type="text" id="dateOutput" readonly placeholder="Resulting date..." />
+
+    <label for="dateOutputLocal">Human Readable Date (Local Time)</label>
+    <input type="text" id="dateOutputLocal" readonly placeholder="Resulting local date..." />
+
     <label for="relativeOutput">Relative Time</label>
     <input type="text" id="relativeOutput" readonly placeholder="Relative time..." />
   </div>
 
   <div class="card">
-    <label for="dateInput">Date String (ISO 8601)</label>
+    <div class="flex-row" style="margin-bottom: 15px;">
+      <div style="flex: 1;">
+        <label for="datetimePicker">Interactive Date & Time Picker (Local)</label>
+        <input type="datetime-local" id="datetimePicker" step="1" style="margin-bottom: 0;" />
+      </div>
+    </div>
+
+    <label for="dateInput">Date String (ISO 8601 / RFC 2822 / Text)</label>
     <input type="text" id="dateInput" placeholder="e.g., 2023-11-15T00:00:00Z" />
-    <label for="tsOutput">Unix Timestamp (Seconds)</label>
-    <input type="text" id="tsOutput" readonly placeholder="Resulting timestamp..." />
+
+    <div class="flex-row" style="margin-bottom: 15px;">
+      <div style="flex: 1;">
+        <label for="tsOutputSeconds">Seconds (s)</label>
+        <input type="text" id="tsOutputSeconds" readonly placeholder="seconds..." style="margin-bottom: 0; font-family: monospace;" />
+      </div>
+      <div style="flex: 1;">
+        <label for="tsOutputMillis">Milliseconds (ms)</label>
+        <input type="text" id="tsOutputMillis" readonly placeholder="milliseconds..." style="margin-bottom: 0; font-family: monospace;" />
+      </div>
+    </div>
+
+    <div class="flex-row">
+      <div style="flex: 1;">
+        <label for="tsOutputMicros">Microseconds (μs)</label>
+        <input type="text" id="tsOutputMicros" readonly placeholder="microseconds..." style="margin-bottom: 0; font-family: monospace;" />
+      </div>
+      <div style="flex: 1;">
+        <label for="tsOutputNanos">Nanoseconds (ns)</label>
+        <input type="text" id="tsOutputNanos" readonly placeholder="nanoseconds..." style="margin-bottom: 0; font-family: monospace;" />
+      </div>
+    </div>
   </div>
 </div>
 <script>
 const timestampEl = document.getElementById('timestamp');
-const nowBtn = document.getElementById('nowBtn');
+const timestampScale = document.getElementById('timestamp-scale');
 const dateOutput = document.getElementById('dateOutput');
+const dateOutputLocal = document.getElementById('dateOutputLocal');
 const relativeOutput = document.getElementById('relativeOutput');
 
+const datetimePicker = document.getElementById('datetimePicker');
 const dateInput = document.getElementById('dateInput');
-const tsOutput = document.getElementById('tsOutput');
+const tsOutputSeconds = document.getElementById('tsOutputSeconds');
+const tsOutputMillis = document.getElementById('tsOutputMillis');
+const tsOutputMicros = document.getElementById('tsOutputMicros');
+const tsOutputNanos = document.getElementById('tsOutputNanos');
+
+// Live Clock Elements
+const liveClockVal = document.getElementById('live-clock-val');
+const liveClockUtc = document.getElementById('live-clock-utc');
+const clockToggleBtn = document.getElementById('clock-toggle-btn');
+const clockUseBtn = document.getElementById('clock-use-btn');
 
 const rtf = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
+
+// Live Clock Logic
+let clockInterval = null;
+let isClockRunning = true;
+
+function updateLiveClock() {
+    const now = new Date();
+    liveClockVal.textContent = Math.floor(now.getTime() / 1000);
+    liveClockUtc.textContent = now.toUTCString();
+}
+
+function startClock() {
+    updateLiveClock();
+    clockInterval = setInterval(updateLiveClock, 1000);
+}
+
+function stopClock() {
+    clearInterval(clockInterval);
+}
+
+startClock();
+
+clockToggleBtn.addEventListener('click', () => {
+    if (isClockRunning) {
+        stopClock();
+        clockToggleBtn.textContent = 'Resume Clock';
+        clockToggleBtn.classList.remove('secondary');
+    } else {
+        startClock();
+        clockToggleBtn.textContent = 'Pause Clock';
+        clockToggleBtn.classList.add('secondary');
+    }
+    isClockRunning = !isClockRunning;
+});
+
+clockUseBtn.addEventListener('click', () => {
+    const now = Date.now();
+    const scale = timestampScale.value;
+    if (scale === 's') {
+        timestampEl.value = Math.floor(now / 1000);
+    } else if (scale === 'ms') {
+        timestampEl.value = now;
+    } else if (scale === 'us') {
+        timestampEl.value = now * 1000;
+    } else if (scale === 'ns') {
+        timestampEl.value = now * 1000000;
+    }
+    updateFromTimestamp();
+});
 
 function formatRelative(ms) {
     const diff = ms - Date.now();
@@ -149,19 +289,32 @@ function updateFromTimestamp() {
     let val = parseFloat(timestampEl.value);
     if (isNaN(val)) {
         dateOutput.value = '';
+        dateOutputLocal.value = '';
         relativeOutput.value = '';
         return;
     }
 
-    // Heuristic: if value is > 10^11, assume it's in milliseconds
-    let ms = val > 100000000000 ? val : val * 1000;
+    let ms;
+    const scale = timestampScale.value;
+    if (scale === 's') {
+        ms = val * 1000;
+    } else if (scale === 'ms') {
+        ms = val;
+    } else if (scale === 'us') {
+        ms = val / 1000;
+    } else if (scale === 'ns') {
+        ms = val / 1000000;
+    }
+
     const date = new Date(ms);
 
     if (isNaN(date.getTime())) {
         dateOutput.value = 'Invalid Date';
+        dateOutputLocal.value = 'Invalid Date';
         relativeOutput.value = '';
     } else {
         dateOutput.value = date.toISOString();
+        dateOutputLocal.value = date.toLocaleString() + ' (Local)';
         relativeOutput.value = formatRelative(ms);
     }
 }
@@ -169,7 +322,11 @@ function updateFromTimestamp() {
 function updateFromDate() {
     let val = dateInput.value;
     if (!val) {
-        tsOutput.value = '';
+        tsOutputSeconds.value = '';
+        tsOutputMillis.value = '';
+        tsOutputMicros.value = '';
+        tsOutputNanos.value = '';
+        datetimePicker.value = '';
         return;
     }
 
@@ -181,22 +338,52 @@ function updateFromDate() {
 
     const date = new Date(dateStr);
     if (isNaN(date.getTime())) {
-        tsOutput.value = 'Invalid Date';
+        tsOutputSeconds.value = 'Invalid Date';
+        tsOutputMillis.value = 'Invalid Date';
+        tsOutputMicros.value = 'Invalid Date';
+        tsOutputNanos.value = 'Invalid Date';
     } else {
-        tsOutput.value = Math.floor(date.getTime() / 1000);
+        const ms = date.getTime();
+        tsOutputSeconds.value = Math.floor(ms / 1000);
+        tsOutputMillis.value = ms;
+        tsOutputMicros.value = ms * 1000;
+        tsOutputNanos.value = ms * 1000000;
+
+        // Try to update datetimePicker to local ISO time
+        if (document.activeElement !== datetimePicker) {
+            const tzoffset = date.getTimezoneOffset() * 60000;
+            const localISOTime = (new Date(date.getTime() - tzoffset)).toISOString().slice(0, 19);
+            datetimePicker.value = localISOTime;
+        }
+    }
+}
+
+function updateFromPicker() {
+    const pickerVal = datetimePicker.value;
+    if (!pickerVal) {
+        dateInput.value = '';
+        updateFromDate();
+        return;
+    }
+
+    // Picked time is local, so Date constructor correctly interprets it in the local zone
+    const date = new Date(pickerVal);
+    if (!isNaN(date.getTime())) {
+        dateInput.value = date.toISOString();
+        updateFromDate();
     }
 }
 
 timestampEl.addEventListener('input', updateFromTimestamp);
-nowBtn.addEventListener('click', () => {
-    timestampEl.value = Math.floor(Date.now() / 1000);
-    updateFromTimestamp();
-});
+timestampScale.addEventListener('change', updateFromTimestamp);
 
 dateInput.addEventListener('input', updateFromDate);
+datetimePicker.addEventListener('input', updateFromPicker);
 
 // Set current as initial
-timestampEl.value = Math.floor(Date.now() / 1000);
+const initialNow = Date.now();
+timestampEl.value = Math.floor(initialNow / 1000);
+timestampScale.value = 's';
 updateFromTimestamp();
 </script>
 </body>
