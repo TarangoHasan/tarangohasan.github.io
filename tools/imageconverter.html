@@ -12,6 +12,9 @@
   --muted: #9aa8b2;
   --glass: rgba(255, 255, 255, 0.03);
 }
+* {
+  box-sizing: border-box;
+}
 html, body {
   min-height: 100%;
   margin: 0;
@@ -28,7 +31,7 @@ html, body {
   max-width: 96%;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
   border-radius: 12px;
-  padding: 20px;
+  padding: 24px;
   box-shadow: 0 8px 30px rgba(2, 6, 23, 0.6);
   border: 1px solid rgba(255, 255, 255, 0.03);
 }
@@ -49,21 +52,31 @@ label {
 }
 input, select {
   width: 100%;
-  padding: 8px;
+  padding: 10px;
   border-radius: 8px;
   background: var(--glass);
   border: 1px solid rgba(255, 255, 255, 0.03);
   color: inherit;
   box-sizing: border-box;
 }
+input:focus, select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
 button {
   background: linear-gradient(90deg, var(--accent), #3b82f6);
   border: 0;
-  padding: 10px 14px;
+  padding: 12px 18px;
   font-weight: 600;
   border-radius: 8px;
   color: #042027;
   cursor: pointer;
+  transition: opacity 0.2s;
+  width: 100%;
+  font-size: 14px;
+}
+button:hover {
+  opacity: 0.9;
 }
 
 .back-link {
@@ -75,6 +88,26 @@ button {
 }
 .back-link:hover {
   text-decoration: underline;
+}
+
+.validation-result {
+  margin-top: 15px;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  display: none;
+}
+.validation-result.valid {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  display: block;
+}
+.validation-result.invalid {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #f87171;
+  display: block;
 }
 </style>
 </head>
@@ -92,9 +125,9 @@ button {
     <option value="image/jpeg">JPG</option>
     <option value="image/webp">WEBP</option>
   </select>
-  <div style="height:10px"></div>
+  <div style="height:15px"></div>
   <button id="convertBtn">Convert and Download</button>
-  <div id="errors" style="margin-top:8px"></div>
+  <div id="errors" class="validation-result"></div>
 </div>
 <script>
 const fileInput = document.getElementById('file');
@@ -102,10 +135,21 @@ const formatSelect = document.getElementById('format');
 const convertBtn = document.getElementById('convertBtn');
 const errors = document.getElementById('errors');
 
+function showValidation(msg, isValid) {
+  errors.textContent = msg;
+  errors.className = 'validation-result ' + (isValid ? 'valid' : 'invalid');
+}
+
+function hideValidation() {
+  errors.style.display = 'none';
+  errors.className = 'validation-result';
+}
+
 convertBtn.addEventListener('click', () => {
+  hideValidation();
   const file = fileInput.files[0];
   if (!file) {
-    errors.textContent = 'Please select an image file.';
+    showValidation('Please select an image file.', false);
     return;
   }
 
@@ -117,9 +161,14 @@ convertBtn.addEventListener('click', () => {
       canvas.width = img.width;
       canvas.height = img.height;
       const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0);
 
       const format = formatSelect.value;
+      if (format === 'image/jpeg') {
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
+      ctx.drawImage(img, 0, 0);
+
       canvas.toBlob((blob) => {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -129,12 +178,21 @@ convertBtn.addEventListener('click', () => {
         a.download = `converted.${ext}`;
         a.click();
         URL.revokeObjectURL(url);
+        showValidation('✓ Image converted and downloaded successfully!', true);
       }, format);
+    };
+    img.onerror = () => {
+      showValidation('❌ Failed to load the image file.', false);
     };
     img.src = e.target.result;
   };
+  reader.onerror = () => {
+    showValidation('❌ Failed to read the file.', false);
+  };
   reader.readAsDataURL(file);
 });
+
+fileInput.addEventListener('change', hideValidation);
 </script>
 </body>
 </html>
