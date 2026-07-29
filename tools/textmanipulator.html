@@ -83,13 +83,20 @@ button {
   text-decoration: underline;
 }
 
+.actions-grid {
+  margin-top: 15px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
 @media (max-width: 768px) {
   .stats, .actions {
     flex-direction: column !important;
     display: flex !important;
     gap: 10px;
   }
-  .actions[style*="grid"] {
+  .actions-grid {
     grid-template-columns: 1fr !important;
   }
 }
@@ -107,7 +114,7 @@ button {
     <div>Lines: <span id="line-count">0</span></div>
     <div>Paragraphs: <span id="para-count">0</span></div>
   </div>
-  <div class="actions" style="margin-top: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+  <div class="actions actions-grid">
     <input type="text" id="find-input" placeholder="Find..." style="min-height: auto; width: 100%; padding: 8px; border-radius: 8px; background: var(--glass); border: 1px solid rgba(255, 255, 255, 0.03); color: inherit; box-sizing: border-box;" />
     <input type="text" id="replace-input" placeholder="Replace with..." style="min-height: auto; width: 100%; padding: 8px; border-radius: 8px; background: var(--glass); border: 1px solid rgba(255, 255, 255, 0.03); color: inherit; box-sizing: border-box;" />
   </div>
