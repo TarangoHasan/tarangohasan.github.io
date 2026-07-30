@@ -69,7 +69,7 @@ button {
   background: white;
   padding: 10px;
   border-radius: 8px;
-  display: inline-block;
+  display: none;
 }
 
 .back-link {
@@ -110,6 +110,7 @@ let qrCodeCanvas = null;
 
 function clearQR() {
   qrcodeContainer.innerHTML = '';
+  qrcodeContainer.style.display = 'none';
   qrCodeCanvas = null;
   downloadBtn.style.display = 'none';
 }
@@ -126,6 +127,7 @@ generateBtn.addEventListener('click', () => {
       }
       qrcodeContainer.innerHTML = '';
       qrcodeContainer.appendChild(canvas);
+      qrcodeContainer.style.display = 'inline-block';
       qrCodeCanvas = canvas;
       downloadBtn.style.display = 'block';
     });
