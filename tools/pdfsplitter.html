@@ -118,6 +118,26 @@ button {
   text-decoration: underline;
 }
 
+.validation-result {
+  margin-top: 15px;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  display: none;
+}
+.validation-result.valid {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  display: block;
+}
+.validation-result.invalid {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #f87171;
+  display: block;
+}
+
 @media (max-width: 768px) {
   .app {
     flex-direction: column;
@@ -143,8 +163,8 @@ button {
     <textarea id="ranges" placeholder="e.g., 1-5, 8, 10-12"></textarea>
     <div style="height:10px"></div>
     <button id="splitBtn">Split PDF</button>
-    <div id="progress" class="muted"></div>
-    <div id="errors" style="margin-top:8px"></div>
+    <div id="progress" class="muted" style="margin-top: 10px;"></div>
+    <div id="errors" class="validation-result"></div>
   </div>
   <div class="main-content">
     <div class="pdf-viewer">
@@ -181,13 +201,19 @@ let currentPage = 1;
 fileInput.addEventListener('change', async (e) => {
   const file = e.target.files[0];
   if (!file) return;
+  hideValidation();
   progress.textContent = 'Loading PDF...';
   const fileReader = new FileReader();
   fileReader.onload = async (event) => {
-    const typedarray = new Uint8Array(event.target.result);
-    pdfDoc = await pdfjsLib.getDocument({ data: typedarray }).promise;
-    progress.textContent = '';
-    renderPage(currentPage);
+    try {
+      const typedarray = new Uint8Array(event.target.result);
+      pdfDoc = await pdfjsLib.getDocument({ data: typedarray }).promise;
+      progress.textContent = '';
+      renderPage(currentPage);
+    } catch(err) {
+      progress.textContent = '';
+      showValidation('❌ Failed to load PDF file: ' + err.message, false);
+    }
   };
   fileReader.readAsArrayBuffer(file);
 });
@@ -216,52 +242,111 @@ nextPageBtn.addEventListener('click', () => {
   }
 });
 
-function parseRanges(text) {
+function showValidation(msg, isValid) {
+  errors.textContent = msg;
+  errors.className = 'validation-result ' + (isValid ? 'valid' : 'invalid');
+  errors.style.display = 'block';
+}
+
+function hideValidation() {
+  errors.style.display = 'none';
+  errors.className = 'validation-result';
+}
+
+function parseRanges(text, totalPages) {
   const ranges = [];
+  if (!text || !text.trim()) {
+    throw new Error('Page ranges input is empty.');
+  }
+
   const parts = text.split(',');
-  for (const part of parts) {
+  for (let part of parts) {
+    part = part.trim();
+    if (!part) continue;
+
     if (part.includes('-')) {
-      const [start, end] = part.split('-').map(Number);
+      const bounds = part.split('-');
+      if (bounds.length !== 2) {
+        throw new Error(`Invalid range format: "${part}"`);
+      }
+      const start = parseInt(bounds[0].trim(), 10);
+      const end = parseInt(bounds[1].trim(), 10);
+
+      if (isNaN(start) || isNaN(end)) {
+        throw new Error(`Range boundaries must be numbers: "${part}"`);
+      }
+      if (start <= 0 || end <= 0) {
+        throw new Error(`Page numbers must be greater than 0: "${part}"`);
+      }
+      if (start > end) {
+        throw new Error(`Start page cannot be greater than end page: "${part}"`);
+      }
+      if (start > totalPages || end > totalPages) {
+        throw new Error(`Page numbers cannot exceed total pages (${totalPages}): "${part}"`);
+      }
       ranges.push({ start, end });
     } else {
-      const num = Number(part);
+      const num = parseInt(part, 10);
+      if (isNaN(num)) {
+        throw new Error(`Invalid page number: "${part}"`);
+      }
+      if (num <= 0) {
+        throw new Error(`Page number must be greater than 0: "${part}"`);
+      }
+      if (num > totalPages) {
+        throw new Error(`Page number cannot exceed total pages (${totalPages}): "${part}"`);
+      }
       ranges.push({ start: num, end: num });
     }
+  }
+
+  if (ranges.length === 0) {
+    throw new Error('No valid page ranges specified.');
   }
   return ranges;
 }
 
 splitBtn.addEventListener('click', async () => {
+  hideValidation();
   if (!pdfDoc) {
-    errors.textContent = 'Please select a PDF file.';
-    return;
-  }
-  const ranges = parseRanges(rangesInput.value);
-  if (ranges.length === 0) {
-    errors.textContent = 'Please enter valid page ranges.';
+    showValidation('Please select a PDF file first.', false);
     return;
   }
 
-  progress.textContent = 'Splitting PDF...';
-  const file = fileInput.files[0];
-  const pdfBytes = await file.arrayBuffer();
-  const srcPdf = await PDFDocument.load(pdfBytes);
-
-  results.innerHTML = '';
-  for (const range of ranges) {
-    const newPdf = await PDFDocument.create();
-    const pages = await newPdf.copyPages(srcPdf, Array.from({ length: range.end - range.start + 1 }, (_, i) => range.start - 1 + i));
-    pages.forEach(page => newPdf.addPage(page));
-    const pdfBytes = await newPdf.save();
-    const blob = new Blob([pdfBytes], { type: 'application/pdf' });
-    const url = URL.createObjectURL(blob);
-
-    const item = document.createElement('div');
-    item.className = 'item';
-    item.innerHTML = `<span>${range.start}-${range.end}.pdf</span><a href="${url}" download="${range.start}-${range.end}.pdf">Download</a>`;
-    results.appendChild(item);
+  let ranges;
+  try {
+    ranges = parseRanges(rangesInput.value, pdfDoc.numPages);
+  } catch(err) {
+    showValidation('❌ Validation Error: ' + err.message, false);
+    return;
   }
-  progress.textContent = 'Done!';
+
+  try {
+    progress.textContent = 'Splitting PDF...';
+    const file = fileInput.files[0];
+    const pdfBytes = await file.arrayBuffer();
+    const srcPdf = await PDFDocument.load(pdfBytes);
+
+    results.innerHTML = '';
+    for (const range of ranges) {
+      const newPdf = await PDFDocument.create();
+      const pages = await newPdf.copyPages(srcPdf, Array.from({ length: range.end - range.start + 1 }, (_, i) => range.start - 1 + i));
+      pages.forEach(page => newPdf.addPage(page));
+      const pdfBytes = await newPdf.save();
+      const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+
+      const item = document.createElement('div');
+      item.className = 'item';
+      item.innerHTML = `<span>${range.start}-${range.end}.pdf</span><a href="${url}" download="${range.start}-${range.end}.pdf">Download</a>`;
+      results.appendChild(item);
+    }
+    progress.textContent = '';
+    showValidation('✓ PDF split successfully! See download links below.', true);
+  } catch(err) {
+    progress.textContent = '';
+    showValidation('❌ Split Error: ' + err.message, false);
+  }
 });
 </script>
 </body>

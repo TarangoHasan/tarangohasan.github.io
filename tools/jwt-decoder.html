@@ -1,0 +1,439 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>JWT Decoder & Parser</title>
+<style>
+:root {
+  --bg: #0f1724;
+  --card: #0b1220;
+  --accent: #06b6d4;
+  --muted: #9aa8b2;
+  --glass: rgba(255, 255, 255, 0.03);
+}
+* {
+  box-sizing: border-box;
+}
+html, body {
+  min-height: 100%;
+  margin: 0;
+  font-family: Inter, system-ui, Segoe UI, Roboto, Arial;
+  background: linear-gradient(180deg, #041025 0%, #0b1730 100%);
+  color: #e6eef6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.app {
+  width: 1000px;
+  max-width: 96%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 8px 30px rgba(2, 6, 23, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+h1 {
+  margin: 0;
+  font-size: 22px;
+}
+p.lead {
+  margin: 6px 0 18px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.back-link {
+  display: inline-block;
+  margin-bottom: 20px;
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 14px;
+}
+.back-link:hover {
+  text-decoration: underline;
+}
+.layout-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-top: 15px;
+}
+label {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+textarea {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  background: var(--glass);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  color: inherit;
+  font-family: monospace;
+  font-size: 13px;
+  resize: vertical;
+  box-sizing: border-box;
+}
+textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.card {
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 15px;
+}
+.card h3 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.json-block {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: 6px;
+  padding: 10px;
+  font-family: monospace;
+  font-size: 13px;
+  white-space: pre-wrap;
+  word-break: break-all;
+  overflow-y: auto;
+  max-height: 200px;
+}
+.btn-copy {
+  background: var(--glass);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--muted);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  margin-top: 8px;
+  float: right;
+}
+.btn-copy:hover {
+  background: var(--accent);
+  color: #042027;
+  border-color: var(--accent);
+}
+.claims-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  font-size: 13px;
+}
+.claims-table th, .claims-table td {
+  padding: 8px;
+  text-align: left;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+.claims-table th {
+  color: var(--muted);
+  font-weight: 500;
+}
+.claims-table td.claim-key {
+  font-family: monospace;
+  font-weight: bold;
+  color: #38bdf8;
+}
+.validation-result {
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  display: none;
+  margin-top: 10px;
+}
+.validation-result.valid {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  display: block;
+}
+.validation-result.invalid {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #f87171;
+  display: block;
+}
+.clear-btn {
+  background: var(--glass);
+  color: #e6eef6;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 8px 14px;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: opacity 0.2s;
+}
+.clear-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+@media (max-width: 768px) {
+  .layout-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+</style>
+</head>
+<body>
+<div class="app" role="main">
+  <a href="../index.html" class="back-link">← Back to Home</a>
+  <h1>JWT Decoder & Parser</h1>
+  <p class="lead">Decode and inspect JSON Web Tokens locally and safely in real-time. No token data is sent to any server.</p>
+
+  <div class="layout-grid">
+    <div>
+      <label for="jwt-input">Encoded Token (JWT)</label>
+      <textarea id="jwt-input" rows="12" placeholder="Paste your encoded JWT string here (e.g., eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...)"></textarea>
+      <button class="clear-btn" id="clear-btn">Clear All</button>
+      <div id="validation-box" class="validation-result"></div>
+    </div>
+
+    <div>
+      <div class="card">
+        <button class="btn-copy" id="copy-header">Copy Header</button>
+        <h3>Header (Algorithm & Token Type)</h3>
+        <pre class="json-block" id="header-block">JSON Header will appear here...</pre>
+        <div style="clear: both;"></div>
+      </div>
+
+      <div class="card">
+        <button class="btn-copy" id="copy-payload">Copy Payload</button>
+        <h3>Payload (Claims)</h3>
+        <pre class="json-block" id="payload-block">JSON Payload will appear here...</pre>
+        <div style="clear: both;"></div>
+      </div>
+
+      <div class="card" id="metadata-card" style="display: none;">
+        <h3>Claims Interpretation</h3>
+        <table class="claims-table" id="claims-table">
+          <thead>
+            <tr>
+              <th>Claim</th>
+              <th>Value</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody id="claims-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const jwtInput = document.getElementById('jwt-input');
+const validationBox = document.getElementById('validation-box');
+const headerBlock = document.getElementById('header-block');
+const payloadBlock = document.getElementById('payload-block');
+const metadataCard = document.getElementById('metadata-card');
+const claimsBody = document.getElementById('claims-body');
+const clearBtn = document.getElementById('clear-btn');
+
+const copyHeaderBtn = document.getElementById('copy-header');
+const copyPayloadBtn = document.getElementById('copy-payload');
+
+let decodedHeaderStr = '';
+let decodedPayloadStr = '';
+
+function showValidation(message, isValid) {
+  validationBox.textContent = message;
+  validationBox.className = 'validation-result ' + (isValid ? 'valid' : 'invalid');
+  validationBox.style.display = 'block';
+}
+
+function hideValidation() {
+  validationBox.style.display = 'none';
+  validationBox.className = 'validation-result';
+}
+
+function base64UrlDecode(str) {
+  // Pad with '=' to make length a multiple of 4
+  let base64 = str.replace(/-/g, '+').replace(/_/g, '/');
+  while (base64.length % 4) {
+    base64 += '=';
+  }
+  // Decode using window.atob and handle UTF-8 correctly
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  const decoder = new TextDecoder();
+  return decoder.decode(bytes);
+}
+
+function formatRelativeTime(seconds) {
+  if (isNaN(seconds)) return '';
+  const now = Math.floor(Date.now() / 1000);
+  const diff = seconds - now;
+  const absDiff = Math.abs(diff);
+
+  if (absDiff < 5) return 'Just now';
+
+  const rtf = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
+  if (absDiff < 60) return rtf.format(diff, 'second');
+  const minutes = Math.round(diff / 60);
+  if (Math.abs(minutes) < 60) return rtf.format(minutes, 'minute');
+  const hours = Math.round(minutes / 60);
+  if (Math.abs(hours) < 24) return rtf.format(hours, 'hour');
+  const days = Math.round(hours / 24);
+  return rtf.format(days, 'day');
+}
+
+const REGISTERED_CLAIMS = {
+  iss: 'Issuer (identifies principal that issued the JWT)',
+  sub: 'Subject (identifies principal that is the subject of the JWT)',
+  aud: 'Audience (identifies recipients that the JWT is intended for)',
+  exp: 'Expiration Time (time after which the JWT must not be accepted)',
+  nbf: 'Not Before (time before which the JWT must not be accepted)',
+  iat: 'Issued At (time at which the JWT was issued)',
+  jti: 'JWT ID (unique identifier for the JWT)'
+};
+
+function parseAndDisplayClaims(payloadObj) {
+  claimsBody.innerHTML = '';
+  const keys = Object.keys(payloadObj);
+  let hasClaims = false;
+
+  keys.forEach(key => {
+    if (REGISTERED_CLAIMS[key] || ['exp', 'iat', 'nbf'].includes(key)) {
+      hasClaims = true;
+      const row = document.createElement('tr');
+
+      const cellKey = document.createElement('td');
+      cellKey.className = 'claim-key';
+      cellKey.textContent = key;
+
+      const cellVal = document.createElement('td');
+      const val = payloadObj[key];
+
+      if (['exp', 'iat', 'nbf'].includes(key) && typeof val === 'number') {
+        const d = new Date(val * 1000);
+        if (!isNaN(d.getTime())) {
+          const iso = d.toISOString();
+          const relative = formatRelativeTime(val);
+          cellVal.innerHTML = `${val}<br><span style="font-size:11px;color:var(--muted);">${iso}<br>(${relative})</span>`;
+        } else {
+          cellVal.textContent = val;
+        }
+      } else if (typeof val === 'object') {
+        cellVal.textContent = JSON.stringify(val);
+      } else {
+        cellVal.textContent = val;
+      }
+
+      const cellDesc = document.createElement('td');
+      cellDesc.textContent = REGISTERED_CLAIMS[key] || 'Custom registered claim';
+
+      row.appendChild(cellKey);
+      row.appendChild(cellVal);
+      row.appendChild(cellDesc);
+      claimsBody.appendChild(row);
+    }
+  });
+
+  if (hasClaims) {
+    metadataCard.style.display = 'block';
+  } else {
+    metadataCard.style.display = 'none';
+  }
+}
+
+function handleInput() {
+  const token = jwtInput.value.trim();
+  hideValidation();
+  headerBlock.textContent = 'JSON Header will appear here...';
+  payloadBlock.textContent = 'JSON Payload will appear here...';
+  metadataCard.style.display = 'none';
+  decodedHeaderStr = '';
+  decodedPayloadStr = '';
+
+  if (!token) return;
+
+  const parts = token.split('.');
+  if (parts.length !== 3) {
+    showValidation('❌ Invalid JWT: A JWT must consist of three parts separated by dots (Header, Payload, Signature).', false);
+    return;
+  }
+
+  const [headerPart, payloadPart, signaturePart] = parts;
+
+  // 1. Decode Header
+  let headerObj;
+  try {
+    decodedHeaderStr = base64UrlDecode(headerPart);
+    headerObj = JSON.parse(decodedHeaderStr);
+    headerBlock.textContent = JSON.stringify(headerObj, null, 2);
+  } catch (e) {
+    showValidation('❌ Header Decoding Failed: ' + e.message, false);
+    return;
+  }
+
+  // 2. Decode Payload
+  let payloadObj;
+  try {
+    decodedPayloadStr = base64UrlDecode(payloadPart);
+    payloadObj = JSON.parse(decodedPayloadStr);
+    payloadBlock.textContent = JSON.stringify(payloadObj, null, 2);
+  } catch (e) {
+    showValidation('❌ Payload Decoding Failed: ' + e.message, false);
+    return;
+  }
+
+  // 3. Validation alerts on expirations
+  let validMsg = '✓ JWT successfully decoded locally!';
+  if (payloadObj && typeof payloadObj.exp === 'number') {
+    const now = Math.floor(Date.now() / 1000);
+    if (payloadObj.exp < now) {
+      validMsg += ` (⚠️ Warning: This token expired ${formatRelativeTime(payloadObj.exp)})`;
+    } else {
+      validMsg += ` (Token expires in ${formatRelativeTime(payloadObj.exp)})`;
+    }
+  }
+
+  showValidation(validMsg, true);
+  parseAndDisplayClaims(payloadObj);
+}
+
+// Copy Action
+function setupCopyBtn(btn, getStr) {
+  btn.addEventListener('click', () => {
+    const str = getStr();
+    if (str) {
+      navigator.clipboard.writeText(str).then(() => {
+        const originalText = btn.textContent;
+        btn.textContent = 'Copied!';
+        setTimeout(() => {
+          btn.textContent = originalText;
+        }, 1500);
+      });
+    }
+  });
+}
+
+setupCopyBtn(copyHeaderBtn, () => decodedHeaderStr);
+setupCopyBtn(copyPayloadBtn, () => decodedPayloadStr);
+
+clearBtn.addEventListener('click', () => {
+  jwtInput.value = '';
+  handleInput();
+});
+
+jwtInput.addEventListener('input', handleInput);
+</script>
+</body>
+</html>
