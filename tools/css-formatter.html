@@ -1,0 +1,614 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>CSS Formatter & Minifier</title>
+<style>
+:root {
+  --bg: #0f1724;
+  --card: #0b1220;
+  --accent: #06b6d4;
+  --muted: #9aa8b2;
+  --glass: rgba(255, 255, 255, 0.03);
+}
+* {
+  box-sizing: border-box;
+}
+html, body {
+  min-height: 100%;
+  margin: 0;
+  font-family: Inter, system-ui, Segoe UI, Roboto, Arial;
+  background: linear-gradient(180deg, #041025 0%, #0b1730 100%);
+  color: #e6eef6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.app {
+  width: 900px;
+  max-width: 96%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 8px 30px rgba(2, 6, 23, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+h1 {
+  margin: 0;
+  font-size: 22px;
+}
+p.lead {
+  margin: 6px 0 18px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.back-link {
+  display: inline-block;
+  margin-bottom: 20px;
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 14px;
+}
+.back-link:hover {
+  text-decoration: underline;
+}
+.control-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+.option-card {
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  padding: 15px;
+}
+label {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  background: var(--glass);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  color: inherit;
+  font-size: 14px;
+}
+select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.text-areas {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+textarea {
+  width: 100%;
+  min-height: 320px;
+  padding: 12px;
+  border-radius: 8px;
+  background: var(--glass);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  color: inherit;
+  font-family: monospace;
+  font-size: 13px;
+  resize: vertical;
+  box-sizing: border-box;
+}
+textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.stats-banner {
+  display: flex;
+  justify-content: space-around;
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 15px;
+  font-size: 13px;
+}
+.stats-item {
+  text-align: center;
+}
+.stats-val {
+  font-weight: bold;
+  color: var(--accent);
+  font-family: monospace;
+}
+.actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 15px;
+}
+button {
+  background: linear-gradient(90deg, var(--accent), #3b82f6);
+  border: 0;
+  padding: 10px 18px;
+  font-weight: 600;
+  border-radius: 8px;
+  color: #042027;
+  cursor: pointer;
+  font-size: 13px;
+  transition: opacity 0.2s, transform 0.1s;
+}
+button:hover {
+  opacity: 0.9;
+}
+button:active {
+  transform: scale(0.98);
+}
+button.secondary {
+  background: var(--glass);
+  color: #e6eef6;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+button.secondary:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+.validation-result {
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  display: none;
+  margin-top: 10px;
+}
+.validation-result.valid {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  display: block;
+}
+.validation-result.invalid {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #f87171;
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .control-grid, .text-areas {
+    grid-template-columns: 1fr !important;
+  }
+  .actions {
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+  button {
+    width: 100%;
+  }
+  .stats-banner {
+    flex-direction: column !important;
+    gap: 8px !important;
+    align-items: center;
+  }
+}
+</style>
+</head>
+<body>
+<div class="app" role="main">
+  <a href="../index.html" class="back-link">← Back to Home</a>
+  <h1>CSS Formatter & Minifier</h1>
+  <p class="lead">Beautify, format, or minify your CSS stylesheets client-side with real-time compression analysis.</p>
+
+  <div class="control-grid">
+    <div class="option-card">
+      <label for="indent-size">Indentation</label>
+      <select id="indent-size">
+        <option value="  ">2 Spaces</option>
+        <option value="    ">4 Spaces</option>
+        <option value="&#9;">Tab</option>
+      </select>
+    </div>
+    <div class="option-card">
+      <label for="sample-btn-label">Quick Actions</label>
+      <div style="display: flex; gap: 10px; height: 38px; align-items: center;">
+        <button id="sample-btn" class="secondary" style="width: 100%; height: 100%; padding: 0;">Load Demo CSS</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats-banner" id="stats-banner" style="display: none;">
+    <div class="stats-item">
+      Original Size: <span class="stats-val" id="stat-orig">0 B</span>
+    </div>
+    <div class="stats-item">
+      Result Size: <span class="stats-val" id="stat-res">0 B</span>
+    </div>
+    <div class="stats-item">
+      Compression Ratio: <span class="stats-val" id="stat-ratio">0%</span>
+    </div>
+  </div>
+
+  <div class="text-areas">
+    <div>
+      <label for="input">CSS Input</label>
+      <textarea id="input" placeholder="Paste your raw, messy, or minified CSS here..."></textarea>
+    </div>
+    <div>
+      <label for="output">Formatted/Minified CSS Output</label>
+      <textarea id="output" placeholder="Beautified or minified CSS will appear here..." readonly></textarea>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button id="beautify-btn">Beautify CSS</button>
+    <button id="minify-btn">Minify CSS</button>
+    <button id="clear-btn" class="secondary">Clear All</button>
+    <button id="copy-btn" class="secondary">Copy Result</button>
+    <button id="download-btn" class="secondary">Download CSS</button>
+  </div>
+
+  <div id="validation-box" class="validation-result"></div>
+</div>
+
+<script>
+const inputArea = document.getElementById('input');
+const outputArea = document.getElementById('output');
+const indentSize = document.getElementById('indent-size');
+const sampleBtn = document.getElementById('sample-btn');
+
+const beautifyBtn = document.getElementById('beautify-btn');
+const minifyBtn = document.getElementById('minify-btn');
+const clearBtn = document.getElementById('clear-btn');
+const copyBtn = document.getElementById('copy-btn');
+const downloadBtn = document.getElementById('download-btn');
+
+const statsBanner = document.getElementById('stats-banner');
+const statOrig = document.getElementById('stat-orig');
+const statRes = document.getElementById('stat-res');
+const statRatio = document.getElementById('stat-ratio');
+const validationBox = document.getElementById('validation-box');
+
+const DEMO_CSS = `@media (max-width: 600px) {
+body { background-color: #f3f4f6; color: #111827; }
+.card { padding: 10px; margin-bottom: 20px; border-radius: 4px; }
+}
+/* This is a comment to demonstrate formatting */
+.container { max-width: 1200px; margin: 0 auto; padding: 0 15px; }
+.btn-primary { background-color: #2563eb; color: #ffffff; border: 1px solid transparent; }
+.btn-primary:hover { background-color: #1d4ed8; }`;
+
+function showValidation(message, isValid) {
+  validationBox.textContent = message;
+  validationBox.className = 'validation-result ' + (isValid ? 'valid' : 'invalid');
+  validationBox.style.display = 'block';
+}
+
+function hideValidation() {
+  validationBox.style.display = 'none';
+  validationBox.className = 'validation-result';
+}
+
+function formatBytes(bytes) {
+  if (bytes === 0) return '0 B';
+  const k = 1024;
+  const sizes = ['B', 'KB', 'MB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+function updateStats(origText, resText) {
+  const origLen = new Blob([origText]).size;
+  const resLen = new Blob([resText]).size;
+
+  statOrig.textContent = formatBytes(origLen);
+  statRes.textContent = formatBytes(resLen);
+
+  if (origLen > 0) {
+    const ratio = Math.max(0, ((origLen - resLen) / origLen) * 100);
+    statRatio.textContent = ratio.toFixed(1) + '%';
+  } else {
+    statRatio.textContent = '0%';
+  }
+  statsBanner.style.display = 'flex';
+}
+
+function beautifyCSS(css, indentOption = '  ') {
+  let i = 0;
+  const len = css.length;
+  let tokens = [];
+
+  while (i < len) {
+    // 1. Check for comment
+    if (css.substring(i, i + 2) === '/*') {
+      const endIdx = css.indexOf('*/', i + 2);
+      if (endIdx === -1) {
+        tokens.push({ type: 'comment', value: css.substring(i) });
+        break;
+      } else {
+        tokens.push({ type: 'comment', value: css.substring(i, endIdx + 2) });
+        i = endIdx + 2;
+        continue;
+      }
+    }
+
+    // 2. Check for double quote string
+    if (css[i] === '"') {
+      let endIdx = i + 1;
+      while (endIdx < len) {
+        if (css[endIdx] === '"' && css[endIdx - 1] !== '\\') {
+          break;
+        }
+        endIdx++;
+      }
+      tokens.push({ type: 'string', value: css.substring(i, Math.min(endIdx + 1, len)) });
+      i = Math.min(endIdx + 1, len);
+      continue;
+    }
+
+    // 3. Check for single quote string
+    if (css[i] === "'") {
+      let endIdx = i + 1;
+      while (endIdx < len) {
+        if (css[endIdx] === "'" && css[endIdx - 1] !== '\\') {
+          break;
+        }
+        endIdx++;
+      }
+      tokens.push({ type: 'string', value: css.substring(i, Math.min(endIdx + 1, len)) });
+      i = Math.min(endIdx + 1, len);
+      continue;
+    }
+
+    // 4. Check for special characters
+    if ('{};:,'.includes(css[i])) {
+      tokens.push({ type: 'char', value: css[i] });
+      i++;
+      continue;
+    }
+
+    // 5. Gather plain text / identifier
+    let start = i;
+    while (i < len && !'/*"\'{};:,'.includes(css[i]) && css.substring(i, i+2) !== '/*') {
+      i++;
+    }
+    tokens.push({ type: 'text', value: css.substring(start, i) });
+  }
+
+  // Clean text tokens
+  let cleanedTokens = [];
+  for (let token of tokens) {
+    if (token.type === 'text') {
+      const val = token.value.trim().replace(/\s+/g, ' ');
+      if (val) {
+        cleanedTokens.push({ type: 'text', value: val });
+      }
+    } else {
+      cleanedTokens.push(token);
+    }
+  }
+
+  let output = '';
+  let depth = 0;
+
+  function getIndent(d) {
+    return indentOption.repeat(d);
+  }
+
+  for (let idx = 0; idx < cleanedTokens.length; idx++) {
+    const token = cleanedTokens[idx];
+    const prev = cleanedTokens[idx - 1];
+    const next = cleanedTokens[idx + 1];
+
+    if (token.type === 'comment') {
+      if (output && !output.endsWith('\n')) {
+        output += '\n';
+      }
+      output += getIndent(depth) + token.value + '\n';
+    } else if (token.type === 'string') {
+      output += token.value;
+    } else if (token.type === 'char') {
+      if (token.value === '{') {
+        if (output && !output.endsWith(' ') && !output.endsWith('\n')) {
+          output += ' ';
+        }
+        output += '{\n';
+        depth++;
+        output += getIndent(depth);
+      } else if (token.value === '}') {
+        depth = Math.max(0, depth - 1);
+        if (output && !output.endsWith('\n')) {
+          output += '\n';
+        }
+        output = output.replace(/[ \t]+$/, '');
+        output += getIndent(depth) + '}\n\n';
+      } else if (token.value === ';') {
+        output += ';\n' + getIndent(depth);
+      } else if (token.value === ':') {
+        output += ': ';
+      } else if (token.value === ',') {
+        output += ', ';
+      }
+    } else if (token.type === 'text') {
+      if (output.endsWith('\n') || output.match(/[ \t]+$/)) {
+        output += token.value;
+      } else if (output.endsWith(': ') || output.endsWith(', ') || output.endsWith('(')) {
+        output += token.value;
+      } else {
+        output += ' ' + token.value;
+      }
+    }
+  }
+
+  return output
+    .split('\n')
+    .map(line => line.trimRight())
+    .join('\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
+function minifyCSS(css) {
+  let i = 0;
+  const len = css.length;
+  let minified = '';
+
+  while (i < len) {
+    if (css.substring(i, i + 2) === '/*') {
+      const endIdx = css.indexOf('*/', i + 2);
+      if (endIdx === -1) {
+        break;
+      }
+      i = endIdx + 2;
+      continue;
+    }
+
+    if (css[i] === '"' || css[i] === "'") {
+      const quote = css[i];
+      let endIdx = i + 1;
+      while (endIdx < len) {
+        if (css[endIdx] === quote && css[endIdx - 1] !== '\\') {
+          break;
+        }
+        endIdx++;
+      }
+      minified += css.substring(i, Math.min(endIdx + 1, len));
+      i = Math.min(endIdx + 1, len);
+      continue;
+    }
+
+    minified += css[i];
+    i++;
+  }
+
+  return minified
+    .replace(/\s+/g, ' ')
+    .replace(/\s*([{};:,])\s*/g, '$1')
+    .replace(/;}/g, '}')
+    .trim();
+}
+
+beautifyBtn.addEventListener('click', () => {
+  hideValidation();
+  const raw = inputArea.value.trim();
+  if (!raw) {
+    showValidation('Please enter some CSS code first.', false);
+    outputArea.value = '';
+    statsBanner.style.display = 'none';
+    return;
+  }
+  try {
+    const formatted = beautifyCSS(raw, indentSize.value);
+    outputArea.value = formatted;
+    updateStats(raw, formatted);
+    showValidation('✓ CSS beautified successfully!', true);
+  } catch (e) {
+    showValidation('❌ CSS Formatting Error: ' + e.message, false);
+    outputArea.value = '';
+    statsBanner.style.display = 'none';
+  }
+});
+
+minifyBtn.addEventListener('click', () => {
+  hideValidation();
+  const raw = inputArea.value.trim();
+  if (!raw) {
+    showValidation('Please enter some CSS code first.', false);
+    outputArea.value = '';
+    statsBanner.style.display = 'none';
+    return;
+  }
+  try {
+    const minified = minifyCSS(raw);
+    outputArea.value = minified;
+    updateStats(raw, minified);
+    showValidation('✓ CSS minified successfully!', true);
+  } catch (e) {
+    showValidation('❌ CSS Minification Error: ' + e.message, false);
+    outputArea.value = '';
+    statsBanner.style.display = 'none';
+  }
+});
+
+sampleBtn.addEventListener('click', () => {
+  inputArea.value = DEMO_CSS;
+  hideValidation();
+  statsBanner.style.display = 'none';
+  outputArea.value = '';
+});
+
+clearBtn.addEventListener('click', () => {
+  inputArea.value = '';
+  outputArea.value = '';
+  statsBanner.style.display = 'none';
+  hideValidation();
+});
+
+copyBtn.addEventListener('click', () => {
+  const text = outputArea.value;
+  if (!text) return;
+
+  const showCopied = () => {
+    const originalText = copyBtn.textContent;
+    copyBtn.textContent = 'Copied!';
+    setTimeout(() => {
+      copyBtn.textContent = originalText;
+    }, 1500);
+  };
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text)
+      .then(showCopied)
+      .catch(() => {
+        // Fallback copy
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        document.body.appendChild(textarea);
+        textarea.select();
+        try {
+          document.execCommand('copy');
+        } catch (err) {}
+        document.body.removeChild(textarea);
+        showCopied();
+      });
+  } else {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    document.body.appendChild(textarea);
+    textarea.select();
+    try {
+      document.execCommand('copy');
+    } catch (err) {}
+    document.body.removeChild(textarea);
+    showCopied();
+  }
+});
+
+downloadBtn.addEventListener('click', () => {
+  const content = outputArea.value;
+  if (!content) return;
+
+  const blob = new Blob([content], { type: 'text/css' });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'style.css';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+});
+
+inputArea.addEventListener('input', () => {
+  if (!inputArea.value.trim()) {
+    hideValidation();
+    statsBanner.style.display = 'none';
+  }
+});
+</script>
+</body>
+</html>
