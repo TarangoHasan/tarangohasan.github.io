@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Color Picker</title>
+<title>Color Picker & Palette Generator</title>
 <style>
 :root {
   --bg: #0f1724;
@@ -11,6 +11,10 @@
   --accent: #06b6d4;
   --muted: #9aa8b2;
   --glass: rgba(255, 255, 255, 0.03);
+  --border-glass: rgba(255, 255, 255, 0.05);
+}
+* {
+  box-sizing: border-box;
 }
 html, body {
   min-height: 100%;
@@ -24,36 +28,23 @@ html, body {
   padding: 24px;
 }
 .app {
-  width: 400px;
+  width: 580px;
   max-width: 96%;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
   border-radius: 12px;
-  padding: 20px;
+  padding: 24px;
   box-shadow: 0 8px 30px rgba(2, 6, 23, 0.6);
   border: 1px solid rgba(255, 255, 255, 0.03);
 }
 h1 {
   margin: 0;
-  font-size: 20px;
+  font-size: 22px;
 }
 p.lead {
   margin: 6px 0 18px;
   color: var(--muted);
   font-size: 13px;
 }
-.color-display {
-  width: 100%;
-  height: 100px;
-  border-radius: 8px;
-  margin-bottom: 10px;
-}
-
-@media (max-width: 480px) {
-  .app {
-    padding: 15px;
-  }
-}
-
 .back-link {
   display: inline-block;
   margin-bottom: 20px;
@@ -64,57 +55,426 @@ p.lead {
 .back-link:hover {
   text-decoration: underline;
 }
+.picker-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.color-picker-wrapper {
+  max-width: 100%;
+}
+.color-display {
+  width: 100%;
+  height: 60px;
+  border-radius: 8px;
+  margin-top: 15px;
+  border: 1px solid var(--border-glass);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.4);
+}
+.values-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.value-row {
+  display: flex;
+  align-items: center;
+  background: var(--glass);
+  border: 1px solid var(--border-glass);
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+.value-label {
+  width: 60px;
+  font-size: 12px;
+  font-weight: bold;
+  color: var(--accent);
+}
+.value-text {
+  flex-grow: 1;
+  font-family: monospace;
+  font-size: 14px;
+}
+.copy-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--muted);
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.copy-btn:hover {
+  background: var(--accent);
+  color: #042027;
+  border-color: var(--accent);
+}
+
+.panel-title {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 10px;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--border-glass);
+  padding-bottom: 4px;
+}
+
+.harmony-section {
+  margin-bottom: 20px;
+}
+.harmony-group {
+  margin-bottom: 12px;
+}
+.harmony-group-title {
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+.swatch-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.swatch {
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.swatch:hover {
+  transform: scale(1.15);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.recent-section {
+  margin-bottom: 10px;
+}
+
+#hexInput {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  background: var(--glass);
+  border: 1px solid var(--border-glass);
+  color: inherit;
+  box-sizing: border-box;
+  margin-bottom: 15px;
+  font-family: monospace;
+  font-size: 16px;
+  text-align: center;
+}
+#hexInput:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+@media (max-width: 768px) {
+  .app {
+    padding: 16px;
+  }
+}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@jaames/iro/dist/iro.min.js"></script>
 </head>
 <body>
 <div class="app" role="main">
   <a href="../index.html" class="back-link">← Back to Home</a>
-  <h1>Color Picker</h1>
-  <p class="lead">Select a color to see its values.</p>
-  <div class="color-picker" style="display: flex; justify-content: center; margin-bottom: 15px;"></div>
-  <div class="color-display"></div>
-  <input type="text" id="hexInput" placeholder="#ff0000" style="width: 100%; padding: 10px; border-radius: 8px; background: var(--glass); border: 1px solid rgba(255, 255, 255, 0.03); color: inherit; box-sizing: border-box; margin-bottom: 15px; font-family: monospace; font-size: 16px; text-align: center;" />
-  <div id="values" style="display: flex; flex-direction: column; gap: 8px; font-size: 14px; text-align: left; margin-top: 10px;"></div>
+  <h1>Color Picker & Palette Generator</h1>
+  <p class="lead">Select or type a color to dynamically inspect formatting values and build stunning color harmonies.</p>
+
+  <div class="picker-container">
+    <div class="color-picker-wrapper">
+      <div class="color-picker"></div>
+    </div>
+    <div class="color-display"></div>
+  </div>
+
+  <input type="text" id="hexInput" placeholder="#ff0000" />
+
+  <div class="values-panel">
+    <div class="value-row">
+      <span class="value-label">HEX</span>
+      <span class="value-text" id="hex-val">#ff0000</span>
+      <button class="copy-btn" id="copy-hex">Copy</button>
+    </div>
+    <div class="value-row">
+      <span class="value-label">RGB</span>
+      <span class="value-text" id="rgb-val">rgb(255, 0, 0)</span>
+      <button class="copy-btn" id="copy-rgb">Copy</button>
+    </div>
+    <div class="value-row">
+      <span class="value-label">HSL</span>
+      <span class="value-text" id="hsl-val">hsl(0, 100%, 50%)</span>
+      <button class="copy-btn" id="copy-hsl">Copy</button>
+    </div>
+  </div>
+
+  <div class="harmony-section">
+    <div class="panel-title">Color Harmonies (Click to Select)</div>
+
+    <div class="harmony-group">
+      <div class="harmony-group-title">Complementary</div>
+      <div class="swatch-row" id="harmony-complementary"></div>
+    </div>
+
+    <div class="harmony-group">
+      <div class="harmony-group-title">Analogous</div>
+      <div class="swatch-row" id="harmony-analogous"></div>
+    </div>
+
+    <div class="harmony-group">
+      <div class="harmony-group-title">Triadic</div>
+      <div class="swatch-row" id="harmony-triadic"></div>
+    </div>
+
+    <div class="harmony-group">
+      <div class="harmony-group-title">Split-Complementary</div>
+      <div class="swatch-row" id="harmony-split"></div>
+    </div>
+
+    <div class="harmony-group">
+      <div class="harmony-group-title">Monochromatic</div>
+      <div class="swatch-row" id="harmony-monochromatic"></div>
+    </div>
+  </div>
+
+  <div class="recent-section">
+    <div class="panel-title">Recent Colors</div>
+    <div class="swatch-row" id="recent-swatches"></div>
+  </div>
 </div>
+
 <script>
+// Determine width dynamically based on viewport to prevent mobile overflow
+const initialWidth = Math.min(280, window.innerWidth - 64);
+
 const colorPicker = new iro.ColorPicker('.color-picker', {
-  width: 280,
-  color: "#f00"
+  width: initialWidth,
+  color: "#ff0000"
 });
+
 const colorDisplay = document.querySelector('.color-display');
 const hexInput = document.getElementById('hexInput');
-const values = document.getElementById('values');
+
+const hexVal = document.getElementById('hex-val');
+const rgbVal = document.getElementById('rgb-val');
+const hslVal = document.getElementById('hsl-val');
+
+const copyHex = document.getElementById('copy-hex');
+const copyRgb = document.getElementById('copy-rgb');
+const copyHsl = document.getElementById('copy-hsl');
+
+const harmComp = document.getElementById('harmony-complementary');
+const harmAna = document.getElementById('harmony-analogous');
+const harmTri = document.getElementById('harmony-triadic');
+const harmSplit = document.getElementById('harmony-split');
+const harmMono = document.getElementById('harmony-monochromatic');
+
+const recentSwatches = document.getElementById('recent-swatches');
+
+function hslToHex(h, s, l) {
+  l /= 100;
+  const a = s * Math.min(l, 1 - l) / 100;
+  const f = n => {
+    const k = (n + h / 30) % 12;
+    const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+    return Math.round(255 * color).toString(16).padStart(2, '0');
+  };
+  return `#${f(0)}${f(8)}${f(4)}`;
+}
+
+// Recent colors management
+let recents = [];
+try {
+  const saved = localStorage.getItem('recent_colors');
+  if (saved) {
+    recents = JSON.parse(saved);
+  }
+} catch (e) {}
+
+function addRecentColor(hex) {
+  recents = recents.filter(c => c.toLowerCase() !== hex.toLowerCase());
+  recents.unshift(hex);
+  if (recents.length > 12) {
+    recents.pop();
+  }
+  try {
+    localStorage.setItem('recent_colors', JSON.stringify(recents));
+  } catch (e) {}
+  renderRecents();
+}
+
+function renderRecents() {
+  recentSwatches.innerHTML = '';
+  if (recents.length === 0) {
+    recentSwatches.innerHTML = '<span style="font-size:12px;color:var(--muted)">No recent colors.</span>';
+    return;
+  }
+  recents.forEach(color => {
+    const swatch = document.createElement('div');
+    swatch.className = 'swatch';
+    swatch.style.backgroundColor = color;
+    swatch.title = color;
+    swatch.addEventListener('click', () => {
+      colorPicker.color.set(color);
+    });
+    recentSwatches.appendChild(swatch);
+  });
+}
+
+function renderHarmonies(color) {
+  const { h, s, l } = color.hsl;
+
+  const palettes = {
+    complementary: [
+      { h, s, l },
+      { h: (h + 180) % 360, s, l }
+    ],
+    analogous: [
+      { h: (h - 30 + 360) % 360, s, l },
+      { h, s, l },
+      { h: (h + 30) % 360, s, l }
+    ],
+    triadic: [
+      { h, s, l },
+      { h: (h + 120) % 360, s, l },
+      { h: (h + 240) % 360, s, l }
+    ],
+    split: [
+      { h, s, l },
+      { h: (h + 150) % 360, s, l },
+      { h: (h + 210) % 360, s, l }
+    ],
+    monochromatic: [
+      { h, s, l: Math.max(10, l - 30) },
+      { h, s, l: Math.max(20, l - 15) },
+      { h, s, l },
+      { h, s, l: Math.min(90, l + 15) },
+      { h, s, l: Math.min(100, l + 30) }
+    ]
+  };
+
+  const drawSwatches = (container, list) => {
+    container.innerHTML = '';
+    list.forEach(item => {
+      const hex = hslToHex(item.h, item.s, item.l);
+      const swatch = document.createElement('div');
+      swatch.className = 'swatch';
+      swatch.style.backgroundColor = hex;
+      swatch.title = hex;
+      swatch.addEventListener('click', () => {
+        colorPicker.color.set(hex);
+      });
+      container.appendChild(swatch);
+    });
+  };
+
+  drawSwatches(harmComp, palettes.complementary);
+  drawSwatches(harmAna, palettes.analogous);
+  drawSwatches(harmTri, palettes.triadic);
+  drawSwatches(harmSplit, palettes.split);
+  drawSwatches(harmMono, palettes.monochromatic);
+}
+
+// Timer to prevent local storage spamming on live dragging
+let recentTimeout = null;
 
 function updateColorValues(color) {
   colorDisplay.style.backgroundColor = color.hexString;
-  values.innerHTML = `
-    <div>HEX: ${color.hexString}</div>
-    <div>RGB: ${color.rgbString}</div>
-    <div>HSL: ${color.hslString}</div>
-  `;
+
+  hexVal.textContent = color.hexString.toUpperCase();
+  rgbVal.textContent = color.rgbString;
+  hslVal.textContent = color.hslString;
+
   if (document.activeElement !== hexInput) {
     hexInput.value = color.hexString;
   }
+
+  renderHarmonies(color);
+
+  // Add to recents after mouse/touch interaction ends or with a delay
+  clearTimeout(recentTimeout);
+  recentTimeout = setTimeout(() => {
+    addRecentColor(color.hexString);
+  }, 500);
 }
 
 colorPicker.on('color:change', updateColorValues);
 
 hexInput.addEventListener('input', () => {
   const value = hexInput.value.trim();
-  // regex validation for 3, 4, 6, or 8 digit hex code
   if (/^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/.test(value)) {
     const hex = value.startsWith('#') ? value : '#' + value;
     try {
       colorPicker.color.set(hex);
-    } catch (e) {
-      // ignore invalid set
+    } catch (e) {}
+  }
+});
+
+// Setup Copy Buttons
+function setupCopy(btn, element) {
+  btn.addEventListener('click', () => {
+    const text = element.textContent;
+    const showCopied = () => {
+      const originalText = btn.textContent;
+      btn.textContent = 'Copied!';
+      setTimeout(() => {
+        btn.textContent = originalText;
+      }, 1500);
+    };
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text)
+        .then(showCopied)
+        .catch(() => {
+          // Fallback copy
+          const textarea = document.createElement('textarea');
+          textarea.value = text;
+          document.body.appendChild(textarea);
+          textarea.select();
+          try {
+            document.execCommand('copy');
+          } catch (err) {}
+          document.body.removeChild(textarea);
+          showCopied();
+        });
+    } else {
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        document.execCommand('copy');
+      } catch (err) {}
+      document.body.removeChild(textarea);
+      showCopied();
     }
+  });
+}
+
+setupCopy(copyHex, hexVal);
+setupCopy(copyRgb, rgbVal);
+setupCopy(copyHsl, hslVal);
+
+// Resize handling for responsive iro.js widget size
+window.addEventListener('resize', () => {
+  const newWidth = Math.min(280, window.innerWidth - 64);
+  if (Math.abs(colorPicker.width - newWidth) > 10) {
+    colorPicker.resize(newWidth);
   }
 });
 
 // Init
 updateColorValues(colorPicker.color);
+renderRecents();
 </script>
 </body>
 </html>
