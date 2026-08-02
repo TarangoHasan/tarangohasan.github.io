@@ -1,0 +1,662 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>CSS Glassmorphism Generator</title>
+<style>
+:root {
+  --bg: #0f1724;
+  --card: #0b1220;
+  --accent: #06b6d4;
+  --muted: #9aa8b2;
+  --glass: rgba(255, 255, 255, 0.03);
+}
+* {
+  box-sizing: border-box;
+}
+html, body {
+  min-height: 100%;
+  margin: 0;
+  font-family: Inter, system-ui, Segoe UI, Roboto, Arial;
+  background: linear-gradient(180deg, #041025 0%, #0b1730 100%);
+  color: #e6eef6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.app {
+  width: 1000px;
+  max-width: 96%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 8px 30px rgba(2, 6, 23, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+h1 {
+  margin: 0;
+  font-size: 22px;
+}
+p.lead {
+  margin: 6px 0 18px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.back-link {
+  display: inline-block;
+  margin-bottom: 20px;
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 14px;
+}
+.back-link:hover {
+  text-decoration: underline;
+}
+
+/* Two-column layout */
+.generator-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.panel {
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: 10px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.panel-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--accent);
+  margin-bottom: 4px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: 8px;
+}
+
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.control-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.control-val {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.input-row {
+  display: flex;
+  gap: 10px;
+}
+
+input[type="range"] {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.1);
+  outline: none;
+  margin: 10px 0;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(6, 182, 212, 0.5);
+  transition: transform 0.1s;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+input[type="color"] {
+  -webkit-appearance: none;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  cursor: pointer;
+  background: none;
+  padding: 0;
+}
+
+input[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+input[type="color"]::-webkit-color-swatch {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+}
+
+input[type="text"] {
+  flex: 1;
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: var(--glass);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  color: inherit;
+  font-size: 13px;
+}
+
+input[type="text"]:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+select {
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--glass);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  color: inherit;
+  font-size: 13px;
+}
+
+select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+/* Preview area */
+.preview-pane {
+  position: relative;
+  border-radius: 10px;
+  min-height: 280px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  transition: background 0.3s;
+}
+
+/* Background Presets */
+.bg-cool-blues {
+  background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #1d4ed8 100%);
+}
+.bg-warm-sunset {
+  background: linear-gradient(135deg, #7c2d12 0%, #ea580c 50%, #db2777 100%);
+}
+.bg-neon-cyberpunk {
+  background: linear-gradient(135deg, #581c87 0%, #d946ef 50%, #06b6d4 100%);
+}
+.bg-mystic-purple {
+  background: linear-gradient(135deg, #311042 0%, #632c80 50%, #4a1d6d 100%);
+}
+.bg-minimal-grid {
+  background-color: #111827;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.bg-shapes {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.shape {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(5px);
+  opacity: 0.8;
+}
+
+.shape-1 {
+  width: 100px;
+  height: 100px;
+  background: #f43f5e;
+  top: 15%;
+  left: 15%;
+}
+
+.shape-2 {
+  width: 120px;
+  height: 120px;
+  background: #10b981;
+  bottom: 15%;
+  right: 15%;
+}
+
+.shape-3 {
+  width: 80px;
+  height: 80px;
+  background: #eab308;
+  top: 50%;
+  left: 60%;
+}
+
+/* Glass card inside preview */
+.glass-card {
+  position: relative;
+  z-index: 2;
+  width: 280px;
+  padding: 24px;
+  text-align: center;
+  transition: all 0.1s ease;
+}
+
+.glass-card h3 {
+  margin: 0 0 8px;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.glass-card p {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  opacity: 0.8;
+}
+
+/* Code Output */
+.code-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.code-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.code-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.copy-btn {
+  background: var(--glass);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  padding: 6px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.copy-btn:hover {
+  background: var(--accent);
+  color: #042027;
+  border-color: var(--accent);
+}
+
+pre {
+  margin: 0;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  padding: 12px;
+  font-family: monospace;
+  font-size: 12px;
+  color: #38bdf8;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+@media (max-width: 768px) {
+  .generator-container {
+    grid-template-columns: 1fr !important;
+  }
+}
+</style>
+</head>
+<body>
+<div class="app" role="main">
+  <a href="../index.html" class="back-link">← Back to Home</a>
+  <h1>CSS Glassmorphism Generator</h1>
+  <p class="lead">Design and inspect modern frosted-glass cards in real-time. Fine-tune transparency, borders, shadows, and blur.</p>
+
+  <div class="generator-container">
+    <!-- Left Column: Controls -->
+    <div class="panel">
+      <div class="panel-title">Card Settings</div>
+
+      <!-- Backdrop Blur -->
+      <div class="control-group">
+        <div class="control-header">
+          <label for="blur-slider">Backdrop Blur</label>
+          <span class="control-val" id="blur-val">10px</span>
+        </div>
+        <input type="range" id="blur-slider" min="0" max="40" value="10" />
+      </div>
+
+      <!-- Background Opacity -->
+      <div class="control-group">
+        <div class="control-header">
+          <label for="bg-opacity-slider">Background Opacity</label>
+          <span class="control-val" id="bg-opacity-val">0.05</span>
+        </div>
+        <input type="range" id="bg-opacity-slider" min="0" max="1" step="0.01" value="0.05" />
+      </div>
+
+      <!-- Background Color -->
+      <div class="control-group">
+        <label for="bg-color-hex">Background Hex Color</label>
+        <div class="input-row">
+          <input type="color" id="bg-color-picker" value="#ffffff" />
+          <input type="text" id="bg-color-hex" value="#ffffff" placeholder="#ffffff" />
+        </div>
+      </div>
+
+      <!-- Border Opacity -->
+      <div class="control-group">
+        <div class="control-header">
+          <label for="border-opacity-slider">Border Opacity</label>
+          <span class="control-val" id="border-opacity-val">0.1</span>
+        </div>
+        <input type="range" id="border-opacity-slider" min="0" max="1" step="0.01" value="0.1" />
+      </div>
+
+      <!-- Border Color -->
+      <div class="control-group">
+        <label for="border-color-hex">Border Hex Color</label>
+        <div class="input-row">
+          <input type="color" id="border-color-picker" value="#ffffff" />
+          <input type="text" id="border-color-hex" value="#ffffff" placeholder="#ffffff" />
+        </div>
+      </div>
+
+      <!-- Border Width -->
+      <div class="control-group">
+        <div class="control-header">
+          <label for="border-width-slider">Border Width</label>
+          <span class="control-val" id="border-width-val">1px</span>
+        </div>
+        <input type="range" id="border-width-slider" min="0" max="10" value="1" />
+      </div>
+
+      <!-- Border Radius -->
+      <div class="control-group">
+        <div class="control-header">
+          <label for="border-radius-slider">Border Radius</label>
+          <span class="control-val" id="border-radius-val">12px</span>
+        </div>
+        <input type="range" id="border-radius-slider" min="0" max="50" value="12" />
+      </div>
+
+      <!-- Box Shadow Opacity -->
+      <div class="control-group">
+        <div class="control-header">
+          <label for="shadow-opacity-slider">Shadow Opacity</label>
+          <span class="control-val" id="shadow-opacity-val">0.3</span>
+        </div>
+        <input type="range" id="shadow-opacity-slider" min="0" max="1" step="0.01" value="0.3" />
+      </div>
+
+      <!-- Box Shadow Blur -->
+      <div class="control-group">
+        <div class="control-header">
+          <label for="shadow-blur-slider">Shadow Blur Depth</label>
+          <span class="control-val" id="shadow-blur-val">24px</span>
+        </div>
+        <input type="range" id="shadow-blur-slider" min="0" max="100" value="24" />
+      </div>
+
+      <!-- Preview Background Type -->
+      <div class="control-group">
+        <label for="bg-preset-select">Preview Canvas Theme</label>
+        <select id="bg-preset-select">
+          <option value="bg-neon-cyberpunk">Neon Cyberpunk</option>
+          <option value="bg-cool-blues" selected>Cool Blues</option>
+          <option value="bg-warm-sunset">Warm Sunset</option>
+          <option value="bg-mystic-purple">Mystic Purple</option>
+          <option value="bg-minimal-grid">Minimal Grid</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Right Column: Visual Preview & Code Export -->
+    <div class="panel">
+      <div class="panel-title">Real-Time Preview</div>
+
+      <div class="preview-pane bg-cool-blues" id="preview-container">
+        <!-- Floating Abstract Shapes under the glass to verify backdrop-filter -->
+        <div class="bg-shapes">
+          <div class="shape shape-1"></div>
+          <div class="shape shape-2"></div>
+          <div class="shape shape-3"></div>
+        </div>
+
+        <div class="glass-card" id="preview-card">
+          <h3>Glassmorphism</h3>
+          <p>Beautiful frosting effects layered smoothly over glowing gradient details.</p>
+        </div>
+      </div>
+
+      <div class="code-container">
+        <div class="code-title-row">
+          <span class="code-label">Vanilla CSS Styles</span>
+          <button class="copy-btn" id="copy-css-btn">Copy CSS</button>
+        </div>
+        <pre id="css-output"></pre>
+      </div>
+
+      <div class="code-container">
+        <div class="code-title-row">
+          <span class="code-label">Tailwind CSS Classes</span>
+          <button class="copy-btn" id="copy-tailwind-btn">Copy Tailwind</button>
+        </div>
+        <pre id="tailwind-output"></pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Sliders and Value text spans
+const blurSlider = document.getElementById('blur-slider');
+const blurVal = document.getElementById('blur-val');
+
+const bgOpacitySlider = document.getElementById('bg-opacity-slider');
+const bgOpacityVal = document.getElementById('bg-opacity-val');
+
+const bgColorPicker = document.getElementById('bg-color-picker');
+const bgColorHex = document.getElementById('bg-color-hex');
+
+const borderOpacitySlider = document.getElementById('border-opacity-slider');
+const borderOpacityVal = document.getElementById('border-opacity-val');
+
+const borderColorPicker = document.getElementById('border-color-picker');
+const borderColorHex = document.getElementById('border-color-hex');
+
+const borderWidthSlider = document.getElementById('border-width-slider');
+const borderWidthVal = document.getElementById('border-width-val');
+
+const borderRadiusSlider = document.getElementById('border-radius-slider');
+const borderRadiusVal = document.getElementById('border-radius-val');
+
+const shadowOpacitySlider = document.getElementById('shadow-opacity-slider');
+const shadowOpacityVal = document.getElementById('shadow-opacity-val');
+
+const shadowBlurSlider = document.getElementById('shadow-blur-slider');
+const shadowBlurVal = document.getElementById('shadow-blur-val');
+
+const bgPresetSelect = document.getElementById('bg-preset-select');
+const previewContainer = document.getElementById('preview-container');
+const previewCard = document.getElementById('preview-card');
+
+const cssOutput = document.getElementById('css-output');
+const tailwindOutput = document.getElementById('tailwind-output');
+
+const copyCssBtn = document.getElementById('copy-css-btn');
+const copyTailwindBtn = document.getElementById('copy-tailwind-btn');
+
+// Convert Hex to RGBA
+function hexToRgb(hex) {
+  let c = hex.replace('#', '');
+  if (c.length === 3) {
+    c = c.split('').map(x => x + x).join('');
+  }
+  const num = parseInt(c, 16);
+  return {
+    r: (num >> 16) & 255,
+    g: (num >> 8) & 255,
+    b: num & 255
+  };
+}
+
+// Update the interactive preview card and code outputs
+function updateCard() {
+  const blur = parseInt(blurSlider.value, 10);
+  const bgOpacity = parseFloat(bgOpacitySlider.value);
+  const bgHex = bgColorHex.value.trim();
+  const borderOpacity = parseFloat(borderOpacitySlider.value);
+  const borderHex = borderColorHex.value.trim();
+  const borderWidth = parseInt(borderWidthSlider.value, 10);
+  const borderRadius = parseInt(borderRadiusSlider.value, 10);
+  const shadowOpacity = parseFloat(shadowOpacitySlider.value);
+  const shadowBlur = parseInt(shadowBlurSlider.value, 10);
+
+  // Update slider displays
+  blurVal.textContent = `${blur}px`;
+  bgOpacityVal.textContent = bgOpacity.toFixed(2);
+  borderOpacityVal.textContent = borderOpacity.toFixed(2);
+  borderWidthVal.textContent = `${borderWidth}px`;
+  borderRadiusVal.textContent = `${borderRadius}px`;
+  shadowOpacityVal.textContent = shadowOpacity.toFixed(2);
+  shadowBlurVal.textContent = `${shadowBlur}px`;
+
+  // Parse colors safely
+  let bgRgb = { r: 255, g: 255, b: 255 };
+  try {
+    if (/^#[0-9A-Fa-f]{3,6}$/.test(bgHex)) {
+      bgRgb = hexToRgb(bgHex);
+    }
+  } catch(e) {}
+
+  let borderRgb = { r: 255, g: 255, b: 255 };
+  try {
+    if (/^#[0-9A-Fa-f]{3,6}$/.test(borderHex)) {
+      borderRgb = hexToRgb(borderHex);
+    }
+  } catch(e) {}
+
+  // Apply visual styles to preview card
+  const bgColorStr = `rgba(${bgRgb.r}, ${bgRgb.g}, ${bgRgb.b}, ${bgOpacity})`;
+  const borderStyleStr = `${borderWidth}px solid rgba(${borderRgb.r}, ${borderRgb.g}, ${borderRgb.b}, ${borderOpacity})`;
+  const backdropFilterStr = `blur(${blur}px)`;
+  const boxShadowStr = `0 8px 32px 0 rgba(0, 0, 0, ${shadowOpacity})`;
+
+  previewCard.style.background = bgColorStr;
+  previewCard.style.backdropFilter = backdropFilterStr;
+  previewCard.style.webkitBackdropFilter = backdropFilterStr;
+  previewCard.style.border = borderStyleStr;
+  previewCard.style.borderRadius = `${borderRadius}px`;
+  previewCard.style.boxShadow = boxShadowStr;
+
+  // Generate Vanilla CSS code snippet
+  const cssCode = `background: ${bgColorStr};
+backdrop-filter: blur(${blur}px);
+-webkit-backdrop-filter: blur(${blur}px);
+border: ${borderStyleStr};
+border-radius: ${borderRadius}px;
+box-shadow: ${boxShadowStr};`;
+
+  cssOutput.textContent = cssCode;
+
+  // Generate Tailwind CSS classes approximation
+  let twBg = `bg-white/[${bgOpacity}]`;
+  if (bgRgb.r === 0 && bgRgb.g === 0 && bgRgb.b === 0) twBg = `bg-black/[${bgOpacity}]`;
+  else if (bgHex !== '#ffffff' && bgHex !== '#000000') twBg = `bg-[rgba(${bgRgb.r},${bgRgb.g},${bgRgb.b},${bgOpacity})]`;
+
+  let twBorder = `border border-white/[${borderOpacity}]`;
+  if (borderWidth === 0) twBorder = 'border-none';
+  else if (borderWidth > 1) {
+    twBorder = `border-[${borderWidth}px] border-white/[${borderOpacity}]`;
+  }
+  if (borderHex !== '#ffffff') {
+    twBorder = `border-[${borderWidth}px] border-[rgba(${borderRgb.r},${borderRgb.g},${borderRgb.b},${borderOpacity})]`;
+  }
+
+  const twBlur = `backdrop-blur-[${blur}px]`;
+  const twRounded = `rounded-[${borderRadius}px]`;
+  const twShadow = `shadow-[0_8px_32px_0_rgba(0,0,0,${shadowOpacity})]`;
+
+  const twCode = `${twBg} ${twBlur} ${twBorder} ${twRounded} ${twShadow}`;
+  tailwindOutput.textContent = twCode;
+}
+
+// Synced inputs helper
+function syncColor(picker, hexInput) {
+  picker.addEventListener('input', () => {
+    hexInput.value = picker.value;
+    updateCard();
+  });
+  hexInput.addEventListener('input', () => {
+    const val = hexInput.value.trim();
+    if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
+      picker.value = val;
+    }
+    updateCard();
+  });
+}
+
+syncColor(bgColorPicker, bgColorHex);
+syncColor(borderColorPicker, borderColorHex);
+
+// Bind simple input listeners
+[
+  blurSlider, bgOpacitySlider, borderOpacitySlider,
+  borderWidthSlider, borderRadiusSlider, shadowOpacitySlider, shadowBlurSlider
+].forEach(el => el.addEventListener('input', updateCard));
+
+// Handle dynamic background updates
+bgPresetSelect.addEventListener('change', () => {
+  previewContainer.className = `preview-pane ${bgPresetSelect.value}`;
+});
+
+// Setup copy triggers
+function handleCopy(btn, element) {
+  btn.addEventListener('click', () => {
+    const code = element.textContent;
+    navigator.clipboard.writeText(code).then(() => {
+      const originalText = btn.textContent;
+      btn.textContent = 'Copied!';
+      setTimeout(() => {
+        btn.textContent = originalText;
+      }, 1500);
+    });
+  });
+}
+
+handleCopy(copyCssBtn, cssOutput);
+handleCopy(copyTailwindBtn, tailwindOutput);
+
+// Init card layout
+updateCard();
+</script>
+</body>
+</html>
