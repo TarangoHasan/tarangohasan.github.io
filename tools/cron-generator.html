@@ -1,0 +1,1347 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Cron Expression Generator &amp; Parser</title>
+<style>
+:root {
+  --bg: #0f1724;
+  --card: #0b1220;
+  --accent: #06b6d4;
+  --muted: #9aa8b2;
+  --glass: rgba(255, 255, 255, 0.03);
+}
+* {
+  box-sizing: border-box;
+}
+html, body {
+  min-height: 100%;
+  margin: 0;
+  font-family: Inter, system-ui, Segoe UI, Roboto, Arial;
+  background: linear-gradient(180deg, #041025 0%, #0b1730 100%);
+  color: #e6eef6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.app {
+  width: 800px;
+  max-width: 96%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 8px 30px rgba(2, 6, 23, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+h1 {
+  margin: 0;
+  font-size: 22px;
+}
+p.lead {
+  margin: 6px 0 18px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.back-link {
+  display: inline-block;
+  margin-bottom: 20px;
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 14px;
+}
+.back-link:hover {
+  text-decoration: underline;
+}
+
+/* Preset & Live String Header */
+.header-card {
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+label {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+select, input[type="text"], input[type="number"] {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  background: var(--glass);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  color: inherit;
+  font-size: 14px;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+select:focus, input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+/* Cron Expression Live Display Row */
+.cron-display-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  background: rgba(0,0,0,0.2);
+  padding: 10px 15px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  margin-top: 15px;
+}
+.cron-input-wrapper {
+  flex: 1;
+}
+.cron-input-wrapper input {
+  font-family: monospace;
+  font-size: 18px;
+  letter-spacing: 1px;
+  color: #34d399;
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+.cron-input-wrapper input:focus {
+  border: none;
+  outline: none;
+}
+
+/* Tab-based Editor */
+.tabs {
+  display: flex;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 8px;
+  padding: 4px;
+  margin-bottom: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  overflow-x: auto;
+}
+.tab-btn {
+  flex: 1;
+  background: transparent;
+  border: 0;
+  padding: 8px 12px;
+  border-radius: 6px;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s;
+  white-space: nowrap;
+  text-align: center;
+}
+.tab-btn.active {
+  background: var(--accent);
+  color: #042027;
+  font-weight: 600;
+}
+.tab-content {
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+.tab-pane {
+  display: none;
+}
+.tab-pane.active {
+  display: block;
+}
+
+/* Radio Option Block */
+.option-block {
+  margin-bottom: 15px;
+}
+.option-block:last-child {
+  margin-bottom: 0;
+}
+.radio-label {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  cursor: pointer;
+  margin-bottom: 8px;
+  user-select: none;
+}
+.radio-label input {
+  margin-right: 8px;
+  cursor: pointer;
+}
+.sub-options {
+  margin-left: 24px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.01);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.02);
+}
+
+/* Value Selection Grid (for Specific checklist) */
+.value-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+  gap: 6px;
+  max-height: 150px;
+  overflow-y: auto;
+  padding: 5px;
+  background: rgba(0,0,0,0.15);
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+.value-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.value-checkbox-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 6px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+  font-size: 11px;
+  font-family: monospace;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.1s;
+}
+.value-checkbox-label input {
+  display: none;
+}
+.value-checkbox-label:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+.value-checkbox-label.selected {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #042027;
+  font-weight: 600;
+}
+
+/* Info Cards styling */
+.info-card {
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+.info-card h3 {
+  margin: 0 0 10px 0;
+  font-size: 14px;
+  color: var(--accent);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.explanation-text {
+  font-size: 15px;
+  line-height: 1.5;
+  color: #e6eef6;
+}
+.date-list {
+  margin: 0;
+  padding-left: 20px;
+  font-family: monospace;
+  font-size: 13px;
+  color: #e6eef6;
+  line-height: 1.6;
+}
+
+/* Copy & Copy notification */
+button {
+  background: linear-gradient(90deg, var(--accent), #3b82f6);
+  border: 0;
+  padding: 10px 16px;
+  font-weight: 600;
+  border-radius: 8px;
+  color: #042027;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.1s;
+  font-size: 13px;
+}
+button:hover {
+  opacity: 0.9;
+}
+button:active {
+  transform: scale(0.98);
+}
+button.secondary {
+  background: var(--glass);
+  color: #e6eef6;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+button.secondary:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.validation-result {
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  display: none;
+  margin-top: 10px;
+}
+.validation-result.valid {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  display: block;
+}
+.validation-result.invalid {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #f87171;
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .grid-2 {
+    grid-template-columns: 1fr !important;
+  }
+  .cron-display-row {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  .cron-display-row button {
+    width: 100%;
+  }
+  .tabs {
+    flex-wrap: nowrap;
+  }
+}
+</style>
+</head>
+<body>
+<div class="app" role="main">
+  <a href="../index.html" class="back-link">← Back to Home</a>
+  <h1>Cron Expression Generator &amp; Parser</h1>
+  <p class="lead">Generate, test, and analyze cron schedule expressions interactively with live English explanations and upcoming schedule dates.</p>
+
+  <!-- Header Card (Presets & Custom input) -->
+  <div class="header-card">
+    <div class="grid-2">
+      <div>
+        <label for="presets">Select Preset Schedule</label>
+        <select id="presets">
+          <option value="custom">-- Custom Cron Expression --</option>
+          <option value="* * * * *">Every Minute (* * * * *)</option>
+          <option value="*/5 * * * *">Every 5 Minutes (*/5 * * * *)</option>
+          <option value="0 * * * *">Every Hour (0 * * * *)</option>
+          <option value="0 */2 * * *">Every 2 Hours (0 */2 * * *)</option>
+          <option value="0 0 * * *">Every Day at Midnight (0 0 * * *)</option>
+          <option value="0 12 * * *">Every Day at 12:00 PM (0 12 * * *)</option>
+          <option value="0 0 * * 0">Every Sunday at Midnight (0 0 * * 0)</option>
+          <option value="0 9 * * 1-5">At 9:00 AM on Weekdays (0 9 * * 1-5)</option>
+          <option value="0 0 1 * *">First Day of Every Month (0 0 1 * *)</option>
+        </select>
+      </div>
+      <div>
+        <label for="cron-input">Cron Syntax Reference</label>
+        <div style="font-size: 12px; color: var(--muted); line-height: 1.4; padding: 4px 0;">
+          <code>min hr dom mon dow</code><br />
+          Ranges: <code>1-5</code> | Steps: <code>*/10</code> | Lists: <code>1,2,5</code>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Cron display and copy -->
+    <div class="cron-display-row">
+      <div class="cron-input-wrapper">
+        <label for="cron-input" style="margin-bottom: 2px;">Active Cron Expression</label>
+        <input type="text" id="cron-input" value="* * * * *" placeholder="e.g. */5 * * * *" />
+      </div>
+      <button id="copyBtn">Copy Expression</button>
+    </div>
+    <div id="validation-box" class="validation-result"></div>
+  </div>
+
+  <!-- Interactive Editor Tabs -->
+  <div class="tabs" id="editor-tabs">
+    <button class="tab-btn active" data-tab="minutes">Minutes</button>
+    <button class="tab-btn" data-tab="hours">Hours</button>
+    <button class="tab-btn" data-tab="dom">Day of Month</button>
+    <button class="tab-btn" data-tab="months">Months</button>
+    <button class="tab-btn" data-tab="dow">Day of Week</button>
+  </div>
+
+  <div class="tab-content">
+    <!-- Minutes Tab -->
+    <div class="tab-pane active" id="tab-minutes">
+      <div class="option-block">
+        <label class="radio-label">
+          <input type="radio" name="minute-mode" value="all" checked />
+          <span>Every minute (*)</span>
+        </label>
+      </div>
+      <div class="option-block">
+        <label class="radio-label">
+          <input type="radio" name="minute-mode" value="step" />
+          <span>At steps / intervals</span>
+        </label>
+        <div class="sub-options" id="min-step-options" style="display: none;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span>Every</span>
+            <input type="number" id="min-step" min="1" max="59" value="5" style="width: 80px;" />
+            <span>minute(s) starting at minute 0</span>
+          </div>
+        </div>
+      </div>
+      <div class="option-block">
+        <label class="radio-label">
+          <input type="radio" name="minute-mode" value="range" />
+          <span>Between specific minutes (Range)</span>
+        </label>
+        <div class="sub-options" id="min-range-options" style="display: none;">
+          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <span>From minute</span>
+            <input type="number" id="min-range-start" min="0" max="59" value="10" style="width: 80px;" />
+            <span>to minute</span>
+            <input type="number" id="min-range-end" min="0" max="59" value="20" style="width: 80px;" />
+          </div>
+        </div>
+      </div>
+      <div class="option-block">
+        <label class="radio-label">
+          <input type="radio" name="minute-mode" value="specific" />
+          <span>Specific minute values</span>
+        </label>
+        <div class="sub-options" id="min-specific-options" style="display: none;">
+          <div class="value-grid" id="min-values-grid"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hours Tab -->
+    <div class="tab-pane" id="tab-hours">
+      <div class="option-block">
+        <label class="radio-label">
+          <input type="radio" name="hour-mode" value="all" checked />
+          <span>Every hour (*)</span>
+        </label>
+      </div>
+      <div class="option-block">
+        <label class="radio-label">
+          <input type="radio" name="hour-mode" value="step" />
+          <span>At steps / intervals</span>
+        </label>
+        <div class="sub-options" id="hour-step-options" style="display: none;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span>Every</span>
+            <input type="number" id="hour-step" min="1" max="23" value="2" style="width: 80px;" />
+            <span>hour(s) starting at hour 0</span>
+          </div>
+        </div>
+      </div>
+      <div class="option-block">
+        <label class="radio-label">
+          <input type="radio" name="hour-mode" value="range" />
+          <span>Between specific hours (Range)</span>
+        </label>
+        <div class="sub-options" id="hour-range-options" style="display: none;">
+          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <span>From hour</span>
+            <input type="number" id="hour-range-start" min="0" max="23" value="9" style="width: 80px;" />
+            <span>to hour</span>
+            <input type="number" id="hour-range-end" min="0" max="23" value="17" style="width: 80px;" />
+          </div>
+        </div>
+      </div>
+      <div class="option-block">
+        <label class="radio-label">
+          <input type="radio" name="hour-mode" value="specific" />
+          <span>Specific hour values</span>
+        </label>
+        <div class="sub-options" id="hour-specific-options" style="display: none;">
+          <div class="value-grid" id="hour-values-grid"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Day of Month Tab -->
+    <div class="tab-pane" id="tab-dom">
+      <div class="option-block">
+        <label class="radio-label">
+          <input type="radio" name="dom-mode" value="all" checked />
+          <span>Every day of month (*)</span>
+        </label>
+      </div>
+      <div class="option-block">
+        <label class="radio-label">
+          <input type="radio" name="dom-mode" value="step" />
+          <span>At steps / intervals</span>
+        </label>
+        <div class="sub-options" id="dom-step-options" style="display: none;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span>Every</span>
+            <input type="number" id="dom-step" min="1" max="31" value="2" style="width: 80px;" />
+            <span>day(s) starting on day 1</span>
+          </div>
+        </div>
+      </div>
+      <div class="option-block">
+        <label class="radio-label">
+          <input type="radio" name="dom-mode" value="range" />
+          <span>Between specific days (Range)</span>
+        </label>
+        <div class="sub-options" id="dom-range-options" style="display: none;">
+          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <span>From day</span>
+            <input type="number" id="dom-range-start" min="1" max="31" value="1" style="width: 80px;" />
+            <span>to day</span>
+            <input type="number" id="dom-range-end" min="1" max="31" value="15" style="width: 80px;" />
+          </div>
+        </div>
+      </div>
+      <div class="option-block">
+        <label class="radio-label">
+          <input type="radio" name="dom-mode" value="specific" />
+          <span>Specific day values</span>
+        </label>
+        <div class="sub-options" id="dom-specific-options" style="display: none;">
+          <div class="value-grid" id="dom-values-grid"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Months Tab -->
+    <div class="tab-pane" id="tab-months">
+      <div class="option-block">
+        <label class="radio-label">
+          <input type="radio" name="month-mode" value="all" checked />
+          <span>Every month (*)</span>
+        </label>
+      </div>
+      <div class="option-block">
+        <label class="radio-label">
+          <input type="radio" name="month-mode" value="range" />
+          <span>Between specific months (Range)</span>
+        </label>
+        <div class="sub-options" id="month-range-options" style="display: none;">
+          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <span>From month</span>
+            <select id="month-range-start" style="width: 120px;">
+              <option value="1">January</option>
+              <option value="2">February</option>
+              <option value="3">March</option>
+              <option value="4">April</option>
+              <option value="5">May</option>
+              <option value="6">June</option>
+              <option value="7">July</option>
+              <option value="8">August</option>
+              <option value="9">September</option>
+              <option value="10">October</option>
+              <option value="11">November</option>
+              <option value="12">December</option>
+            </select>
+            <span>to month</span>
+            <select id="month-range-end" style="width: 120px;">
+              <option value="1">January</option>
+              <option value="2">February</option>
+              <option value="3">March</option>
+              <option value="4">April</option>
+              <option value="5">May</option>
+              <option value="6">June</option>
+              <option value="7">July</option>
+              <option value="8">August</option>
+              <option value="9">September</option>
+              <option value="10">October</option>
+              <option value="11">November</option>
+              <option value="12" selected>December</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="option-block">
+        <label class="radio-label">
+          <input type="radio" name="month-mode" value="specific" />
+          <span>Specific months</span>
+        </label>
+        <div class="sub-options" id="month-specific-options" style="display: none;">
+          <div class="value-grid" id="month-values-grid"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Day of Week Tab -->
+    <div class="tab-pane" id="tab-dow">
+      <div class="option-block">
+        <label class="radio-label">
+          <input type="radio" name="dow-mode" value="all" checked />
+          <span>Every day of week (*)</span>
+        </label>
+      </div>
+      <div class="option-block">
+        <label class="radio-label">
+          <input type="radio" name="dow-mode" value="range" />
+          <span>Between specific weekdays (Range)</span>
+        </label>
+        <div class="sub-options" id="dow-range-options" style="display: none;">
+          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <span>From day</span>
+            <select id="dow-range-start" style="width: 120px;">
+              <option value="1">Monday</option>
+              <option value="2">Tuesday</option>
+              <option value="3">Wednesday</option>
+              <option value="4">Thursday</option>
+              <option value="5">Friday</option>
+              <option value="6">Saturday</option>
+              <option value="0">Sunday</option>
+            </select>
+            <span>to day</span>
+            <select id="dow-range-end" style="width: 120px;">
+              <option value="1">Monday</option>
+              <option value="2">Tuesday</option>
+              <option value="3">Wednesday</option>
+              <option value="4">Thursday</option>
+              <option value="5" selected>Friday</option>
+              <option value="6">Saturday</option>
+              <option value="0">Sunday</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="option-block">
+        <label class="radio-label">
+          <input type="radio" name="dow-mode" value="specific" />
+          <span>Specific days of week</span>
+        </label>
+        <div class="sub-options" id="dow-specific-options" style="display: none;">
+          <div class="value-grid" id="dow-values-grid"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Live Description and upcoming dates -->
+  <div class="info-card">
+    <h3>Schedule Description (Human Readable)</h3>
+    <div class="explanation-text" id="explanation-text">Every minute.</div>
+  </div>
+
+  <div class="info-card">
+    <h3>Next 5 Upcoming Execution Times</h3>
+    <ul class="date-list" id="upcoming-dates">
+      <li>Calculating...</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+// --- Variables and Initializations ---
+const tabButtons = document.querySelectorAll('#editor-tabs .tab-btn');
+const tabPanes = document.querySelectorAll('.tab-pane');
+const presetsSelect = document.getElementById('presets');
+const cronInput = document.getElementById('cron-input');
+const copyBtn = document.getElementById('copyBtn');
+const validationBox = document.getElementById('validation-box');
+
+const explanationText = document.getElementById('explanation-text');
+const upcomingDatesList = document.getElementById('upcoming-dates');
+
+// Maps for Day names and Month names
+const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+// Generate grids for Minutes, Hours, DOM, Months, Weekdays
+function createGrid(containerId, min, max, labelMapper = (v) => v) {
+  const grid = document.getElementById(containerId);
+  grid.innerHTML = '';
+  for (let i = min; i <= max; i++) {
+    const item = document.createElement('div');
+    item.className = 'value-item';
+
+    const lbl = document.createElement('label');
+    lbl.className = 'value-checkbox-label';
+    lbl.id = `${containerId}-lbl-${i}`;
+
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.value = i;
+    cb.addEventListener('change', () => {
+      if (cb.checked) {
+        lbl.classList.add('selected');
+      } else {
+        lbl.classList.remove('selected');
+      }
+      onEditorChange();
+    });
+
+    lbl.appendChild(cb);
+    lbl.appendChild(document.createTextNode(labelMapper(i)));
+    item.appendChild(lbl);
+    grid.appendChild(item);
+  }
+}
+
+// Create Specific value option grids
+createGrid('min-values-grid', 0, 59, (v) => v.toString().padStart(2, '0'));
+createGrid('hour-values-grid', 0, 23, (v) => v.toString().padStart(2, '0') + ':00');
+createGrid('dom-values-grid', 1, 31);
+createGrid('month-values-grid', 1, 12, (v) => MONTHS[v - 1].substring(0, 3));
+createGrid('dow-values-grid', 0, 6, (v) => DAYS[v].substring(0, 3));
+
+// Tabs Click handler
+tabButtons.forEach(btn => {
+  btn.addEventListener('click', () => {
+    tabButtons.forEach(b => b.classList.remove('active'));
+    tabPanes.forEach(p => p.classList.remove('active'));
+
+    btn.classList.add('active');
+    document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');
+  });
+});
+
+// Select Mode elements
+const minModes = document.querySelectorAll('input[name="minute-mode"]');
+const hourModes = document.querySelectorAll('input[name="hour-mode"]');
+const domModes = document.querySelectorAll('input[name="dom-mode"]');
+const monthModes = document.querySelectorAll('input[name="month-mode"]');
+const dowModes = document.querySelectorAll('input[name="dow-mode"]');
+
+// Add Change listeners to all forms to build cron live
+const formSelectors = [
+  '#min-step', '#min-range-start', '#min-range-end',
+  '#hour-step', '#hour-range-start', '#hour-range-end',
+  '#dom-step', '#dom-range-start', '#dom-range-end',
+  '#month-range-start', '#month-range-end',
+  '#dow-range-start', '#dow-range-end'
+];
+formSelectors.forEach(selector => {
+  document.querySelector(selector).addEventListener('change', onEditorChange);
+  document.querySelector(selector).addEventListener('input', onEditorChange);
+});
+
+// Bind radio container showing/hiding
+function setupRadioContainers(name, subSelectorPrefix) {
+  const radios = document.querySelectorAll(`input[name="${name}"]`);
+  radios.forEach(radio => {
+    radio.addEventListener('change', () => {
+      // Hide all sub options
+      radios.forEach(r => {
+        const pane = document.getElementById(`${subSelectorPrefix}-${r.value}-options`);
+        if (pane) pane.style.display = 'none';
+      });
+      // Show selected
+      const activePane = document.getElementById(`${subSelectorPrefix}-${radio.value}-options`);
+      if (activePane) activePane.style.display = 'block';
+
+      onEditorChange();
+    });
+  });
+}
+
+setupRadioContainers('minute-mode', 'min');
+setupRadioContainers('hour-mode', 'hour');
+setupRadioContainers('dom-mode', 'dom');
+setupRadioContainers('month-mode', 'month');
+setupRadioContainers('dow-mode', 'dow');
+
+// --- Helper: Assemble Field string from settings ---
+function getFieldString(name, mode, stepId, rangeSId, rangeEId, gridId) {
+  if (mode === 'all') return '*';
+  if (mode === 'step') {
+    const stepVal = parseInt(document.getElementById(stepId).value, 10) || 1;
+    return `*/${stepVal}`;
+  }
+  if (mode === 'range') {
+    const start = parseInt(document.getElementById(rangeSId).value, 10) || 0;
+    const end = parseInt(document.getElementById(rangeEId).value, 10) || 0;
+    return `${start}-${end}`;
+  }
+  if (mode === 'specific') {
+    const selected = [];
+    const checkboxes = document.querySelectorAll(`#${gridId} input[type="checkbox"]`);
+    checkboxes.forEach(cb => {
+      if (cb.checked) selected.push(cb.value);
+    });
+    if (selected.length === 0) return '*';
+    return selected.join(',');
+  }
+  return '*';
+}
+
+// Triggered when anything in the visual editor changes
+let isUpdatingFromInput = false;
+
+function onEditorChange() {
+  if (isUpdatingFromInput) return;
+
+  const minMode = document.querySelector('input[name="minute-mode"]:checked').value;
+  const hourMode = document.querySelector('input[name="hour-mode"]:checked').value;
+  const domMode = document.querySelector('input[name="dom-mode"]:checked').value;
+  const monthMode = document.querySelector('input[name="month-mode"]:checked').value;
+  const dowMode = document.querySelector('input[name="dow-mode"]:checked').value;
+
+  const minStr = getFieldString('minutes', minMode, 'min-step', 'min-range-start', 'min-range-end', 'min-values-grid');
+  const hourStr = getFieldString('hours', hourMode, 'hour-step', 'hour-range-start', 'hour-range-end', 'hour-values-grid');
+  const domStr = getFieldString('dom', domMode, 'dom-step', 'dom-range-start', 'dom-range-end', 'dom-values-grid');
+  const monthStr = getFieldString('months', monthMode, null, 'month-range-start', 'month-range-end', 'month-values-grid');
+  const dowStr = getFieldString('dow', dowMode, null, 'dow-range-start', 'dow-range-end', 'dow-values-grid');
+
+  const expr = `${minStr} ${hourStr} ${domStr} ${monthStr} ${dowStr}`;
+  cronInput.value = expr;
+  presetsSelect.value = 'custom';
+
+  validateAndTranslate(expr);
+}
+
+// --- Bidirectional: Update visual UI controls when direct input text changes ---
+function selectRadio(name, val) {
+  const radios = document.querySelectorAll(`input[name="${name}"]`);
+  radios.forEach(r => {
+    if (r.value === val) {
+      r.checked = true;
+      r.dispatchEvent(new Event('change'));
+    }
+  });
+}
+
+function updateVisualEditor(expr) {
+  const fields = expr.trim().split(/\s+/);
+  if (fields.length !== 5) return;
+
+  isUpdatingFromInput = true;
+
+  // 1. Minutes
+  const min = fields[0];
+  if (min === '*') {
+    selectRadio('minute-mode', 'all');
+  } else if (min.startsWith('*/')) {
+    selectRadio('minute-mode', 'step');
+    document.getElementById('min-step').value = min.substring(2);
+  } else if (min.includes('-')) {
+    selectRadio('minute-mode', 'range');
+    const [start, end] = min.split('-');
+    document.getElementById('min-range-start').value = start;
+    document.getElementById('min-range-end').value = end;
+  } else {
+    selectRadio('minute-mode', 'specific');
+    const list = min.split(',');
+    const checkboxes = document.querySelectorAll('#min-values-grid input[type="checkbox"]');
+    checkboxes.forEach(cb => {
+      cb.checked = list.includes(cb.value);
+      const lbl = document.getElementById(`min-values-grid-lbl-${cb.value}`);
+      if (cb.checked) lbl.classList.add('selected');
+      else lbl.classList.remove('selected');
+    });
+  }
+
+  // 2. Hours
+  const hour = fields[1];
+  if (hour === '*') {
+    selectRadio('hour-mode', 'all');
+  } else if (hour.startsWith('*/')) {
+    selectRadio('hour-mode', 'step');
+    document.getElementById('hour-step').value = hour.substring(2);
+  } else if (hour.includes('-')) {
+    selectRadio('hour-mode', 'range');
+    const [start, end] = hour.split('-');
+    document.getElementById('hour-range-start').value = start;
+    document.getElementById('hour-range-end').value = end;
+  } else {
+    selectRadio('hour-mode', 'specific');
+    const list = hour.split(',');
+    const checkboxes = document.querySelectorAll('#hour-values-grid input[type="checkbox"]');
+    checkboxes.forEach(cb => {
+      cb.checked = list.includes(cb.value);
+      const lbl = document.getElementById(`hour-values-grid-lbl-${cb.value}`);
+      if (cb.checked) lbl.classList.add('selected');
+      else lbl.classList.remove('selected');
+    });
+  }
+
+  // 3. Day of Month
+  const dom = fields[2];
+  if (dom === '*') {
+    selectRadio('dom-mode', 'all');
+  } else if (dom.startsWith('*/')) {
+    selectRadio('dom-mode', 'step');
+    document.getElementById('dom-step').value = dom.substring(2);
+  } else if (dom.includes('-')) {
+    selectRadio('dom-mode', 'range');
+    const [start, end] = dom.split('-');
+    document.getElementById('dom-range-start').value = start;
+    document.getElementById('dom-range-end').value = end;
+  } else {
+    selectRadio('dom-mode', 'specific');
+    const list = dom.split(',');
+    const checkboxes = document.querySelectorAll('#dom-values-grid input[type="checkbox"]');
+    checkboxes.forEach(cb => {
+      cb.checked = list.includes(cb.value);
+      const lbl = document.getElementById(`dom-values-grid-lbl-${cb.value}`);
+      if (cb.checked) lbl.classList.add('selected');
+      else lbl.classList.remove('selected');
+    });
+  }
+
+  // 4. Months
+  const mon = fields[3];
+  if (mon === '*') {
+    selectRadio('month-mode', 'all');
+  } else if (mon.includes('-')) {
+    selectRadio('month-mode', 'range');
+    const [start, end] = mon.split('-');
+    document.getElementById('month-range-start').value = start;
+    document.getElementById('month-range-end').value = end;
+  } else {
+    selectRadio('month-mode', 'specific');
+    const list = mon.split(',');
+    const checkboxes = document.querySelectorAll('#month-values-grid input[type="checkbox"]');
+    checkboxes.forEach(cb => {
+      cb.checked = list.includes(cb.value);
+      const lbl = document.getElementById(`month-values-grid-lbl-${cb.value}`);
+      if (cb.checked) lbl.classList.add('selected');
+      else lbl.classList.remove('selected');
+    });
+  }
+
+  // 5. Day of Week
+  const dow = fields[4];
+  if (dow === '*') {
+    selectRadio('dow-mode', 'all');
+  } else if (dow.includes('-')) {
+    selectRadio('dow-mode', 'range');
+    const [start, end] = dow.split('-');
+    document.getElementById('dow-range-start').value = start;
+    document.getElementById('dow-range-end').value = end;
+  } else {
+    selectRadio('dow-mode', 'specific');
+    const list = dow.split(',');
+    const checkboxes = document.querySelectorAll('#dow-values-grid input[type="checkbox"]');
+    checkboxes.forEach(cb => {
+      cb.checked = list.includes(cb.value);
+      const lbl = document.getElementById(`dow-values-grid-lbl-${cb.value}`);
+      if (cb.checked) lbl.classList.add('selected');
+      else lbl.classList.remove('selected');
+    });
+  }
+
+  isUpdatingFromInput = false;
+}
+
+// --- Validation and Translation Mechanics ---
+function parseField(field, min, max, altNames = []) {
+  if (field === '*') return { all: true };
+
+  const parsedParts = [];
+  const parts = field.split(',');
+
+  for (let part of parts) {
+    if (part === '*') {
+      parsedParts.push({ all: true });
+      continue;
+    }
+
+    // Replace names like Jan, Sun with indexes
+    let normalizedPart = part.toLowerCase();
+    altNames.forEach((name, idx) => {
+      normalizedPart = normalizedPart.replace(new RegExp(name.toLowerCase(), 'g'), idx + min);
+    });
+
+    if (normalizedPart.startsWith('*/')) {
+      const step = parseInt(normalizedPart.substring(2), 10);
+      if (isNaN(step) || step < 1) return null;
+      parsedParts.push({ step, start: min, end: max });
+    } else if (normalizedPart.includes('-')) {
+      const subparts = normalizedPart.split('-');
+      if (subparts.length !== 2) return null;
+
+      let start, end, step = 1;
+      if (subparts[1].includes('/')) {
+        const subSub = subparts[1].split('/');
+        end = parseInt(subSub[0], 10);
+        step = parseInt(subSub[1], 10);
+      } else {
+        end = parseInt(subparts[1], 10);
+      }
+      start = parseInt(subparts[0], 10);
+
+      if (isNaN(start) || isNaN(end) || isNaN(step)) return null;
+      if (start < min || end > max || start > end) return null;
+      parsedParts.push({ range: true, start, end, step });
+    } else {
+      const val = parseInt(normalizedPart, 10);
+      if (isNaN(val) || val < min || val > max) return null;
+      parsedParts.push({ single: true, val });
+    }
+  }
+
+  return { parts: parsedParts };
+}
+
+function checkAllowed(val, parsed) {
+  if (!parsed) return false;
+  if (parsed.all) return true;
+
+  for (let part of parsed.parts) {
+    if (part.all) return true;
+    if (part.single && part.val === val) return true;
+    if (part.step && (val - part.start) % part.step === 0) return true;
+    if (part.range && val >= part.start && val <= part.end && (val - part.start) % part.step === 0) return true;
+  }
+  return false;
+}
+
+// Map textual short names to numeric values
+const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']; // Sunday is 0 or 7
+
+function validateCron(expr) {
+  const fields = expr.trim().split(/\s+/);
+  if (fields.length !== 5) {
+    return { valid: false, message: 'Expression must contain exactly 5 space-separated fields.' };
+  }
+
+  const parsedMin = parseField(fields[0], 0, 59);
+  const parsedHour = parseField(fields[1], 0, 23);
+  const parsedDom = parseField(fields[2], 1, 31);
+  const parsedMonth = parseField(fields[3], 1, 12, MONTH_NAMES);
+  const parsedDow = parseField(fields[4], 0, 7, DAY_NAMES); // Sun is 0 or 7
+
+  if (!parsedMin || !parsedHour || !parsedDom || !parsedMonth || !parsedDow) {
+    return { valid: false, message: 'Invalid field values or incorrect format.' };
+  }
+
+  return {
+    valid: true,
+    parsed: {
+      min: parsedMin,
+      hour: parsedHour,
+      dom: parsedDom,
+      month: parsedMonth,
+      dow: parsedDow
+    }
+  };
+}
+
+// Expand a parsed field into set of integers
+function expandParsedField(parsed, min, max) {
+  const set = new Set();
+  for (let i = min; i <= max; i++) {
+    if (checkAllowed(i, parsed)) set.add(i);
+  }
+  return set;
+}
+
+// --- Upcoming Dates jumping Calculator ---
+function calculateUpcoming(parsed, limit = 5) {
+  const upcoming = [];
+  const now = new Date();
+
+  // Start checking from the next immediate minute
+  let year = now.getFullYear();
+  let month = now.getMonth(); // 0-based
+  let date = now.getDate();
+  let hour = now.getHours();
+  let minute = now.getMinutes() + 1;
+
+  // Pre-expand allowed sets for performance step iteration
+  const allowedMins = expandParsedField(parsed.min, 0, 59);
+  const allowedHours = expandParsedField(parsed.hour, 0, 23);
+  const allowedMonths = expandParsedField(parsed.month, 1, 12); // returns 1-12 set
+
+  // For DOW/DOM, we have complex interaction.
+  // Standard cron logic: if both DOM and DOW are restricted (not '*'), then either DOM OR DOW matching allows execution.
+  // Otherwise, BOTH must match.
+  const domIsRestricted = !parsed.dom.all;
+  const dowIsRestricted = !parsed.dow.all;
+
+  let loopLimit = 10000; // anti-infinite loop safeguard
+  while (upcoming.length < limit && loopLimit-- > 0) {
+    // 1. Validate Month
+    // JS Months are 0-11. Cron months are 1-12.
+    if (!allowedMonths.has(month + 1)) {
+      minute = 0; hour = 0; date = 1;
+      month++;
+      if (month > 11) { month = 0; year++; }
+      continue;
+    }
+
+    // Check DOM/DOW
+    const currentDateObj = new Date(year, month, date, hour, minute);
+    const dayOfWeek = currentDateObj.getDay(); // 0-6 (Sun-Sat)
+
+    // Check if current dayOfMonth is allowed
+    const domMatch = checkAllowed(date, parsed.dom);
+    // JS Day: 0=Sun. Cron Day: 0 or 7 is Sun.
+    const dowMatch = checkAllowed(dayOfWeek, parsed.dow) || (dayOfWeek === 0 && checkAllowed(7, parsed.dow));
+
+    let dayMatch = false;
+    if (domIsRestricted && dowIsRestricted) {
+      // If both DOM and DOW are restricted, then either must match
+      dayMatch = domMatch || dowMatch;
+    } else {
+      // If one or both are '*' (not restricted), then both must match
+      dayMatch = domMatch && dowMatch;
+    }
+
+    if (!dayMatch) {
+      minute = 0; hour = 0;
+      date++;
+      // Handle rolling over months
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      if (date > daysInMonth) {
+        date = 1;
+        month++;
+        if (month > 11) { month = 0; year++; }
+      }
+      continue;
+    }
+
+    // 2. Validate Hour
+    if (!allowedHours.has(hour)) {
+      minute = 0;
+      hour++;
+      if (hour > 23) {
+        hour = 0;
+        date++;
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        if (date > daysInMonth) {
+          date = 1; month++;
+          if (month > 11) { month = 0; year++; }
+        }
+      }
+      continue;
+    }
+
+    // 3. Validate Minute
+    if (!allowedMins.has(minute)) {
+      minute++;
+      if (minute > 59) {
+        minute = 0;
+        hour++;
+        if (hour > 23) {
+          hour = 0; date++;
+          const daysInMonth = new Date(year, month + 1, 0).getDate();
+          if (date > daysInMonth) {
+            date = 1; month++;
+            if (month > 11) { month = 0; year++; }
+          }
+        }
+      }
+      continue;
+    }
+
+    // If we reached here, current Date is a match!
+    const matchDateObj = new Date(year, month, date, hour, minute);
+    upcoming.push(matchDateObj.toLocaleString(undefined, {
+      weekday: 'short',
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    }));
+
+    // Step minute forward to check next run
+    minute++;
+    if (minute > 59) {
+      minute = 0;
+      hour++;
+      if (hour > 23) {
+        hour = 0; date++;
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        if (date > daysInMonth) {
+          date = 1; month++;
+          if (month > 11) { month = 0; year++; }
+        }
+      }
+    }
+  }
+
+  return upcoming;
+}
+
+// --- English Translation Engine ---
+function describeField(fieldStr, altNames, singular, plural, minVal, maxVal) {
+  if (fieldStr === '*') return `every ${singular}`;
+  if (fieldStr === '*/1') return `every ${singular}`;
+
+  if (fieldStr.startsWith('*/')) {
+    const step = fieldStr.substring(2);
+    return `every ${step} ${plural}`;
+  }
+
+  if (fieldStr.includes('-')) {
+    const parts = fieldStr.split('-');
+    let start = parts[0], end = parts[1];
+    let step = null;
+    if (end.includes('/')) {
+      const endParts = end.split('/');
+      end = endParts[0];
+      step = endParts[1];
+    }
+
+    // Resolve textual values
+    if (altNames) {
+      const startIdx = parseInt(start, 10);
+      const endIdx = parseInt(end, 10);
+      if (!isNaN(startIdx)) start = altNames[startIdx - minVal];
+      if (!isNaN(endIdx)) end = altNames[endIdx - minVal];
+    }
+
+    let desc = `${singular}s ${start} through ${end}`;
+    if (step) desc += ` (every ${step} ${plural})`;
+    return desc;
+  }
+
+  if (fieldStr.includes(',')) {
+    const vals = fieldStr.split(',').map(val => {
+      const idx = parseInt(val, 10);
+      if (altNames && !isNaN(idx)) {
+        return altNames[idx - minVal];
+      }
+      return val;
+    });
+    return `at specific ${plural}: ${vals.join(', ')}`;
+  }
+
+  // Single number
+  const valInt = parseInt(fieldStr, 10);
+  if (altNames && !isNaN(valInt)) {
+    return `during ${altNames[valInt - minVal]}`;
+  }
+  return `at ${singular} ${fieldStr}`;
+}
+
+function translateToEnglish(expr) {
+  const fields = expr.trim().split(/\s+/);
+  if (fields.length !== 5) return 'Invalid cron syntax.';
+
+  const minStr = fields[0];
+  const hourStr = fields[1];
+  const domStr = fields[2];
+  const monStr = fields[3];
+  const dowStr = fields[4];
+
+  let phrase = '';
+
+  // Handle standard hour:minute alignments first
+  const isSingleMin = !isNaN(parseInt(minStr, 10)) && !minStr.includes(',') && !minStr.includes('-') && !minStr.includes('/');
+  const isSingleHour = !isNaN(parseInt(hourStr, 10)) && !hourStr.includes(',') && !hourStr.includes('-') && !hourStr.includes('/');
+
+  if (isSingleMin && isSingleHour) {
+    const hh = parseInt(hourStr, 10).toString().padStart(2, '0');
+    const mm = parseInt(minStr, 10).toString().padStart(2, '0');
+    phrase += `At ${hh}:${mm}`;
+  } else {
+    // Describe minutes & hours separately
+    const minDesc = describeField(minStr, null, 'minute', 'minutes', 0, 59);
+    const hourDesc = describeField(hourStr, null, 'hour', 'hours', 0, 23);
+    phrase += `${minDesc.charAt(0).toUpperCase() + minDesc.slice(1)} past ${hourDesc}`;
+  }
+
+  // Days and Months
+  const domDesc = describeField(domStr, null, 'day of month', 'days of month', 1, 31);
+  const monDesc = describeField(monStr, MONTHS, 'month', 'months', 1, 12);
+  const dowDesc = describeField(dowStr, DAYS, 'day of week', 'days of week', 0, 6);
+
+  if (domStr !== '*' && dowStr !== '*') {
+    phrase += `, on ${domDesc} OR ${dowDesc}`;
+  } else {
+    if (domStr !== '*') phrase += `, on ${domDesc}`;
+    if (dowStr !== '*') phrase += `, on ${dowDesc}`;
+  }
+
+  if (monStr !== '*') {
+    phrase += `, in ${monDesc}`;
+  }
+
+  phrase += '.';
+  return phrase;
+}
+
+// --- Combine Parser and Display ---
+function validateAndTranslate(expr) {
+  const result = validateCron(expr);
+  if (!result.valid) {
+    validationBox.textContent = `❌ ${result.message}`;
+    validationBox.className = 'validation-result invalid';
+    validationBox.style.display = 'block';
+
+    explanationText.textContent = '-';
+    upcomingDatesList.innerHTML = '<li>Invalid schedule</li>';
+    return;
+  }
+
+  validationBox.textContent = '✓ Valid Cron Expression';
+  validationBox.className = 'validation-result valid';
+  validationBox.style.display = 'block';
+
+  // Translate to human-readable English
+  explanationText.textContent = translateToEnglish(expr);
+
+  // Compute upcoming schedule
+  const nextRuns = calculateUpcoming(result.parsed, 5);
+  upcomingDatesList.innerHTML = '';
+  nextRuns.forEach(dateStr => {
+    const li = document.createElement('li');
+    li.textContent = dateStr;
+    upcomingDatesList.appendChild(li);
+  });
+}
+
+// --- Handle Direct Text Input changes ---
+cronInput.addEventListener('input', () => {
+  const val = cronInput.value.trim();
+  if (val) {
+    // If it has 5 fields, update the active UI form elements
+    const parts = val.split(/\s+/);
+    if (parts.length === 5) {
+      updateVisualEditor(val);
+      validateAndTranslate(val);
+    } else {
+      validationBox.textContent = '❌ Needs exactly 5 space-separated values';
+      validationBox.className = 'validation-result invalid';
+      validationBox.style.display = 'block';
+    }
+  }
+});
+
+// Presets Select Handler
+presetsSelect.addEventListener('change', () => {
+  const expr = presetsSelect.value;
+  if (expr !== 'custom') {
+    cronInput.value = expr;
+    updateVisualEditor(expr);
+    validateAndTranslate(expr);
+  }
+});
+
+// Copy to Clipboard
+copyBtn.addEventListener('click', () => {
+  const text = cronInput.value;
+  if (text) {
+    navigator.clipboard.writeText(text).then(() => {
+      const orig = copyBtn.textContent;
+      copyBtn.textContent = 'Copied!';
+      setTimeout(() => copyBtn.textContent = orig, 1500);
+    });
+  }
+});
+
+// --- Initial Setup and Launch ---
+// Standard Init starts with "* * * * *" (Every Minute)
+updateVisualEditor('* * * * *');
+validateAndTranslate('* * * * *');
+</script>
+</body>
+</html>
