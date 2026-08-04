@@ -375,6 +375,10 @@ function beautifyCSS(css, indentOption = '  ') {
     while (i < len && !'/*"\'{};:,'.includes(css[i]) && css.substring(i, i+2) !== '/*') {
       i++;
     }
+    // If we didn't advance, we must advance by 1 character to avoid infinite loop
+    if (i === start) {
+      i++;
+    }
     tokens.push({ type: 'text', value: css.substring(start, i) });
   }
 
