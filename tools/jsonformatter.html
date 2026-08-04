@@ -11,6 +11,7 @@
   --accent: #06b6d4;
   --muted: #9aa8b2;
   --glass: rgba(255, 255, 255, 0.03);
+  --border-glass: rgba(255, 255, 255, 0.05);
 }
 * {
   box-sizing: border-box;
@@ -27,7 +28,7 @@ html, body {
   padding: 24px;
 }
 .app {
-  width: 800px;
+  width: 900px;
   max-width: 96%;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
   border-radius: 12px;
@@ -37,50 +38,12 @@ html, body {
 }
 h1 {
   margin: 0;
-  font-size: 20px;
+  font-size: 22px;
 }
 p.lead {
   margin: 6px 0 18px;
   color: var(--muted);
   font-size: 13px;
-}
-textarea {
-  width: 100%;
-  min-height: 250px;
-  padding: 12px;
-  border-radius: 8px;
-  background: var(--glass);
-  border: 1px solid rgba(255, 255, 255, 0.03);
-  color: inherit;
-  font-family: monospace;
-  font-size: 14px;
-  resize: vertical;
-  box-sizing: border-box;
-}
-textarea:focus {
-  outline: none;
-  border-color: var(--accent);
-}
-button {
-  background: linear-gradient(90deg, var(--accent), #3b82f6);
-  border: 0;
-  padding: 10px 16px;
-  font-weight: 600;
-  border-radius: 8px;
-  color: #042027;
-  cursor: pointer;
-  transition: opacity 0.2s;
-}
-button:hover {
-  opacity: 0.9;
-}
-button.secondary {
-  background: var(--glass);
-  color: #e6eef6;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-button.secondary:hover {
-  background: rgba(255, 255, 255, 0.08);
 }
 .back-link {
   display: inline-block;
@@ -92,16 +55,154 @@ button.secondary:hover {
 .back-link:hover {
   text-decoration: underline;
 }
-.flex-row {
+.control-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+.option-card {
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  padding: 15px;
+}
+label {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  background: var(--glass);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  color: inherit;
+  font-size: 14px;
+}
+select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.dropzone {
+  border: 2px dashed rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 15px;
+  text-align: center;
+  background: var(--glass);
+  cursor: pointer;
+  transition: border-color 0.2s, background-color 0.2s;
+  margin-bottom: 15px;
+}
+.dropzone:hover, .dropzone.dragover {
+  border-color: var(--accent);
+  background: rgba(6, 182, 212, 0.05);
+}
+.dropzone p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+.editor-viewer-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+textarea {
+  width: 100%;
+  min-height: 320px;
+  padding: 12px;
+  border-radius: 8px;
+  background: var(--glass);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  color: inherit;
+  font-family: monospace;
+  font-size: 13px;
+  resize: vertical;
+  box-sizing: border-box;
+}
+textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.viewer-pane {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  padding: 12px;
+  max-height: 350px;
+  overflow-y: auto;
+  font-family: monospace;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.tree-node {
+  margin-left: 15px;
+  position: relative;
+}
+.tree-toggle {
+  cursor: pointer;
+  color: var(--accent);
+  user-select: none;
+  margin-right: 5px;
+  font-weight: bold;
+}
+.tree-key {
+  color: #a78bfa;
+}
+.tree-value-string {
+  color: #34d399;
+}
+.tree-value-number {
+  color: #fb7185;
+}
+.tree-value-boolean {
+  color: #60a5fa;
+}
+.tree-value-null {
+  color: #9ca3af;
+}
+.actions {
   display: flex;
   gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 15px;
+}
+button {
+  background: linear-gradient(90deg, var(--accent), #3b82f6);
+  border: 0;
+  padding: 10px 18px;
+  font-weight: 600;
+  border-radius: 8px;
+  color: #042027;
+  cursor: pointer;
+  font-size: 13px;
+  transition: opacity 0.2s, transform 0.1s;
+}
+button:hover {
+  opacity: 0.9;
+}
+button:active {
+  transform: scale(0.98);
+}
+button.secondary {
+  background: var(--glass);
+  color: #e6eef6;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+button.secondary:hover {
+  background: rgba(255, 255, 255, 0.08);
 }
 .validation-result {
-  margin-top: 15px;
   padding: 12px;
   border-radius: 8px;
   font-size: 13px;
   display: none;
+  margin-top: 10px;
 }
 .validation-result.valid {
   background: rgba(16, 185, 129, 0.1);
@@ -117,8 +218,12 @@ button.secondary:hover {
 }
 
 @media (max-width: 768px) {
-  .flex-row {
+  .control-grid, .editor-viewer-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .actions {
     flex-direction: column !important;
+    gap: 10px !important;
   }
   button {
     width: 100%;
@@ -130,22 +235,90 @@ button.secondary:hover {
 <div class="app" role="main">
   <a href="../index.html" class="back-link">← Back to Home</a>
   <h1>JSON Formatter/Validator</h1>
-  <p class="lead">Paste your JSON data to automatically format, validate, and minify it.</p>
-  <textarea id="json-input" placeholder="Paste or type your JSON here..."></textarea>
-  <div style="height:10px"></div>
-  <div class="flex-row">
+  <p class="lead">Validate, format, minify, and interactively explore your JSON structure client-side.</p>
+
+  <div class="control-grid">
+    <div class="option-card">
+      <label for="indent-size">Indentation</label>
+      <select id="indent-size">
+        <option value="2">2 Spaces</option>
+        <option value="4">4 Spaces</option>
+        <option value="tab">Tab</option>
+      </select>
+    </div>
+    <div class="option-card">
+      <label>Demo Dataset</label>
+      <button id="demo-btn" class="secondary" style="width: 100%; height: 38px; padding: 0;">Load Demo JSON</button>
+    </div>
+  </div>
+
+  <div class="dropzone" id="dropzone">
+    <p>Drag & Drop a .json file here, or click to browse</p>
+    <input type="file" id="file-input" style="display: none;" accept=".json" />
+  </div>
+
+  <div class="editor-viewer-grid">
+    <div>
+      <label for="json-input">JSON Editor</label>
+      <textarea id="json-input" placeholder="Paste or type your JSON here..."></textarea>
+    </div>
+    <div>
+      <label>Collapsible Tree Viewer</label>
+      <div id="tree-viewer" class="viewer-pane">
+        <span style="color: var(--muted);">Valid JSON will render as an interactive collapsible tree structure here...</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="actions">
     <button id="formatBtn">Format JSON</button>
     <button id="minifyBtn" class="secondary">Minify JSON</button>
     <button id="copyBtn" class="secondary">Copy JSON</button>
+    <button id="downloadBtn" class="secondary">Download JSON</button>
   </div>
+
   <div id="errors" class="validation-result"></div>
 </div>
+
 <script>
 const jsonInput = document.getElementById('json-input');
+const indentSize = document.getElementById('indent-size');
+const demoBtn = document.getElementById('demo-btn');
+const dropzone = document.getElementById('dropzone');
+const fileInput = document.getElementById('file-input');
+const treeViewer = document.getElementById('tree-viewer');
+
 const formatBtn = document.getElementById('formatBtn');
 const minifyBtn = document.getElementById('minifyBtn');
 const copyBtn = document.getElementById('copyBtn');
+const downloadBtn = document.getElementById('downloadBtn');
 const errors = document.getElementById('errors');
+
+const DEMO_JSON = {
+  "name": "Tarango Tools Suite",
+  "version": "2.4.0",
+  "active": true,
+  "developer": {
+    "name": "Tarango Hasan",
+    "skills": ["JavaScript", "HTML5", "CSS3", "Security"]
+  },
+  "modules": [
+    { "id": 1, "name": "Aspect Ratio Calculator", "status": "stable" },
+    { "id": 2, "name": "BPM Counter", "status": "updated" },
+    { "id": 3, "name": "YAML/JSON Converter", "status": "new" }
+  ],
+  "preferences": {
+    "theme": "Glassmorphism",
+    "cacheLimit": 2048,
+    "fallbackUrl": null
+  }
+};
+
+function getIndentParam() {
+  const size = indentSize.value;
+  if (size === 'tab') return '\t';
+  return parseInt(size, 10);
+}
 
 function showResult(text, isValid) {
   errors.textContent = text;
@@ -154,6 +327,7 @@ function showResult(text, isValid) {
   } else {
     errors.className = 'validation-result invalid';
   }
+  errors.style.display = 'block';
 }
 
 function hideResult() {
@@ -161,31 +335,148 @@ function hideResult() {
   errors.className = 'validation-result';
 }
 
-formatBtn.addEventListener('click', () => {
+// Collapsible Tree View Generator
+function buildTree(obj, keyName = null) {
+  const container = document.createElement('div');
+  container.className = 'tree-node';
+
+  const row = document.createElement('div');
+  if (keyName !== null) {
+    const keySpan = document.createElement('span');
+    keySpan.className = 'tree-key';
+    keySpan.textContent = `"${keyName}": `;
+    row.appendChild(keySpan);
+  }
+
+  if (obj === null) {
+    const valSpan = document.createElement('span');
+    valSpan.className = 'tree-value-null';
+    valSpan.textContent = 'null';
+    row.appendChild(valSpan);
+    container.appendChild(row);
+  } else if (typeof obj === 'object') {
+    const isArray = Array.isArray(obj);
+    const opener = isArray ? '[' : '{';
+    const closer = isArray ? ']' : '}';
+    const size = isArray ? obj.length : Object.keys(obj).length;
+
+    const toggle = document.createElement('span');
+    toggle.className = 'tree-toggle';
+    toggle.textContent = '▼';
+    row.insertBefore(toggle, row.firstChild);
+
+    const braceOpen = document.createElement('span');
+    braceOpen.textContent = opener;
+    row.appendChild(braceOpen);
+
+    const childContainer = document.createElement('div');
+    childContainer.style.display = 'block';
+    childContainer.style.paddingLeft = '10px';
+
+    if (isArray) {
+      obj.forEach((item, index) => {
+        const itemNode = buildTree(item, null);
+        // Add comma to child rows
+        if (index < obj.length - 1) {
+          const comma = document.createElement('span');
+          comma.textContent = ',';
+          itemNode.appendChild(comma);
+        }
+        childContainer.appendChild(itemNode);
+      });
+    } else {
+      const keys = Object.keys(obj);
+      keys.forEach((key, index) => {
+        const itemNode = buildTree(obj[key], key);
+        if (index < keys.length - 1) {
+          const comma = document.createElement('span');
+          comma.textContent = ',';
+          itemNode.appendChild(comma);
+        }
+        childContainer.appendChild(itemNode);
+      });
+    }
+
+    const braceClose = document.createElement('div');
+    braceClose.textContent = closer;
+    braceClose.style.paddingLeft = '5px';
+
+    toggle.addEventListener('click', () => {
+      if (childContainer.style.display === 'block') {
+        childContainer.style.display = 'none';
+        toggle.textContent = '▶';
+        braceOpen.textContent = `${opener}...${closer} (${size} items)`;
+        if (braceClose.parentNode === container) {
+          container.removeChild(braceClose);
+        }
+      } else {
+        childContainer.style.display = 'block';
+        toggle.textContent = '▼';
+        braceOpen.textContent = opener;
+        container.appendChild(braceClose);
+      }
+    });
+
+    container.appendChild(row);
+    container.appendChild(childContainer);
+    container.appendChild(braceClose);
+
+  } else {
+    const valSpan = document.createElement('span');
+    if (typeof obj === 'string') {
+      valSpan.className = 'tree-value-string';
+      valSpan.textContent = `"${obj}"`;
+    } else if (typeof obj === 'number') {
+      valSpan.className = 'tree-value-number';
+      valSpan.textContent = obj;
+    } else if (typeof obj === 'boolean') {
+      valSpan.className = 'tree-value-boolean';
+      valSpan.textContent = obj;
+    }
+    row.appendChild(valSpan);
+    container.appendChild(row);
+  }
+
+  return container;
+}
+
+function updateTreeViewer(obj) {
+  treeViewer.innerHTML = '';
+  treeViewer.appendChild(buildTree(obj));
+}
+
+function processFormat() {
   const val = jsonInput.value.trim();
   if (!val) {
     showResult('Please enter JSON text to format.', false);
+    treeViewer.innerHTML = '<span style="color: var(--muted);">Valid JSON will render as an interactive collapsible tree structure here...</span>';
     return;
   }
   try {
     const jsonObj = JSON.parse(val);
-    jsonInput.value = JSON.stringify(jsonObj, null, 2);
+    const indent = getIndentParam();
+    jsonInput.value = JSON.stringify(jsonObj, null, indent);
     showResult('✓ Valid JSON - Formatted successfully!', true);
+    updateTreeViewer(jsonObj);
   } catch (e) {
     showResult('❌ Invalid JSON: ' + e.message, false);
   }
-});
+}
+
+formatBtn.addEventListener('click', processFormat);
 
 minifyBtn.addEventListener('click', () => {
   const val = jsonInput.value.trim();
   if (!val) {
     showResult('Please enter JSON text to minify.', false);
+    treeViewer.innerHTML = '<span style="color: var(--muted);">Valid JSON will render as an interactive collapsible tree structure here...</span>';
     return;
   }
   try {
     const jsonObj = JSON.parse(val);
     jsonInput.value = JSON.stringify(jsonObj);
     showResult('✓ Valid JSON - Minified successfully!', true);
+    updateTreeViewer(jsonObj);
   } catch (e) {
     showResult('❌ Invalid JSON: ' + e.message, false);
   }
@@ -200,9 +491,67 @@ copyBtn.addEventListener('click', () => {
   }
 });
 
+demoBtn.addEventListener('click', () => {
+  jsonInput.value = JSON.stringify(DEMO_JSON, null, 2);
+  hideResult();
+  processFormat();
+});
+
+// Download JSON
+downloadBtn.addEventListener('click', () => {
+  const content = jsonInput.value;
+  if (!content) return;
+
+  const blob = new Blob([content], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'formatted_data.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+});
+
+// Drag & Drop
+dropzone.addEventListener('click', () => fileInput.click());
+
+dropzone.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  dropzone.classList.add('dragover');
+});
+
+dropzone.addEventListener('dragleave', () => {
+  dropzone.classList.remove('dragover');
+});
+
+dropzone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  dropzone.classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  handleFile(file);
+});
+
+fileInput.addEventListener('change', () => {
+  const file = fileInput.files[0];
+  handleFile(file);
+});
+
+function handleFile(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    jsonInput.value = e.target.result;
+    hideResult();
+    processFormat();
+  };
+  reader.readAsText(file);
+}
+
 jsonInput.addEventListener('input', () => {
   if (!jsonInput.value.trim()) {
     hideResult();
+    treeViewer.innerHTML = '<span style="color: var(--muted);">Valid JSON will render as an interactive collapsible tree structure here...</span>';
   }
 });
 </script>
