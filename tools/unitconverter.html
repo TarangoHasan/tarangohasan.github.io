@@ -96,6 +96,7 @@ label {
     <option value="volume">Volume</option>
     <option value="speed">Speed</option>
     <option value="area">Area</option>
+    <option value="digital">Digital Storage</option>
   </select>
   <div style="height:15px"></div>
 
@@ -164,6 +165,15 @@ const units = {
     ft2: { name: 'Square Feet (ft2)', factor: 0.09290304 },
     mi2: { name: 'Square Miles (mi2)', factor: 2589988.110336 },
     ac: { name: 'Acres', factor: 4046.8564224 }
+  },
+  digital: {
+    b: { name: 'Bits (b)', factor: 0.125 },
+    B: { name: 'Bytes (B)', factor: 1 },
+    KB: { name: 'Kilobytes (KB)', factor: 1024 },
+    MB: { name: 'Megabytes (MB)', factor: 1048576 },
+    GB: { name: 'Gigabytes (GB)', factor: 1073741824 },
+    TB: { name: 'Terabytes (TB)', factor: 1099511627776 },
+    PB: { name: 'Petabytes (PB)', factor: 1125899906842624 }
   }
 };
 
@@ -196,6 +206,8 @@ function populateUnits() {
       toUnit.value = 'kmh';
   } else if (cat === 'area') {
       toUnit.value = 'm2';
+  } else if (cat === 'digital') {
+      toUnit.value = 'MB';
   }
 
   convert();
