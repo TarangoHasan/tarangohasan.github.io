@@ -89,6 +89,21 @@ textarea {
 .back-link:hover {
   text-decoration: underline;
 }
+
+@media (max-width: 768px) {
+  .app {
+    height: auto !important;
+    padding: 15px !important;
+  }
+  .editor-container {
+    flex-direction: column !important;
+    gap: 15px !important;
+  }
+  textarea, .preview {
+    min-height: 250px !important;
+    flex: none !important;
+  }
+}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
