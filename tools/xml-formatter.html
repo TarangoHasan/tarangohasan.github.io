@@ -1,0 +1,604 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>XML Formatter & Beautifier</title>
+<style>
+:root {
+  --bg: #0f1724;
+  --card: #0b1220;
+  --accent: #06b6d4;
+  --muted: #9aa8b2;
+  --glass: rgba(255, 255, 255, 0.03);
+}
+* {
+  box-sizing: border-box;
+}
+html, body {
+  min-height: 100%;
+  margin: 0;
+  font-family: Inter, system-ui, Segoe UI, Roboto, Arial;
+  background: linear-gradient(180deg, #041025 0%, #0b1730 100%);
+  color: #e6eef6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.app {
+  width: 900px;
+  max-width: 96%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 8px 30px rgba(2, 6, 23, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+h1 {
+  margin: 0;
+  font-size: 22px;
+}
+p.lead {
+  margin: 6px 0 18px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.back-link {
+  display: inline-block;
+  margin-bottom: 20px;
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 14px;
+}
+.back-link:hover {
+  text-decoration: underline;
+}
+.control-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  margin-bottom: 15px;
+}
+.option-card {
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  padding: 12px;
+}
+label {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  background: var(--glass);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  color: inherit;
+  font-size: 14px;
+  transition: border-color 0.2s;
+}
+select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.dropzone {
+  border: 2px dashed rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 15px;
+  text-align: center;
+  background: var(--glass);
+  cursor: pointer;
+  transition: border-color 0.2s, background-color 0.2s;
+  margin-bottom: 15px;
+}
+.dropzone:hover, .dropzone.dragover {
+  border-color: var(--accent);
+  background: rgba(6, 182, 212, 0.05);
+}
+.dropzone p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+.text-areas {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+textarea {
+  width: 100%;
+  min-height: 300px;
+  padding: 12px;
+  border-radius: 8px;
+  background: var(--glass);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  color: inherit;
+  font-family: monospace;
+  font-size: 13px;
+  resize: vertical;
+  box-sizing: border-box;
+}
+textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 15px;
+}
+button {
+  background: linear-gradient(90deg, var(--accent), #3b82f6);
+  border: 0;
+  padding: 10px 18px;
+  font-weight: 600;
+  border-radius: 8px;
+  color: #042027;
+  cursor: pointer;
+  font-size: 13px;
+  transition: opacity 0.2s, transform 0.1s;
+}
+button:hover {
+  opacity: 0.9;
+}
+button:active {
+  transform: scale(0.98);
+}
+button.secondary {
+  background: var(--glass);
+  color: #e6eef6;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+button.secondary:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+.validation-result {
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  display: none;
+  margin-top: 10px;
+}
+.validation-result.valid {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  display: block;
+}
+.validation-result.invalid {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #f87171;
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .control-grid, .text-areas {
+    grid-template-columns: 1fr !important;
+  }
+  .actions {
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+  button {
+    width: 100%;
+  }
+}
+</style>
+</head>
+<body>
+<div class="app" role="main">
+  <a href="../index.html" class="back-link">← Back to Home</a>
+  <h1>XML Formatter & Beautifier</h1>
+  <p class="lead">Beautify, validate, format, or minify your XML code locally. Supports custom indentation options and provides instant error detection.</p>
+
+  <div class="control-grid">
+    <div class="option-card">
+      <label for="indent-size">Indentation</label>
+      <select id="indent-size">
+        <option value="2">2 Spaces</option>
+        <option value="4">4 Spaces</option>
+        <option value="tab">Tab</option>
+      </select>
+    </div>
+    <div class="option-card">
+      <label>Quick Actions</label>
+      <button id="demo-btn" class="secondary" style="width: 100%; height: 38px; padding: 0;">Load Demo XML</button>
+    </div>
+  </div>
+
+  <div class="dropzone" id="dropzone">
+    <p>Drag & Drop an .xml file here, or click to browse</p>
+    <input type="file" id="file-input" style="display: none;" accept=".xml,.txt" />
+  </div>
+
+  <div class="text-areas">
+    <div>
+      <label for="input">Input XML</label>
+      <textarea id="input" placeholder="Paste your raw, messy XML here..."></textarea>
+    </div>
+    <div>
+      <label for="output">Formatted/Minified XML</label>
+      <textarea id="output" placeholder="XML result will appear here..." readonly></textarea>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button id="format-btn">Format XML</button>
+    <button id="minify-btn" class="secondary">Minify XML</button>
+    <button id="clear-btn" class="secondary">Clear All</button>
+    <button id="copy-btn" class="secondary">Copy Result</button>
+    <button id="download-btn" class="secondary">Download XML</button>
+  </div>
+
+  <div id="validation-box" class="validation-result"></div>
+</div>
+
+<script>
+const indentSize = document.getElementById('indent-size');
+const demoBtn = document.getElementById('demo-btn');
+const dropzone = document.getElementById('dropzone');
+const fileInput = document.getElementById('file-input');
+
+const inputArea = document.getElementById('input');
+const outputArea = document.getElementById('output');
+
+const formatBtn = document.getElementById('format-btn');
+const minifyBtn = document.getElementById('minify-btn');
+const clearBtn = document.getElementById('clear-btn');
+const copyBtn = document.getElementById('copy-btn');
+const downloadBtn = document.getElementById('download-btn');
+const validationBox = document.getElementById('validation-box');
+
+const DEMO_XML = `<?xml version="1.0" encoding="UTF-8"?>
+<!-- Company employees roster demo -->
+<company name="CyberDyne Systems" industry="AI &amp; Robotics">
+  <department id="dept-01">
+    <name>Research &amp; Development</name>
+    <location>Silicon Valley</location>
+    <employees>
+      <employee status="active">
+        <id>emp-101</id>
+        <name>Sarah Connor</name>
+        <role>Lead Systems Analyst</role>
+        <skills>
+          <skill level="expert">Cybernetics</skill>
+          <skill level="advanced">Threat Analysis</skill>
+        </skills>
+      </employee>
+      <employee status="active">
+        <id>emp-102</id>
+        <name>John Connor</name>
+        <role>Tactical Coordinator</role>
+        <skills>
+          <skill level="advanced">Network Security</skill>
+          <skill level="intermediate">Hardware Hacking</skill>
+        </skills>
+      </employee>
+    </employees>
+  </department>
+  <system-status>
+    <uptime_hours>8760</uptime_hours>
+    <online>true</online>
+    <load_factor>0.42</load_factor>
+  </system-status>
+</company>`;
+
+function showValidation(message, isValid) {
+  validationBox.textContent = message;
+  validationBox.className = 'validation-result ' + (isValid ? 'valid' : 'invalid');
+  validationBox.style.display = 'block';
+}
+
+function hideValidation() {
+  validationBox.style.display = 'none';
+  validationBox.className = 'validation-result';
+}
+
+function getIndentString() {
+  const size = indentSize.value;
+  if (size === 'tab') return '\t';
+  return ' '.repeat(parseInt(size, 10));
+}
+
+function formatXMLNode(node, indent = '', indentOption = '  ') {
+  if (node.nodeType === Node.ELEMENT_NODE) {
+    let result = indent + '<' + node.tagName;
+    for (let i = 0; i < node.attributes.length; i++) {
+      const attr = node.attributes[i];
+      result += ` ${attr.name}="${attr.value}"`;
+    }
+
+    if (node.childNodes.length === 0) {
+      result += ' />\n';
+      return result;
+    }
+
+    // Check if it has only one text child
+    if (node.childNodes.length === 1 && node.childNodes[0].nodeType === Node.TEXT_NODE) {
+      const text = node.childNodes[0].nodeValue.trim();
+      if (text) {
+        // Simple escape helper for inner text standard entities
+        const escapedText = text
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;');
+        result += '>' + escapedText + '</' + node.tagName + '>\n';
+        return result;
+      }
+    }
+
+    result += '>\n';
+    for (let i = 0; i < node.childNodes.length; i++) {
+      const child = node.childNodes[i];
+      const childFormatted = formatXMLNode(child, indent + indentOption, indentOption);
+      if (childFormatted) {
+        result += childFormatted;
+      }
+    }
+    result += indent + '</' + node.tagName + '>\n';
+    return result;
+  } else if (node.nodeType === Node.TEXT_NODE) {
+    const text = node.nodeValue.trim();
+    if (text) {
+      const escapedText = text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+      return indent + escapedText + '\n';
+    }
+  } else if (node.nodeType === Node.COMMENT_NODE) {
+    return indent + '<!--' + node.nodeValue.trim() + '-->\n';
+  } else if (node.nodeType === Node.CDATA_SECTION_NODE) {
+    return indent + '<![CDATA[' + node.nodeValue + ']]>\n';
+  } else if (node.nodeType === Node.DOCUMENT_NODE) {
+    let result = '';
+    for (let i = 0; i < node.childNodes.length; i++) {
+      result += formatXMLNode(node.childNodes[i], indent, indentOption);
+    }
+    return result;
+  } else if (node.nodeType === Node.PROCESSING_INSTRUCTION_NODE) {
+    return indent + '<?' + node.target + ' ' + node.data + '?>\n';
+  }
+  return '';
+}
+
+function parseAndFormat() {
+  hideValidation();
+  const rawText = inputArea.value.trim();
+  if (!rawText) {
+    showValidation('Please enter some XML code to format.', false);
+    outputArea.value = '';
+    return;
+  }
+
+  const parser = new DOMParser();
+  const xmlDoc = parser.parseFromString(rawText, 'application/xml');
+
+  // Check for DOMParser parsing errors
+  const parserErrorNode = xmlDoc.querySelector('parsererror');
+  if (parserErrorNode) {
+    showValidation('❌ XML Parsing Error: ' + parserErrorNode.textContent, false);
+    outputArea.value = '';
+    return;
+  }
+
+  try {
+    const indentOption = getIndentString();
+
+    // We want to preserve the XML processing instruction (declaration) if it was in the input
+    let declaration = '';
+    const declMatch = rawText.match(/^\s*(<\?xml[^>]*\?>)/i);
+    if (declMatch) {
+      declaration = declMatch[1] + '\n';
+    }
+
+    let formatted = '';
+    for (let i = 0; i < xmlDoc.childNodes.length; i++) {
+      const child = xmlDoc.childNodes[i];
+      // Skip duplicate declaration rendering if it is in the DOM parsed childNodes as a processing instruction
+      if (child.nodeType === Node.PROCESSING_INSTRUCTION_NODE && child.target.toLowerCase() === 'xml') {
+        continue;
+      }
+      formatted += formatXMLNode(child, '', indentOption);
+    }
+
+    outputArea.value = (declaration + formatted).trim();
+    showValidation('✓ Success - XML formatted successfully!', true);
+  } catch (err) {
+    showValidation('❌ XML Formatting Error: ' + err.message, false);
+    outputArea.value = '';
+  }
+}
+
+function processMinify() {
+  hideValidation();
+  const rawText = inputArea.value.trim();
+  if (!rawText) {
+    showValidation('Please enter some XML code to minify.', false);
+    outputArea.value = '';
+    return;
+  }
+
+  const parser = new DOMParser();
+  const xmlDoc = parser.parseFromString(rawText, 'application/xml');
+
+  const parserErrorNode = xmlDoc.querySelector('parsererror');
+  if (parserErrorNode) {
+    showValidation('❌ XML Parsing Error: ' + parserErrorNode.textContent, false);
+    outputArea.value = '';
+    return;
+  }
+
+  try {
+    // Standard minification: remove spaces between tags, extra whitespaces
+    // Preserve processing instruction if any
+    let declaration = '';
+    const declMatch = rawText.match(/^\s*(<\?xml[^>]*\?>)/i);
+    if (declMatch) {
+      declaration = declMatch[1];
+    }
+
+    // Helper to recursively minify node structure to a single string
+    function minifyNode(node) {
+      if (node.nodeType === Node.ELEMENT_NODE) {
+        let result = '<' + node.tagName;
+        for (let i = 0; i < node.attributes.length; i++) {
+          const attr = node.attributes[i];
+          result += ` ${attr.name}="${attr.value}"`;
+        }
+
+        if (node.childNodes.length === 0) {
+          return result + '/>';
+        }
+
+        result += '>';
+        for (let i = 0; i < node.childNodes.length; i++) {
+          result += minifyNode(node.childNodes[i]);
+        }
+        result += '</' + node.tagName + '>';
+        return result;
+      } else if (node.nodeType === Node.TEXT_NODE) {
+        return node.nodeValue.trim()
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;');
+      } else if (node.nodeType === Node.COMMENT_NODE) {
+        // Comments are stripped during minification
+        return '';
+      } else if (node.nodeType === Node.CDATA_SECTION_NODE) {
+        return '<![CDATA[' + node.nodeValue + ']]>';
+      } else if (node.nodeType === Node.DOCUMENT_NODE) {
+        let result = '';
+        for (let i = 0; i < node.childNodes.length; i++) {
+          result += minifyNode(node.childNodes[i]);
+        }
+        return result;
+      } else if (node.nodeType === Node.PROCESSING_INSTRUCTION_NODE) {
+        if (node.target.toLowerCase() === 'xml') {
+          return '';
+        }
+        return '<?' + node.target + ' ' + node.data + '?>';
+      }
+      return '';
+    }
+
+    let minified = '';
+    for (let i = 0; i < xmlDoc.childNodes.length; i++) {
+      minified += minifyNode(xmlDoc.childNodes[i]);
+    }
+
+    outputArea.value = declaration + minified;
+    showValidation('✓ Success - XML minified successfully!', true);
+  } catch (err) {
+    showValidation('❌ XML Minification Error: ' + err.message, false);
+    outputArea.value = '';
+  }
+}
+
+// Drag & Drop
+dropzone.addEventListener('click', () => fileInput.click());
+
+dropzone.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  dropzone.classList.add('dragover');
+});
+
+dropzone.addEventListener('dragleave', () => {
+  dropzone.classList.remove('dragover');
+});
+
+dropzone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  dropzone.classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  handleFile(file);
+});
+
+fileInput.addEventListener('change', () => {
+  const file = fileInput.files[0];
+  handleFile(file);
+});
+
+function handleFile(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    inputArea.value = e.target.result;
+    hideValidation();
+    parseAndFormat();
+  };
+  reader.readAsText(file);
+}
+
+// Clear All
+clearBtn.addEventListener('click', () => {
+  inputArea.value = '';
+  outputArea.value = '';
+  hideValidation();
+});
+
+// Demo XML
+demoBtn.addEventListener('click', () => {
+  inputArea.value = DEMO_XML;
+  hideValidation();
+  parseAndFormat();
+});
+
+// Copy Result
+copyBtn.addEventListener('click', () => {
+  if (outputArea.value) {
+    navigator.clipboard.writeText(outputArea.value).then(() => {
+      const originalText = copyBtn.textContent;
+      copyBtn.textContent = 'Copied!';
+      setTimeout(() => {
+        copyBtn.textContent = originalText;
+      }, 1500);
+    });
+  }
+});
+
+// Download result
+downloadBtn.addEventListener('click', () => {
+  const content = outputArea.value;
+  if (!content) return;
+
+  const blob = new Blob([content], { type: 'application/xml' });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'formatted_document.xml';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+});
+
+// Auto re-format on indent adjustment if input exists
+indentSize.addEventListener('change', () => {
+  if (inputArea.value.trim() && outputArea.value.trim()) {
+    parseAndFormat();
+  }
+});
+
+formatBtn.addEventListener('click', parseAndFormat);
+minifyBtn.addEventListener('click', processMinify);
+
+inputArea.addEventListener('input', () => {
+  if (!inputArea.value.trim()) {
+    hideValidation();
+    outputArea.value = '';
+  }
+});
+</script>
+</body>
+</html>
