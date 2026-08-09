@@ -61,6 +61,7 @@ textarea {
   margin-top: 10px;
   display: flex;
   gap: 10px;
+  flex-wrap: wrap;
 }
 button {
   background: linear-gradient(90deg, var(--accent), #3b82f6);
@@ -70,6 +71,13 @@ button {
   border-radius: 8px;
   color: #042027;
   cursor: pointer;
+  transition: opacity 0.2s, transform 0.1s;
+}
+button:hover {
+  opacity: 0.9;
+}
+button:active {
+  transform: scale(0.98);
 }
 
 .back-link {
@@ -94,7 +102,10 @@ button {
   .stats, .actions {
     flex-direction: column !important;
     display: flex !important;
-    gap: 10px;
+    gap: 10px !important;
+  }
+  .actions button {
+    width: 100% !important;
   }
   .actions-grid {
     grid-template-columns: 1fr !important;
@@ -190,7 +201,7 @@ lowerBtn.addEventListener('click', () => {
 
 sentenceBtn.addEventListener('click', () => {
   const text = textInput.value.toLowerCase();
-  textInput.value = text.replace(/(^\s*\w|[.!?]\s*\w)/g, c => c.toUpperCase());
+  textInput.value = text.replace(/(^\s*\w|[.!?]\s+\w)/g, c => c.toUpperCase());
   textInput.dispatchEvent(new Event('input'));
 });
 
