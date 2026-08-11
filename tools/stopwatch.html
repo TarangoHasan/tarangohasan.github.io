@@ -286,7 +286,6 @@ button.control-btn:disabled {
 // Tab Switching
 function switchTab(mode) {
   const tabs = document.querySelectorAll('.tab-btn');
-  const contents = document.querySelectorAll('.tab-content');
 
   tabs.forEach(tab => {
     if (tab.textContent.toLowerCase().includes(mode)) {
@@ -298,8 +297,10 @@ function switchTab(mode) {
 
   if (mode === 'stopwatch') {
     document.getElementById('stopwatch-tab').classList.add('active');
+    document.getElementById('timer-tab').classList.remove('active');
   } else {
     document.getElementById('timer-tab').classList.add('active');
+    document.getElementById('stopwatch-tab').classList.remove('active');
   }
 }
 
