@@ -648,6 +648,8 @@ function handleCopy(btn, element) {
       setTimeout(() => {
         btn.textContent = originalText;
       }, 1500);
+    }).catch(err => {
+      console.error('Copy failed: ', err);
     });
   });
 }

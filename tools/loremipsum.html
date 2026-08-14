@@ -145,10 +145,13 @@ generateBtn.addEventListener('click', generateLorem);
 
 copyBtn.addEventListener('click', () => {
   if (output.value) {
-    navigator.clipboard.writeText(output.value);
-    const originalText = copyBtn.textContent;
-    copyBtn.textContent = "Copied!";
-    setTimeout(() => copyBtn.textContent = originalText, 2000);
+    navigator.clipboard.writeText(output.value).then(() => {
+      const originalText = copyBtn.textContent;
+      copyBtn.textContent = "Copied!";
+      setTimeout(() => copyBtn.textContent = originalText, 2000);
+    }).catch(err => {
+      console.error('Copy failed: ', err);
+    });
   }
 });
 

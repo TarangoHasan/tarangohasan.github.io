@@ -369,6 +369,8 @@ document.querySelectorAll('.copy-btn').forEach(btn => {
           btn.style.background = '';
           btn.style.color = '';
         }, 1500);
+      }).catch(err => {
+        console.error('Copy failed: ', err);
       });
     }
   });
