@@ -253,6 +253,8 @@ document.getElementById('copy-md-btn').addEventListener('click', () => {
       const originalText = btn.textContent;
       btn.textContent = 'Copied Markdown!';
       setTimeout(() => btn.textContent = originalText, 1500);
+    }).catch(err => {
+      console.error('Copy failed: ', err);
     });
   }
 });
@@ -264,6 +266,8 @@ document.getElementById('copy-html-btn').addEventListener('click', () => {
       const originalText = btn.textContent;
       btn.textContent = 'Copied HTML!';
       setTimeout(() => btn.textContent = originalText, 1500);
+    }).catch(err => {
+      console.error('Copy failed: ', err);
     });
   }
 });
