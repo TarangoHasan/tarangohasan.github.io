@@ -521,7 +521,7 @@ copyBtn.addEventListener('click', () => {
       setTimeout(() => {
         copyBtn.textContent = originalText;
       }, 1500);
-    });
+    }).catch(() => {});
   }
 });
 
