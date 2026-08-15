@@ -648,7 +648,7 @@ function handleCopy(btn, element) {
       setTimeout(() => {
         btn.textContent = originalText;
       }, 1500);
-    });
+    }).catch(() => {});
   });
 }
 
