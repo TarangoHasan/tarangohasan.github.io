@@ -250,7 +250,7 @@ button.secondary:hover {
       </select>
     </div>
     <div class="option-card">
-      <div style="display: flex; flex-direction: column; gap: 8px;">
+      <div class="options-col">
         <label class="checkbox-group">
           <input type="checkbox" id="dense-operators" />
           <span>Dense Operators</span>
@@ -421,7 +421,7 @@ copyBtn.addEventListener('click', () => {
       setTimeout(() => {
         copyBtn.textContent = originalText;
       }, 1500);
-    });
+    }).catch(err => console.error("Clipboard copy failed:", err));
   }
 });
 

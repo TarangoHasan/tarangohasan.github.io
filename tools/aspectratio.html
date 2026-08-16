@@ -103,6 +103,19 @@ input, select {
   font-weight: bold;
   color: var(--accent);
 }
+.checkbox-row {
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+.action-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 10px;
+}
 
 @media (max-width: 768px) {
   .grid {
@@ -139,7 +152,7 @@ input, select {
     </div>
   </div>
 
-  <div style="margin-bottom: 20px; display: flex; align-items: center; gap: 8px; font-size: 14px;">
+  <div class="checkbox-row">
     <input type="checkbox" id="lockRatio" checked style="width: auto; cursor: pointer;" />
     <label for="lockRatio" style="display: inline; margin-bottom: 0; cursor: pointer; user-select: none;">Lock Aspect Ratio</label>
   </div>
@@ -147,7 +160,7 @@ input, select {
   <div class="result-box">
     <label>Calculated Ratio</label>
     <div id="ratio-text" class="ratio-display">-</div>
-    <div style="display: flex; gap: 10px; justify-content: center; margin-top: 10px;">
+    <div class="action-buttons">
       <button id="calc-ratio-btn" class="preset-btn">Calculate Ratio from W & H</button>
       <button id="copy-btn" class="preset-btn">Copy Ratio</button>
     </div>
