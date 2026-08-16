@@ -253,7 +253,7 @@ input[type="range"] {
 
         <div id="tap-area">TAP HERE</div>
 
-        <div style="display: flex; gap: 10px; justify-content: center;">
+        <div class="actions-row">
           <button id="reset-btn" class="secondary" style="flex: 1;">Reset Counter</button>
           <button id="sync-btn" style="flex: 1;">Sync Metronome</button>
         </div>
@@ -292,7 +292,7 @@ input[type="range"] {
             <input type="range" id="metro-bpm" min="40" max="250" value="120" />
           </div>
 
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 5px;">
+          <div class="subactions-grid">
             <div>
               <label for="metro-beats" style="font-size: 11px;">Beats per Bar</label>
               <select id="metro-beats">

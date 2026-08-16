@@ -396,7 +396,7 @@ button.secondary:hover {
           <span>At steps / intervals</span>
         </label>
         <div class="sub-options" id="min-step-options" style="display: none;">
-          <div style="display: flex; align-items: center; gap: 10px;">
+          <div class="flex-row-gap">
             <span>Every</span>
             <input type="number" id="min-step" min="1" max="59" value="5" style="width: 80px;" />
             <span>minute(s) starting at minute 0</span>
@@ -409,7 +409,7 @@ button.secondary:hover {
           <span>Between specific minutes (Range)</span>
         </label>
         <div class="sub-options" id="min-range-options" style="display: none;">
-          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+          <div class="flex-row-gap">
             <span>From minute</span>
             <input type="number" id="min-range-start" min="0" max="59" value="10" style="width: 80px;" />
             <span>to minute</span>
@@ -442,7 +442,7 @@ button.secondary:hover {
           <span>At steps / intervals</span>
         </label>
         <div class="sub-options" id="hour-step-options" style="display: none;">
-          <div style="display: flex; align-items: center; gap: 10px;">
+          <div class="flex-row-gap">
             <span>Every</span>
             <input type="number" id="hour-step" min="1" max="23" value="2" style="width: 80px;" />
             <span>hour(s) starting at hour 0</span>
@@ -455,7 +455,7 @@ button.secondary:hover {
           <span>Between specific hours (Range)</span>
         </label>
         <div class="sub-options" id="hour-range-options" style="display: none;">
-          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+          <div class="flex-row-gap">
             <span>From hour</span>
             <input type="number" id="hour-range-start" min="0" max="23" value="9" style="width: 80px;" />
             <span>to hour</span>
@@ -488,7 +488,7 @@ button.secondary:hover {
           <span>At steps / intervals</span>
         </label>
         <div class="sub-options" id="dom-step-options" style="display: none;">
-          <div style="display: flex; align-items: center; gap: 10px;">
+          <div class="flex-row-gap">
             <span>Every</span>
             <input type="number" id="dom-step" min="1" max="31" value="2" style="width: 80px;" />
             <span>day(s) starting on day 1</span>
@@ -501,7 +501,7 @@ button.secondary:hover {
           <span>Between specific days (Range)</span>
         </label>
         <div class="sub-options" id="dom-range-options" style="display: none;">
-          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+          <div class="flex-row-gap">
             <span>From day</span>
             <input type="number" id="dom-range-start" min="1" max="31" value="1" style="width: 80px;" />
             <span>to day</span>
@@ -534,7 +534,7 @@ button.secondary:hover {
           <span>Between specific months (Range)</span>
         </label>
         <div class="sub-options" id="month-range-options" style="display: none;">
-          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+          <div class="flex-row-gap">
             <span>From month</span>
             <select id="month-range-start" style="width: 120px;">
               <option value="1">January</option>
@@ -593,7 +593,7 @@ button.secondary:hover {
           <span>Between specific weekdays (Range)</span>
         </label>
         <div class="sub-options" id="dow-range-options" style="display: none;">
-          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+          <div class="flex-row-gap">
             <span>From day</span>
             <select id="dow-range-start" style="width: 120px;">
               <option value="1">Monday</option>
@@ -1334,7 +1334,7 @@ copyBtn.addEventListener('click', () => {
       const orig = copyBtn.textContent;
       copyBtn.textContent = 'Copied!';
       setTimeout(() => copyBtn.textContent = orig, 1500);
-    });
+    }).catch(err => console.error("Clipboard copy failed:", err));
   }
 });
 
