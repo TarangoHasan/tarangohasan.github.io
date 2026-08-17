@@ -97,6 +97,9 @@ label {
     <option value="speed">Speed</option>
     <option value="area">Area</option>
     <option value="digital">Digital Storage</option>
+    <option value="pressure">Pressure</option>
+    <option value="energy">Energy</option>
+    <option value="power">Power</option>
   </select>
   <div style="height:15px"></div>
 
@@ -174,6 +177,27 @@ const units = {
     GB: { name: 'Gigabytes (GB)', factor: 1073741824 },
     TB: { name: 'Terabytes (TB)', factor: 1099511627776 },
     PB: { name: 'Petabytes (PB)', factor: 1125899906842624 }
+  },
+  pressure: {
+    pa: { name: 'Pascal (Pa)', factor: 1 },
+    kPa: { name: 'Kilopascal (kPa)', factor: 1000 },
+    bar: { name: 'Bar', factor: 100000 },
+    psi: { name: 'Pounds per sq inch (PSI)', factor: 6894.757293168 },
+    atm: { name: 'Atmosphere (atm)', factor: 101325 }
+  },
+  energy: {
+    j: { name: 'Joules (J)', factor: 1 },
+    kj: { name: 'Kilojoules (kJ)', factor: 1000 },
+    cal: { name: 'Calories (cal)', factor: 4.184 },
+    kcal: { name: 'Kilocalories (kcal)', factor: 4184 },
+    wh: { name: 'Watt-hours (Wh)', factor: 3600 },
+    kwh: { name: 'Kilowatt-hours (kWh)', factor: 3600000 }
+  },
+  power: {
+    w: { name: 'Watts (W)', factor: 1 },
+    kw: { name: 'Kilowatts (kW)', factor: 1000 },
+    mw: { name: 'Megawatts (MW)', factor: 1000000 },
+    hp: { name: 'Horsepower (hp)', factor: 745.6998715822702 }
   }
 };
 
@@ -208,6 +232,12 @@ function populateUnits() {
       toUnit.value = 'm2';
   } else if (cat === 'digital') {
       toUnit.value = 'MB';
+  } else if (cat === 'pressure') {
+      toUnit.value = 'bar';
+  } else if (cat === 'energy') {
+      toUnit.value = 'kj';
+  } else if (cat === 'power') {
+      toUnit.value = 'kw';
   }
 
   convert();
