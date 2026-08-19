@@ -252,6 +252,22 @@ button.primary:active {
 .download-btn:hover {
   opacity: 0.9;
 }
+
+@media (max-width: 768px) {
+  .download-card {
+    flex-direction: column !important;
+    gap: 10px !important;
+    align-items: stretch !important;
+    text-align: center;
+  }
+  .download-btn {
+    display: block;
+    text-align: center;
+  }
+  button.primary {
+    width: 100%;
+  }
+}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/pdf-lib/dist/pdf-lib.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sortablejs/Sortable.min.js"></script>

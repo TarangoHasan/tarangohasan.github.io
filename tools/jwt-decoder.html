@@ -420,7 +420,7 @@ function setupCopyBtn(btn, getStr) {
         setTimeout(() => {
           btn.textContent = originalText;
         }, 1500);
-      });
+      }).catch(err => console.error("Clipboard error:", err));
     }
   });
 }

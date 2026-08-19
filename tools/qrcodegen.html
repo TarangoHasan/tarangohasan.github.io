@@ -12,6 +12,9 @@
   --muted: #9aa8b2;
   --glass: rgba(255, 255, 255, 0.03);
 }
+* {
+  box-sizing: border-box;
+}
 html, body {
   min-height: 100%;
   margin: 0;
@@ -24,54 +27,23 @@ html, body {
   padding: 24px;
 }
 .app {
-  width: 600px;
+  width: 680px;
   max-width: 96%;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
   border-radius: 12px;
-  padding: 20px;
+  padding: 24px;
   box-shadow: 0 8px 30px rgba(2, 6, 23, 0.6);
   border: 1px solid rgba(255, 255, 255, 0.03);
 }
 h1 {
   margin: 0;
-  font-size: 20px;
+  font-size: 22px;
 }
 p.lead {
   margin: 6px 0 18px;
   color: var(--muted);
   font-size: 13px;
 }
-label {
-  display: block;
-  font-size: 13px;
-  margin-bottom: 6px;
-  color: var(--muted);
-}
-input {
-  width: 100%;
-  padding: 8px;
-  border-radius: 8px;
-  background: var(--glass);
-  border: 1px solid rgba(255, 255, 255, 0.03);
-  color: inherit;
-}
-button {
-  background: linear-gradient(90deg, var(--accent), #3b82f6);
-  border: 0;
-  padding: 10px 14px;
-  font-weight: 600;
-  border-radius: 8px;
-  color: #042027;
-  cursor: pointer;
-}
-#qrcode {
-  margin-top: 20px;
-  background: white;
-  padding: 10px;
-  border-radius: 8px;
-  display: none;
-}
-
 .back-link {
   display: inline-block;
   margin-bottom: 20px;
@@ -82,6 +54,157 @@ button {
 .back-link:hover {
   text-decoration: underline;
 }
+
+label {
+  display: block;
+  font-size: 13px;
+  margin-bottom: 6px;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+textarea, input[type="text"], select {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--glass);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  color: #e6eef6;
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+}
+textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+textarea:focus, input:focus, select:focus {
+  border-color: var(--accent);
+}
+
+select option {
+  background: #0f1724;
+  color: #e6eef6;
+}
+
+.control-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-top: 16px;
+  margin-bottom: 20px;
+}
+
+.color-input-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--glass);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 6px 12px;
+  border-radius: 8px;
+}
+.color-input-group input[type="color"] {
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  cursor: pointer;
+  background: transparent;
+}
+
+.preview-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+#qrcode {
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+#qrcode canvas {
+  border-radius: 6px;
+  display: block;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+  justify-content: center;
+}
+
+button {
+  background: linear-gradient(90deg, var(--accent), #3b82f6);
+  border: 0;
+  padding: 10px 18px;
+  font-weight: 600;
+  border-radius: 8px;
+  color: #042027;
+  cursor: pointer;
+  font-size: 13px;
+  transition: opacity 0.2s, transform 0.1s;
+}
+button:hover {
+  opacity: 0.9;
+}
+button:active {
+  transform: scale(0.98);
+}
+button.secondary {
+  background: var(--glass);
+  color: #e6eef6;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+button.secondary:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.validation-result {
+  margin-top: 15px;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  display: none;
+  width: 100%;
+  text-align: center;
+}
+.validation-result.valid {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  display: block;
+}
+.validation-result.invalid {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #f87171;
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .control-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .actions {
+    flex-direction: column !important;
+    gap: 10px !important;
+    width: 100%;
+  }
+  .actions button {
+    width: 100% !important;
+  }
+}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
 </head>
@@ -89,57 +212,161 @@ button {
 <div class="app" role="main">
   <a href="../index.html" class="back-link">← Back to Home</a>
   <h1>QR Code Generator</h1>
-  <p class="lead">Enter text to generate a QR code.</p>
-  <label for="text">Text</label>
-  <input id="text" type="text" placeholder="Enter text here" />
-  <div style="height:10px"></div>
-  <button id="generateBtn">Generate QR Code</button>
-  <div id="qrcode"></div>
-  <div id="errors" style="margin-top:8px; color: #ff4b2b;"></div>
-  <div style="height:10px"></div>
-  <button id="downloadBtn" style="display:none;">Download QR Code</button>
+  <p class="lead">Generate custom QR codes instantly with real-time color, size, and error correction customization.</p>
+
+  <div>
+    <label for="text">Text or URL</label>
+    <textarea id="text" placeholder="Enter URL or text to generate QR code..."></textarea>
+  </div>
+
+  <div class="control-grid">
+    <div>
+      <label for="fgColor">Foreground Color</label>
+      <div class="color-input-group">
+        <input type="color" id="fgColor" value="#000000" />
+        <span id="fgColorHex">#000000</span>
+      </div>
+    </div>
+    <div>
+      <label for="bgColor">Background Color</label>
+      <div class="color-input-group">
+        <input type="color" id="bgColor" value="#ffffff" />
+        <span id="bgColorHex">#ffffff</span>
+      </div>
+    </div>
+    <div>
+      <label for="sizeSelect">Size (Pixels)</label>
+      <select id="sizeSelect">
+        <option value="150">150 x 150</option>
+        <option value="200" selected>200 x 200</option>
+        <option value="250">250 x 250</option>
+        <option value="300">300 x 300</option>
+        <option value="400">400 x 400</option>
+      </select>
+    </div>
+    <div>
+      <label for="eclSelect">Error Correction Level</label>
+      <select id="eclSelect">
+        <option value="L">Low (7%)</option>
+        <option value="M" selected>Medium (15%)</option>
+        <option value="Q">Quartile (25%)</option>
+        <option value="H">High (30%)</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button id="generateBtn">Generate QR Code</button>
+    <button id="clearBtn" class="secondary">Clear</button>
+  </div>
+
+  <div id="errors" class="validation-result"></div>
+
+  <div class="preview-container">
+    <div id="qrcode"></div>
+    <div class="actions" id="downloadActions" style="display: none; width: 100%;">
+      <button id="downloadBtn">Download PNG</button>
+    </div>
+  </div>
 </div>
+
 <script>
-const generateBtn = document.getElementById('generateBtn');
 const textInput = document.getElementById('text');
+const fgColor = document.getElementById('fgColor');
+const bgColor = document.getElementById('bgColor');
+const fgColorHex = document.getElementById('fgColorHex');
+const bgColorHex = document.getElementById('bgColorHex');
+const sizeSelect = document.getElementById('sizeSelect');
+const eclSelect = document.getElementById('eclSelect');
+
+const generateBtn = document.getElementById('generateBtn');
+const clearBtn = document.getElementById('clearBtn');
 const qrcodeContainer = document.getElementById('qrcode');
-const downloadBtn = document.getElementById('downloadBtn');
 const errors = document.getElementById('errors');
+const downloadActions = document.getElementById('downloadActions');
+const downloadBtn = document.getElementById('downloadBtn');
 
 let qrCodeCanvas = null;
+
+function hideValidation() {
+  errors.style.display = 'none';
+  errors.className = 'validation-result';
+}
+
+function showValidation(msg, isValid) {
+  errors.textContent = msg;
+  errors.className = 'validation-result ' + (isValid ? 'valid' : 'invalid');
+  errors.style.display = 'block';
+}
 
 function clearQR() {
   qrcodeContainer.innerHTML = '';
   qrcodeContainer.style.display = 'none';
   qrCodeCanvas = null;
-  downloadBtn.style.display = 'none';
+  downloadActions.style.display = 'none';
+  hideValidation();
 }
 
-generateBtn.addEventListener('click', () => {
+function generateQR() {
   const text = textInput.value.trim();
-  errors.textContent = '';
-  if (text) {
-    QRCode.toCanvas(text, { errorCorrectionLevel: 'H' }, (err, canvas) => {
-      if (err) {
-        errors.textContent = 'Error generating QR Code: ' + err.message;
-        clearQR();
-        return;
-      }
-      qrcodeContainer.innerHTML = '';
-      qrcodeContainer.appendChild(canvas);
-      qrcodeContainer.style.display = 'inline-block';
-      qrCodeCanvas = canvas;
-      downloadBtn.style.display = 'block';
-    });
-  } else {
-    errors.textContent = 'Please enter text/URL to generate a QR Code.';
+  if (!text) {
+    showValidation('Please enter a URL or text to generate a QR Code.', false);
     clearQR();
+    return;
   }
+
+  const options = {
+    errorCorrectionLevel: eclSelect.value,
+    width: parseInt(sizeSelect.value, 10),
+    margin: 2,
+    color: {
+      dark: fgColor.value,
+      light: bgColor.value
+    }
+  };
+
+  QRCode.toCanvas(text, options, (err, canvas) => {
+    if (err) {
+      showValidation('Error generating QR Code: ' + err.message, false);
+      clearQR();
+      return;
+    }
+    qrcodeContainer.innerHTML = '';
+    qrcodeContainer.appendChild(canvas);
+    qrcodeContainer.style.display = 'flex';
+    qrCodeCanvas = canvas;
+    downloadActions.style.display = 'flex';
+    showValidation('✓ QR Code generated successfully!', true);
+  });
+}
+
+fgColor.addEventListener('input', () => {
+  fgColorHex.textContent = fgColor.value;
+  if (textInput.value.trim()) generateQR();
+});
+
+bgColor.addEventListener('input', () => {
+  bgColorHex.textContent = bgColor.value;
+  if (textInput.value.trim()) generateQR();
+});
+
+sizeSelect.addEventListener('change', () => {
+  if (textInput.value.trim()) generateQR();
+});
+
+eclSelect.addEventListener('change', () => {
+  if (textInput.value.trim()) generateQR();
+});
+
+generateBtn.addEventListener('click', generateQR);
+
+clearBtn.addEventListener('click', () => {
+  textInput.value = '';
+  clearQR();
 });
 
 textInput.addEventListener('input', () => {
   if (!textInput.value.trim()) {
-    errors.textContent = '';
     clearQR();
   }
 });
@@ -149,7 +376,9 @@ downloadBtn.addEventListener('click', () => {
     const a = document.createElement('a');
     a.href = qrCodeCanvas.toDataURL('image/png');
     a.download = 'qrcode.png';
+    document.body.appendChild(a);
     a.click();
+    document.body.removeChild(a);
   }
 });
 </script>
