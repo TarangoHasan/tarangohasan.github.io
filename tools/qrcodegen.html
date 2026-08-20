@@ -12,6 +12,9 @@
   --muted: #9aa8b2;
   --glass: rgba(255, 255, 255, 0.03);
 }
+* {
+  box-sizing: border-box;
+}
 html, body {
   min-height: 100%;
   margin: 0;
@@ -24,17 +27,17 @@ html, body {
   padding: 24px;
 }
 .app {
-  width: 600px;
+  width: 650px;
   max-width: 96%;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
   border-radius: 12px;
-  padding: 20px;
+  padding: 24px;
   box-shadow: 0 8px 30px rgba(2, 6, 23, 0.6);
   border: 1px solid rgba(255, 255, 255, 0.03);
 }
 h1 {
   margin: 0;
-  font-size: 20px;
+  font-size: 22px;
 }
 p.lead {
   margin: 6px 0 18px;
@@ -43,33 +46,84 @@ p.lead {
 }
 label {
   display: block;
-  font-size: 13px;
+  font-size: 12px;
   margin-bottom: 6px;
   color: var(--muted);
+  font-weight: 500;
 }
-input {
+input, select {
   width: 100%;
-  padding: 8px;
+  padding: 9px 12px;
   border-radius: 8px;
   background: var(--glass);
-  border: 1px solid rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
   color: inherit;
+  font-size: 14px;
 }
-button {
-  background: linear-gradient(90deg, var(--accent), #3b82f6);
-  border: 0;
-  padding: 10px 14px;
-  font-weight: 600;
-  border-radius: 8px;
-  color: #042027;
+input[type="color"] {
+  height: 40px;
+  padding: 4px;
   cursor: pointer;
 }
-#qrcode {
-  margin-top: 20px;
-  background: white;
-  padding: 10px;
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+.action-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+button {
+  padding: 10px 16px;
+  font-weight: 600;
   border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  border: 0;
+  transition: opacity 0.2s, transform 0.1s;
+}
+button.primary {
+  background: linear-gradient(90deg, var(--accent), #3b82f6);
+  color: #042027;
+  flex: 2;
+}
+button.secondary {
+  background: rgba(255, 255, 255, 0.08);
+  color: #e6eef6;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  flex: 1;
+}
+button:hover {
+  opacity: 0.9;
+}
+button:active {
+  transform: scale(0.98);
+}
+#qrcode-wrapper {
+  margin-top: 20px;
+  text-align: center;
+}
+#qrcode {
   display: none;
+  background: white;
+  padding: 16px;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  margin: 0 auto;
+  max-width: 100%;
+}
+#qrcode canvas {
+  display: block;
+  margin: 0 auto;
+  max-width: 100%;
+  height: auto !important;
 }
 
 .back-link {
@@ -82,6 +136,32 @@ button {
 .back-link:hover {
   text-decoration: underline;
 }
+
+.validation-result {
+  margin-top: 15px;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  display: none;
+}
+.validation-result.invalid {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #f87171;
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .grid-2, .grid-4 {
+    grid-template-columns: 1fr;
+  }
+  .action-buttons {
+    flex-direction: column;
+  }
+  .app {
+    padding: 16px;
+  }
+}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
 </head>
@@ -89,21 +169,69 @@ button {
 <div class="app" role="main">
   <a href="../index.html" class="back-link">← Back to Home</a>
   <h1>QR Code Generator</h1>
-  <p class="lead">Enter text to generate a QR code.</p>
-  <label for="text">Text</label>
-  <input id="text" type="text" placeholder="Enter text here" />
-  <div style="height:10px"></div>
-  <button id="generateBtn">Generate QR Code</button>
-  <div id="qrcode"></div>
-  <div id="errors" style="margin-top:8px; color: #ff4b2b;"></div>
-  <div style="height:10px"></div>
-  <button id="downloadBtn" style="display:none;">Download QR Code</button>
+  <p class="lead">Customize colors, sizes, and error correction levels to generate high-resolution QR codes.</p>
+
+  <div style="margin-bottom: 12px;">
+    <label for="text">Content / URL</label>
+    <input id="text" type="text" placeholder="Enter text or URL here (e.g. https://example.com)" />
+  </div>
+
+  <div class="grid-2" style="margin-bottom: 12px;">
+    <div>
+      <label for="fgColor">Foreground Color</label>
+      <input type="color" id="fgColor" value="#000000" />
+    </div>
+    <div>
+      <label for="bgColor">Background Color</label>
+      <input type="color" id="bgColor" value="#ffffff" />
+    </div>
+  </div>
+
+  <div class="grid-2" style="margin-bottom: 12px;">
+    <div>
+      <label for="qrSize">Pixel Size (px)</label>
+      <select id="qrSize">
+        <option value="150">150 x 150 px</option>
+        <option value="200" selected>200 x 200 px</option>
+        <option value="250">250 x 250 px</option>
+        <option value="300">300 x 300 px</option>
+        <option value="400">400 x 400 px</option>
+      </select>
+    </div>
+    <div>
+      <label for="ecl">Error Correction Level</label>
+      <select id="ecl">
+        <option value="L">Low (7% recovery)</option>
+        <option value="M">Medium (15% recovery)</option>
+        <option value="Q">Quartile (25% recovery)</option>
+        <option value="H" selected>High (30% recovery)</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="action-buttons">
+    <button id="generateBtn" class="primary">Generate QR Code</button>
+    <button id="downloadBtn" class="secondary" style="display:none;">Download PNG</button>
+    <button id="clearBtn" class="secondary">Clear</button>
+  </div>
+
+  <div id="errors" class="validation-result"></div>
+
+  <div id="qrcode-wrapper">
+    <div id="qrcode"></div>
+  </div>
 </div>
+
 <script>
 const generateBtn = document.getElementById('generateBtn');
-const textInput = document.getElementById('text');
-const qrcodeContainer = document.getElementById('qrcode');
 const downloadBtn = document.getElementById('downloadBtn');
+const clearBtn = document.getElementById('clearBtn');
+const textInput = document.getElementById('text');
+const fgColorInput = document.getElementById('fgColor');
+const bgColorInput = document.getElementById('bgColor');
+const qrSizeSelect = document.getElementById('qrSize');
+const eclSelect = document.getElementById('ecl');
+const qrcodeContainer = document.getElementById('qrcode');
 const errors = document.getElementById('errors');
 
 let qrCodeCanvas = null;
@@ -113,35 +241,62 @@ function clearQR() {
   qrcodeContainer.style.display = 'none';
   qrCodeCanvas = null;
   downloadBtn.style.display = 'none';
+  errors.style.display = 'none';
+  errors.textContent = '';
 }
 
-generateBtn.addEventListener('click', () => {
+function generateQR() {
   const text = textInput.value.trim();
+  errors.style.display = 'none';
   errors.textContent = '';
-  if (text) {
-    QRCode.toCanvas(text, { errorCorrectionLevel: 'H' }, (err, canvas) => {
-      if (err) {
-        errors.textContent = 'Error generating QR Code: ' + err.message;
-        clearQR();
-        return;
-      }
-      qrcodeContainer.innerHTML = '';
-      qrcodeContainer.appendChild(canvas);
-      qrcodeContainer.style.display = 'inline-block';
-      qrCodeCanvas = canvas;
-      downloadBtn.style.display = 'block';
-    });
-  } else {
-    errors.textContent = 'Please enter text/URL to generate a QR Code.';
+
+  if (!text) {
+    errors.textContent = '❌ Please enter text or a URL to generate a QR Code.';
+    errors.className = 'validation-result invalid';
+    clearQR();
+    return;
+  }
+
+  const options = {
+    errorCorrectionLevel: eclSelect.value,
+    width: parseInt(qrSizeSelect.value, 10),
+    margin: 1,
+    color: {
+      dark: fgColorInput.value,
+      light: bgColorInput.value
+    }
+  };
+
+  QRCode.toCanvas(text, options, (err, canvas) => {
+    if (err) {
+      errors.textContent = '❌ Error generating QR Code: ' + err.message;
+      errors.className = 'validation-result invalid';
+      clearQR();
+      return;
+    }
+    qrcodeContainer.innerHTML = '';
+    qrcodeContainer.appendChild(canvas);
+    qrcodeContainer.style.display = 'inline-block';
+    qrCodeCanvas = canvas;
+    downloadBtn.style.display = 'inline-block';
+  });
+}
+
+generateBtn.addEventListener('click', generateQR);
+
+textInput.addEventListener('input', () => {
+  if (!textInput.value.trim()) {
     clearQR();
   }
 });
 
-textInput.addEventListener('input', () => {
-  if (!textInput.value.trim()) {
-    errors.textContent = '';
-    clearQR();
-  }
+clearBtn.addEventListener('click', () => {
+  textInput.value = '';
+  fgColorInput.value = '#000000';
+  bgColorInput.value = '#ffffff';
+  qrSizeSelect.value = '200';
+  eclSelect.value = 'H';
+  clearQR();
 });
 
 downloadBtn.addEventListener('click', () => {
