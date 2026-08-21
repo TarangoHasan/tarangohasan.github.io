@@ -1,0 +1,500 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>HTML Entity Encoder & Decoder</title>
+<style>
+:root {
+  --bg: #0f1724;
+  --card: #0b1220;
+  --accent: #06b6d4;
+  --muted: #9aa8b2;
+  --glass: rgba(255, 255, 255, 0.03);
+}
+* {
+  box-sizing: border-box;
+}
+html, body {
+  min-height: 100%;
+  margin: 0;
+  font-family: Inter, system-ui, Segoe UI, Roboto, Arial, sans-serif;
+  background: linear-gradient(180deg, #041025 0%, #0b1730 100%);
+  color: #e6eef6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.app {
+  width: 800px;
+  max-width: 96%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 8px 30px rgba(2, 6, 23, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+h1 {
+  margin: 0;
+  font-size: 22px;
+}
+p.lead {
+  margin: 6px 0 20px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.back-link {
+  display: inline-block;
+  margin-bottom: 20px;
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 14px;
+}
+.back-link:hover {
+  text-decoration: underline;
+}
+
+.mode-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.mode-btn {
+  background: var(--glass);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--muted);
+  padding: 8px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+.mode-btn.active {
+  background: linear-gradient(90deg, var(--accent), #3b82f6);
+  color: #042027;
+  border-color: transparent;
+}
+
+.options-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+label {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+select, input[type="text"] {
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--glass);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: inherit;
+  font-size: 13px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.drop-zone {
+  border: 2px dashed rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  padding: 12px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 12px;
+  margin-bottom: 16px;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+.drop-zone.dragover {
+  border-color: var(--accent);
+  background: rgba(6, 182, 212, 0.05);
+}
+
+.io-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.io-box {
+  display: flex;
+  flex-direction: column;
+}
+
+.io-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.io-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+textarea {
+  width: 100%;
+  height: 200px;
+  padding: 12px;
+  border-radius: 8px;
+  background: var(--glass);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  color: inherit;
+  resize: vertical;
+  font-family: monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  box-sizing: border-box;
+}
+
+textarea:focus {
+  outline: 1px solid var(--accent);
+}
+
+.actions-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+button.action-btn {
+  background: linear-gradient(90deg, var(--accent), #3b82f6);
+  border: 0;
+  padding: 10px 16px;
+  font-weight: 600;
+  border-radius: 8px;
+  color: #042027;
+  cursor: pointer;
+  font-size: 13px;
+  transition: opacity 0.2s, transform 0.1s;
+}
+button.action-btn:hover {
+  opacity: 0.9;
+}
+button.action-btn:active {
+  transform: scale(0.98);
+}
+button.secondary-btn {
+  background: var(--glass);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #e6eef6;
+}
+
+.alert-msg {
+  margin-top: 12px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  display: none;
+}
+.alert-msg.show {
+  display: block;
+}
+.alert-success {
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: #34d399;
+}
+
+@media (max-width: 768px) {
+  .io-container {
+    grid-template-columns: 1fr !important;
+  }
+  .mode-row, .options-row, .actions-row {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  button.action-btn, .mode-btn {
+    width: 100% !important;
+  }
+}
+</style>
+</head>
+<body>
+<div class="app" role="main">
+  <a href="../index.html" class="back-link">← Back to Home</a>
+  <h1>HTML Entity Encoder & Decoder</h1>
+  <p class="lead">Convert special characters to HTML entities and back instantly.</p>
+
+  <div class="mode-row">
+    <button id="encodeTab" class="mode-btn active">Encode</button>
+    <button id="decodeTab" class="mode-btn">Decode</button>
+  </div>
+
+  <div class="options-row" id="encodeOptions">
+    <div>
+      <label for="entityType">Entity Type:</label>
+      <select id="entityType">
+        <option value="named">Named (&amp;lt;, &amp;gt;, &amp;amp;)</option>
+        <option value="decimal">Decimal (&amp;#60;, &amp;#62;)</option>
+        <option value="hex">Hexadecimal (&amp;#x3C;, &amp;#x3E;)</option>
+      </select>
+    </div>
+    <label class="checkbox-label">
+      <input type="checkbox" id="encodeNonAscii" checked />
+      <span>Encode non-ASCII characters</span>
+    </label>
+  </div>
+
+  <div class="drop-zone" id="dropZone">
+    Drag & drop a text or HTML file here, or click to upload
+    <input type="file" id="fileInput" accept=".txt,.html,.htm,.xml,.js,.json" style="display:none;" />
+  </div>
+
+  <div class="io-container">
+    <div class="io-box">
+      <div class="io-header">
+        <span class="io-title" id="inputTitle">Input Text</span>
+        <span class="io-title" id="inputStats">0 chars</span>
+      </div>
+      <textarea id="inputText" placeholder="Type or paste text here..."></textarea>
+    </div>
+
+    <div class="io-box">
+      <div class="io-header">
+        <span class="io-title" id="outputTitle">Result</span>
+        <span class="io-title" id="outputStats">0 chars</span>
+      </div>
+      <textarea id="outputText" readonly placeholder="Converted output will appear here..."></textarea>
+    </div>
+  </div>
+
+  <div class="actions-row">
+    <button class="action-btn" id="copyBtn">Copy Result</button>
+    <button class="action-btn secondary-btn" id="demoBtn">Load Demo</button>
+    <button class="action-btn secondary-btn" id="downloadBtn">Download</button>
+    <button class="action-btn secondary-btn" id="clearBtn">Clear All</button>
+  </div>
+
+  <div class="alert-msg alert-success" id="alertMsg"></div>
+</div>
+
+<script>
+let currentMode = 'encode';
+
+const encodeTab = document.getElementById('encodeTab');
+const decodeTab = document.getElementById('decodeTab');
+const encodeOptions = document.getElementById('encodeOptions');
+const entityType = document.getElementById('entityType');
+const encodeNonAscii = document.getElementById('encodeNonAscii');
+
+const inputText = document.getElementById('inputText');
+const outputText = document.getElementById('outputText');
+const inputStats = document.getElementById('inputStats');
+const outputStats = document.getElementById('outputStats');
+
+const copyBtn = document.getElementById('copyBtn');
+const demoBtn = document.getElementById('demoBtn');
+const downloadBtn = document.getElementById('downloadBtn');
+const clearBtn = document.getElementById('clearBtn');
+const alertMsg = document.getElementById('alertMsg');
+
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+
+// Named entity map
+const namedEntities = {
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  "'": '&apos;',
+  '¢': '&cent;',
+  '£': '&pound;',
+  '¥': '&yen;',
+  '€': '&euro;',
+  '©': '&copy;',
+  '®': '&reg;'
+};
+
+function showAlert(message) {
+  alertMsg.textContent = message;
+  alertMsg.classList.add('show');
+  setTimeout(() => {
+    alertMsg.classList.remove('show');
+  }, 2500);
+}
+
+function updateStats() {
+  inputStats.textContent = `${inputText.value.length} chars`;
+  outputStats.textContent = `${outputText.value.length} chars`;
+}
+
+function processText() {
+  const input = inputText.value;
+  if (!input) {
+    outputText.value = '';
+    updateStats();
+    return;
+  }
+
+  if (currentMode === 'encode') {
+    const mode = entityType.value;
+    const nonAscii = encodeNonAscii.checked;
+    let result = '';
+
+    for (let i = 0; i < input.length; i++) {
+      const char = input[i];
+      const code = char.charCodeAt(0);
+
+      if (mode === 'named' && namedEntities[char]) {
+        result += namedEntities[char];
+      } else if (char === '&' || char === '<' || char === '>' || char === '"' || char === "'") {
+        if (mode === 'decimal') {
+          result += `&#${code};`;
+        } else if (mode === 'hex') {
+          result += `&#x${code.toString(16).toUpperCase()};`;
+        } else {
+          result += namedEntities[char] || char;
+        }
+      } else if (nonAscii && (code > 127 || code < 32 && code !== 10 && code !== 13 && code !== 9)) {
+        if (mode === 'hex') {
+          result += `&#x${code.toString(16).toUpperCase()};`;
+        } else {
+          result += `&#${code};`;
+        }
+      } else {
+        result += char;
+      }
+    }
+    outputText.value = result;
+  } else {
+    // Decode mode
+    const doc = new DOMParser().parseFromString(input, 'text/html');
+    outputText.value = doc.documentElement.textContent || '';
+  }
+
+  updateStats();
+}
+
+// Mode Switch
+encodeTab.addEventListener('click', () => {
+  currentMode = 'encode';
+  encodeTab.classList.add('active');
+  decodeTab.classList.remove('active');
+  encodeOptions.style.display = 'flex';
+  processText();
+});
+
+decodeTab.addEventListener('click', () => {
+  currentMode = 'decode';
+  decodeTab.classList.add('active');
+  encodeTab.classList.remove('active');
+  encodeOptions.style.display = 'none';
+  processText();
+});
+
+entityType.addEventListener('change', processText);
+encodeNonAscii.addEventListener('change', processText);
+inputText.addEventListener('input', processText);
+
+// Actions
+copyBtn.addEventListener('click', () => {
+  if (!outputText.value) return;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(outputText.value).then(() => {
+      showAlert('Result copied to clipboard!');
+    }).catch(err => {
+      showAlert('Failed to copy to clipboard.');
+    });
+  } else {
+    outputText.select();
+    document.execCommand('copy');
+    showAlert('Result copied to clipboard!');
+  }
+});
+
+demoBtn.addEventListener('click', () => {
+  if (currentMode === 'encode') {
+    inputText.value = `<div class="card">\n  <h1>Hello "World" & 'Friends'!</h1>\n  <p>Price: 100€ & 50£ © 2026</p>\n</div>`;
+  } else {
+    inputText.value = `&lt;div class=&quot;card&quot;&gt;\n  &lt;h1&gt;Hello &quot;World&quot; &amp; &apos;Friends&apos;!&lt;/h1&gt;\n  &lt;p&gt;Price: 100&amp;euro; &amp; 50&amp;pound; &amp;copy; 2026&lt;/p&gt;\n&lt;/div&gt;`;
+  }
+  processText();
+  showAlert('Demo data loaded!');
+});
+
+downloadBtn.addEventListener('click', () => {
+  if (!outputText.value) return;
+  const blob = new Blob([outputText.value], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = currentMode === 'encode' ? 'encoded-entities.txt' : 'decoded-entities.txt';
+  a.click();
+  URL.revokeObjectURL(url);
+  showAlert('Download started!');
+});
+
+clearBtn.addEventListener('click', () => {
+  inputText.value = '';
+  outputText.value = '';
+  updateStats();
+  showAlert('Cleared all inputs.');
+});
+
+// Drag & Drop File Handling
+dropZone.addEventListener('click', () => fileInput.click());
+
+dropZone.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  dropZone.classList.add('dragover');
+});
+
+dropZone.addEventListener('dragleave', () => {
+  dropZone.classList.remove('dragover');
+});
+
+dropZone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  dropZone.classList.remove('dragover');
+  if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+    const file = e.dataTransfer.files[0];
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      inputText.value = evt.target.result;
+      processText();
+      showAlert(`Loaded file: ${file.name}`);
+    };
+    reader.readAsText(file);
+  }
+});
+
+fileInput.addEventListener('change', (e) => {
+  if (e.target.files && e.target.files.length > 0) {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      inputText.value = evt.target.result;
+      processText();
+      showAlert(`Loaded file: ${file.name}`);
+    };
+    reader.readAsText(file);
+  }
+});
+</script>
+</body>
+</html>
