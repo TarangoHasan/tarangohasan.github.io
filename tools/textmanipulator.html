@@ -217,10 +217,21 @@ clearBtn.addEventListener('click', () => {
 
 copyBtn.addEventListener('click', () => {
   if (textInput.value) {
-    navigator.clipboard.writeText(textInput.value);
-    const originalText = copyBtn.textContent;
-    copyBtn.textContent = "Copied!";
-    setTimeout(() => copyBtn.textContent = originalText, 2000);
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(textInput.value).then(() => {
+        const originalText = copyBtn.textContent;
+        copyBtn.textContent = "Copied!";
+        setTimeout(() => copyBtn.textContent = originalText, 2000);
+      }).catch(err => {
+        console.error('Failed to copy: ', err);
+      });
+    } else {
+      textInput.select();
+      document.execCommand('copy');
+      const originalText = copyBtn.textContent;
+      copyBtn.textContent = "Copied!";
+      setTimeout(() => copyBtn.textContent = originalText, 2000);
+    }
   }
 });
 </script>
